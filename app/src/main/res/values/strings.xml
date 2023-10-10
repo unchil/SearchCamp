@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">SearchCamp</string>
+
+
+
+    <string name="mainmenu_search">검색</string>
+    <string name="mainmenu_result">결과</string>
+    <string name="resultmenu_list">리스트</string>
+    <string name="resultmenu_map" >지도</string>
+
+    <string name="main_detail" >상세보기</string>
+
+    <string name="detailmenu_introduction" >소개</string>
+    <string name="detailmenu_imageview" >이미지</string>
+    <string name="detailmenu_homepage" >홈페이지</string>
+
+    <string name="chkNetWork_msg" >네트웍 연결을 확인해 주세요</string>
+    <string name="showGotoSettingsDialog_title" >설정</string>
+
+    <string name="permission_rationale_title"> "권한 요청"</string>
+    <string name="permission_rationale_msg"> "기능 제약 없는 GisMemo 를 사용 하기 위해서 권한이 필요 합니다."</string>
+
+    <string name="permission_setting_title">"시스템 설정"</string>
+    <string name="permission_setting_msg"> "App Info 에서 권한 설정을 해 주세요."</string>
+
+
+    <string name="weather_desc_sun"> "일출:%s 일몰:%s"</string>
+    <string name="weather_desc_temp"> "기온:%.0f°C  최저:%.0f°C  최고:%.0f°C"</string>
+    <string name="weather_desc_weather"> "기압:%,.0fhPa 습도:%.0f"</string>
+    <string name="weather_desc_wind">"바람:%.0fm/s 방향:%.0f° 가시거리:%dkm"</string>
+    <string name="weather_location_searching"> "위치 검색 중"</string>
+
+
+    <string name="snackbar_3">검색된 데이터 </string>
+    <string name="snackbar_2">검색 조건을 클리어 하였습니다.</string>
+
+</resources>

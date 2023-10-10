@@ -1,0 +1,151 @@
+package com.unchil.searchcamp.view
+
+
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.unchil.gismemo.view.SiteWebViewNew
+import com.unchil.searchcamp.db.LocalSearchCampDB
+import com.unchil.searchcamp.db.SearchCampDB
+import com.unchil.searchcamp.model.SiteDefaultData
+import com.unchil.searchcamp.navigation.SearchCampDestinations
+import com.unchil.searchcamp.navigation.detailScreens
+import com.unchil.searchcamp.shared.LocalPermissionsManager
+import com.unchil.searchcamp.shared.PermissionsManager
+import com.unchil.searchcamp.ui.theme.SearchCampTheme
+
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+fun SiteDetailScreen(data:SiteDefaultData) {
+
+    val selectedScreen =  mutableStateOf(0)
+    val context = LocalContext.current
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigation(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .shadow(elevation = 1.dp),
+                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+            ) {
+
+
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+
+                detailScreens.forEachIndexed { index, it ->
+
+                    BottomNavigationItem(
+                        icon = {
+                            Icon(
+                                imageVector = it.icon ?: Icons.Outlined.Info,
+                                contentDescription = context.resources.getString(it.name),
+                                tint = if (selectedScreen.value  == index) Color.Red else MaterialTheme.colorScheme.secondary
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = context.resources.getString(it.name),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        alwaysShowLabel = false,
+                        selected = selectedScreen.value == index,
+                        onClick = {
+                            selectedScreen.value  = index
+                       //     navControllerNew.navigateTo(SearchCampDestinations.createRoute(detailScreens[index], data.contentId, data.firstImageUrl))
+
+                        },
+                        selectedContentColor = Color.Red,
+                        unselectedContentColor = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+
+            }
+
+        }
+    ) {
+        Box(
+            Modifier
+                .padding(it)
+        ) {
+
+
+            when(detailScreens[selectedScreen.value]){
+                SearchCampDestinations.introductionScreen -> {
+                    SiteIntroductionView(data)
+                }
+                SearchCampDestinations.imageScreen -> {
+                    SiteImagePagerView(contentId = data.contentId)
+                }
+                SearchCampDestinations.homepageScreen -> {
+                    SiteWebViewNew( data.homepage)
+                }
+
+                else -> {}
+            }
+
+
+
+        }
+
+    }
+
+
+
+}
+
+
+
+@Preview
+@Composable
+fun PrevSiteDetailView(){
+    val context = LocalContext.current
+    val permissionsManager = PermissionsManager()
+    val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
+
+    SearchCampTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+
+            CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
+                CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
+
+                    SiteDetailScreen(data = SiteDefaultData.setInitValue())
+                }
+            }
+
+        }
+
+    }
+}
