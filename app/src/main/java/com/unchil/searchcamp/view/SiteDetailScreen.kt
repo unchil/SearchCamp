@@ -25,7 +25,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -34,6 +38,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.unchil.gismemo.view.SiteWebView
+import com.unchil.searchcamp.data.GoCampingService
+import com.unchil.searchcamp.data.RepositoryProvider
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.model.SiteDefaultData
@@ -41,7 +47,10 @@ import com.unchil.searchcamp.navigation.SearchCampDestinations
 import com.unchil.searchcamp.navigation.detailScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
+import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
+import com.unchil.searchcamp.viewmodel.SiteImagePagerViewModel
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -50,6 +59,36 @@ fun SiteDetailScreen(data:SiteDefaultData) {
 
     val selectedScreen =  mutableStateOf(0)
     val context = LocalContext.current
+    val db = LocalSearchCampDB.current
+
+    val viewModel =
+        SiteImagePagerViewModel(
+            repository = RepositoryProvider.getRepository().apply { database = db })
+
+
+    var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
+
+    LaunchedEffect(key1 = isConnect) {
+        while (!isConnect) {
+            delay(500)
+            isConnect = context.checkInternetConnected()
+        }
+    }
+
+
+    LaunchedEffect(key1 = viewModel){
+
+        if(isConnect) {
+            viewModel.onEvent(
+                SiteImagePagerViewModel.Event.RecvGoCampingData(
+                    servicetype =  GoCampingService.SITEIMAGE,
+                    contentId = data.contentId
+                )
+            )
+        }
+    }
+
+
 
     Scaffold(
         topBar = {
@@ -87,8 +126,6 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                             selected = selectedScreen.value == index,
                             onClick = {
                                 selectedScreen.value  = index
-                                //     navControllerNew.navigateTo(SearchCampDestinations.createRoute(detailScreens[index], data.contentId, data.firstImageUrl))
-
                             },
                             selectedContentColor = Color.Red,
                             unselectedContentColor = MaterialTheme.colorScheme.secondary
@@ -120,7 +157,7 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                     SiteIntroductionView(data)
                 }
                 SearchCampDestinations.imageScreen -> {
-                    SiteImagePagerView(contentId = data.contentId)
+                    SiteImagePagerView(viewModel)
                 }
                 SearchCampDestinations.homepageScreen -> {
                     if( data.homepage.isNotEmpty()) {

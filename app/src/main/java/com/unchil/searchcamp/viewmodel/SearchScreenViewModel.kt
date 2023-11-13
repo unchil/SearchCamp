@@ -48,7 +48,7 @@ class SearchScreenViewModel   (val repository: Repository) : ViewModel() {
     ){
         viewModelScope.launch {
 
-           val resultCount =  repository.getCampSiteListFlowNew(
+           val resultCount =  repository.getCampSiteListFlow(
                 administrativeDistrictSiDoCode,
                 administrativeDistrictSiGunGu,
                 searchTitle

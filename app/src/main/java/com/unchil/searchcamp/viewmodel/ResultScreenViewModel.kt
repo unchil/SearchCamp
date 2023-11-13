@@ -97,6 +97,7 @@ class ResultScreenViewModel   (
                     event.contentId
                 )
             }
+            /*
             is Event.Search -> {
                 getCampSiteListFlow(
                     event.administrativeDistrictSiDoCode,
@@ -105,11 +106,13 @@ class ResultScreenViewModel   (
                 )
             }
 
+             */
+
             else -> {}
         }
     }
 
-
+/*
     fun getCampSiteListFlow(
         administrativeDistrictSiDoCode:String,
         administrativeDistrictSiGunGu:String,
@@ -123,6 +126,8 @@ class ResultScreenViewModel   (
             )
         }
     }
+
+ */
 
     fun recvGoCampingData(
         serviceType: GoCampingService,

@@ -654,7 +654,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun SiteImagePagerView( contentId: String){
+fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? = null){
 
     val permissions = listOf(
         Manifest.permission.INTERNET,
@@ -677,7 +677,7 @@ fun SiteImagePagerView( contentId: String){
     ) {
 
 
-        val db = LocalSearchCampDB.current
+
         val context = LocalContext.current
 
         var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
@@ -689,30 +689,6 @@ fun SiteImagePagerView( contentId: String){
             }
         }
 
-
-        val viewModel = remember {
-            SiteImagePagerViewModel(
-                repository = RepositoryProvider.getRepository().apply { database = db })
-        }
-
-
-        LaunchedEffect(key1 = viewModel){
-
-            if(isConnect) {
-                viewModel.onEvent(
-                    SiteImagePagerViewModel.Event.RecvGoCampingData(
-                        servicetype =  GoCampingService.SITEIMAGE,
-                        contentId = contentId
-                    )
-                )
-            }
-
-
-
-            viewModel.onEvent(
-                SiteImagePagerViewModel.Event.GetImageList(contentId = contentId)
-            )
-       }
 
         val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
 
@@ -750,7 +726,7 @@ fun SiteImagePagerView( contentId: String){
                     state = pagerState,
                     pageSpacing = 0.dp,
                     pageSize = threePagesPerViewport,
-                    beyondBoundsPageCount = 6,
+                    beyondBoundsPageCount = 9,
                     contentPadding = PaddingValues(start = 60.dp, end = 60.dp),
                 ) { page ->
 
@@ -841,7 +817,7 @@ fun PrevSiteView(){
 
                     Box(
                         Modifier.fillMaxSize()) {
-                        SiteImagePagerView(contentId = "92")
+               //         SiteImagePagerView(contentId = "92")
                     }
                         //       SiteWebView(navController = navController, "https://goldenvalleycamping.modoo.at/")
                     }

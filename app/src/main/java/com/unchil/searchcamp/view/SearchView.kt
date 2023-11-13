@@ -219,11 +219,13 @@ fun SearchCampView(
 
         LaunchedEffect(key1 = siggData.value) {
             if (siggData.value.isNotEmpty()) {
-                administrativeDistrictTitle =
-                    administrativeDistrictSiDo + " " + siggData.value.first().sig_kor_nm
+
+                administrativeDistrictSiGunGu =  siggData.value.first().sig_kor_nm
+                administrativeDistrictTitle =  administrativeDistrictSiDo + " " + siggData.value.first().sig_kor_nm
             }
 
             if (administrativeDistrictSiDo.equals("현위치")) {
+                administrativeDistrictSiGunGu = "현위치"
                 administrativeDistrictTitle = "현위치"
             }
 
@@ -354,8 +356,6 @@ fun SearchCampView(
                     containerColor = Color.Transparent
                 )
             ) { }
-
-
 
 
             HorizontalDivider()

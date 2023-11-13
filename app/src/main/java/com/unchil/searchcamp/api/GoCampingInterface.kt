@@ -2,6 +2,7 @@ package com.unchil.searchcamp.api
 
 import com.unchil.searchcamp.model.GoCampingResponse
 import com.unchil.searchcamp.model.GoCampingResponseImage
+import com.unchil.searchcamp.model.GoCampingResponseImageEmpty
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -65,10 +66,19 @@ interface GoCampingInterface {
         @Query("MobileOS")MobileOS:String,
         @Query("MobileApp")MobileApp:String,
         @Query("_type")_type:String,
-
         @Query("contentId")contentId:String
     ): GoCampingResponseImage
 
+    @GET("imageList")
+    suspend fun getImageEmpty(
+        @Query("serviceKey")serviceKey:String,
+        @Query("numOfRows")numOfRows:String,
+        @Query("pageNo")pageNo:String,
+        @Query("MobileOS")MobileOS:String,
+        @Query("MobileApp")MobileApp:String,
+        @Query("_type")_type:String,
+        @Query("contentId")contentId:String
+    ): GoCampingResponseImageEmpty
 
 
 }

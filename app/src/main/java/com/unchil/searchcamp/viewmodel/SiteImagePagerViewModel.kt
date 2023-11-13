@@ -25,19 +25,25 @@ class SiteImagePagerViewModel  (val repository: Repository) : ViewModel() {
                     event.contentId
                 )
             }
-
+/*
             is Event.GetImageList -> {
                 getSiteImageList(contentId = event.contentId)
             }
+
+ */
+            else -> {}
         }
 
     }
 
+    /*
     fun getSiteImageList(contentId:String){
         viewModelScope.launch {
             repository.getSiteImageList(contentId = contentId)
         }
     }
+
+     */
 
     fun recvGoCampingData(
         serviceType: GoCampingService,
@@ -66,7 +72,7 @@ class SiteImagePagerViewModel  (val repository: Repository) : ViewModel() {
             val  contentId:String
         ):Event()
 
-        data class GetImageList(val contentId:String):Event()
+       // data class GetImageList(val contentId:String):Event()
 
     }
 

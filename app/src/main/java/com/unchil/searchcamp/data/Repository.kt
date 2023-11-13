@@ -176,40 +176,17 @@ class Repository {
 
     val siteImageListStateFlow:MutableStateFlow<List<SiteImage_TBL>> = MutableStateFlow(listOf())
 
-    val siteDefaultDataStateFlow:MutableStateFlow<SiteDefaultData?> = MutableStateFlow(null)
+  //  val siteDefaultDataStateFlow:MutableStateFlow<SiteDefaultData?> = MutableStateFlow(null)
 
     var currentListDataStateFlow:MutableStateFlow<List<CampSite_TBL>> = MutableStateFlow(listOf())
 
 
-    suspend fun getNearCampSiteList( facltNm:String){
-        database.nearCampSiteDao.select_Search_Flow(facltNm).collectLatest {
-            currentListDataStateFlow.emit(it)
-        }
-    }
 
-    suspend fun getCampSiteList(
-        donm: Array<String>,
-        sigungNm: String,
-        addr1: String,
-        facltNm:String
-    ) {
-
-        database.campSiteDao.select_Search_Flow(
-            donm,
-            sigungNm,
-            addr1,
-            facltNm
-        ).collectLatest {
-            currentListDataStateFlow.emit(it)
-        }
-
-    }
-
-
-     suspend fun getCampSiteListFlowNew(
+     suspend fun getCampSiteListFlow(
         administrativeDistrictSiDoCode:String,
         administrativeDistrictSiGunGu:String,
         searchTitle:String? = null): Int{
+
 
         val facltNm =  if(searchTitle.isNullOrEmpty()){
             "%%"
@@ -227,16 +204,17 @@ class Repository {
 
         val administrativeDistrictSiGunGuSplitArray = administrativeDistrictSiGunGu.split(" ", limit = 2)
 
-        val sigungNm = administrativeDistrictSiGunGuSplitArray[0]
+        //세종특별자치시 예외사항
+         val sigungNm = if(administrativeDistrictSiDoCode == "36"){"%"} else {administrativeDistrictSiGunGuSplitArray[0] }
 
-        val addr1 = if(administrativeDistrictSiGunGuSplitArray.size == 2) {
+
+         val addr1 = if(administrativeDistrictSiGunGuSplitArray.size == 2) {
             "%" +  administrativeDistrictSiGunGuSplitArray[1] + "%"
         } else {
             "%%"
         }
 
          val result =  if(administrativeDistrictSiDoCode == "0"){
-             // database.nearCampSiteDao.select_Search_Flow(facltNm)
              database.nearCampSiteDao.select_Search(facltNm)
          }else {
              database.campSiteDao.select_Search(
@@ -250,55 +228,6 @@ class Repository {
 
          return result.size
     }
-
-
-
-
-
-
-    suspend fun getCampSiteListFlow(
-        administrativeDistrictSiDoCode:String,
-        administrativeDistrictSiGunGu:String,
-        searchTitle:String? = null){
-
-        val facltNm =  if(searchTitle.isNullOrEmpty()){
-            "%%"
-        } else {
-            "%" +  searchTitle.replace(' ','%' )  + "%"
-        }
-
-        val donm = if (administrativeDistrictSiDoCode == "0"){
-            emptyArray()
-        } else {
-            AdministrativeDistrictSiDoList.first{
-                it.getCodeString() == administrativeDistrictSiDoCode
-            }.getExtentionNameList()
-        }
-
-        val administrativeDistrictSiGunGuSplitArray = administrativeDistrictSiGunGu.split(" ", limit = 2)
-
-        val sigungNm = administrativeDistrictSiGunGuSplitArray[0]
-
-        val addr1 = if(administrativeDistrictSiGunGuSplitArray.size == 2) {
-            "%" +  administrativeDistrictSiGunGuSplitArray[1] + "%"
-        } else {
-            "%%"
-        }
-
-         if(administrativeDistrictSiDoCode == "0"){
-             getNearCampSiteList(   facltNm)
-        }else {
-             getCampSiteList(
-                donm,
-                sigungNm,
-                addr1,
-                facltNm
-            )
-        }
-
-    }
-
-
 
 
 
@@ -357,7 +286,8 @@ class Repository {
 
         val administrativeDistrictSiGunGuSplitArray = administrativeDistrictSiGunGu.split(" ", limit = 2)
 
-        val sigungNm = administrativeDistrictSiGunGuSplitArray[0]
+        //세종특별자치시 예외사항
+        val sigungNm = if(administrativeDistrictSiDoCode == "36"){"%"} else {administrativeDistrictSiGunGuSplitArray[0] }
 
         val addr1 = if(administrativeDistrictSiGunGuSplitArray.size == 2) {
            "%" +  administrativeDistrictSiGunGuSplitArray[1] + "%"
@@ -387,11 +317,6 @@ class Repository {
         currentLatLng.emit(data)
     }
 
-    suspend fun getSiteImageList(contentId:String){
-        database.siteimageDao.select_Flow(contentId).collectLatest {
-            siteImageListStateFlow.emit(it)
-        }
-    }
 
 
     suspend fun getSiDoList() {
@@ -406,12 +331,6 @@ class Repository {
         }
     }
 
-
-    suspend fun getCampSiteData(contentId: String) {
-        database.campSiteDao.select_Flow(contentId).collectLatest {
-            siteDefaultDataStateFlow.emit(CampSite_TBL.toSiteDefaultData(it))
-        }
-    }
 
 
 
@@ -489,13 +408,7 @@ class Repository {
                         database.sidoDao.trancate()
                         database.sidoDao.insert_List(resultList)
                         updateCollectTime(serviceType.name)
-                        /*
-                        database.collectTimeDao.update(
-                            type = serviceType.name,
-                            time = System.currentTimeMillis()
-                        )
 
-                         */
                         /****
                         Transaction 내에  동일한 테이블을 로드하는 Flow 를 넣으면  Transaction 이 종료 되지 않음 (무한 루프)
                         getSiDoList()
@@ -519,13 +432,6 @@ class Repository {
                         database.sigunguDao.trancate()
                         database.sigunguDao.insert_List(resultList)
                         updateCollectTime(serviceType.name)
-                        /*
-                        database.collectTimeDao.update(
-                            type = serviceType.name,
-                            time = System.currentTimeMillis()
-                        )
-
-                         */
                     }
                 }
             }
@@ -596,15 +502,46 @@ class Repository {
                     GoCampingService.SITEIMAGE -> {
 
                         if (!contentId.isNullOrEmpty()) {
-                            service.getImage(
-                                serviceKey = serviceKey,
-                                numOfRows = numOfRows,
-                                pageNo = pageNo,
-                                MobileOS = MobileOS,
-                                MobileApp = MobileApp,
-                                _type = datatype,
-                                contentId = contentId
-                            )
+
+                            try {
+                                service.getImage(
+                                    serviceKey = serviceKey,
+                                    numOfRows = numOfRows,
+                                    pageNo = pageNo,
+                                    MobileOS = MobileOS,
+                                    MobileApp = MobileApp,
+                                    _type = datatype,
+                                    contentId = contentId
+                                )
+
+                            } catch(e: Exception) {
+
+                                val apiResponse  =  service.getImageEmpty(
+                                    serviceKey = serviceKey,
+                                    numOfRows = numOfRows,
+                                    pageNo = pageNo,
+                                    MobileOS = MobileOS,
+                                    MobileApp = MobileApp,
+                                    _type = datatype,
+                                    contentId = contentId
+                                )
+
+                                val resultStatus = GoCampingResponseStatusList.first {
+                                    it.getDesc().first == apiResponse.response.header.resultCode
+                                }
+
+                                if (resultStatus == GoCampingResponseStatus.OK){
+                                    val resultList: MutableList<SiteImage_TBL> = mutableListOf()
+                                    siteImageListStateFlow.emit(resultList)
+                                } else {
+
+                                }
+
+                                return
+
+                            }
+
+
                         } else {
 
                         }
@@ -627,6 +564,8 @@ class Repository {
                     }
                 }
 
+
+
                 val resultStatus = GoCampingResponseStatusList.first {
                     it.getDesc().first == when(serviceType){
                         GoCampingService.CAMPSITE,
@@ -641,12 +580,6 @@ class Repository {
                     }
                 }
 
-               /*
-                val resultStatus = GoCampingResponseStatusList.first {
-                    it.getDesc().first == (apiResponse as GoCampingResponse).response?.header?.resultCode
-                }
-
-                */
 
                 when (resultStatus) {
 
@@ -689,7 +622,7 @@ class Repository {
                                 val resultUpdateList: MutableList<CampSite_TBL> = mutableListOf()
                                 val resultAppendList: MutableList<CampSite_TBL> = mutableListOf()
                                 val resultDeleteList: MutableList<String> = mutableListOf()
-                        //        val resultUnknownList: MutableList<CampSite_TBL> = mutableListOf()
+
 
                                 (apiResponse as GoCampingResponse).response?.body?.items?.item?.forEach {
                                     when (it.syncStatus) {
@@ -712,12 +645,6 @@ class Repository {
                                         }
 
                                         else -> {
-                                            /*
-                                            resultUnknownList.add(
-                                                GoCampingRecvItem.toCampSite_TBL(it)
-                                            )
-
-                                             */
                                         }
                                     }
                                 }
@@ -757,6 +684,8 @@ class Repository {
                                     )
                                 }
 
+                                siteImageListStateFlow.emit(resultList)
+
                                 database.withTransaction {
                                     database.siteimageDao.trancate()
                                     database.siteimageDao.insert_List(resultList)
@@ -774,7 +703,8 @@ class Repository {
 
             } catch (e: Exception){
                 val errMsg = e.localizedMessage
-            }
+            } // catch
+
 
         }
 
