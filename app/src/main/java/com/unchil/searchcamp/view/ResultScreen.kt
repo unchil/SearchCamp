@@ -118,6 +118,17 @@ fun ResultScreen(
     var selectedScreen by remember { mutableStateOf(0) }
 
 
+    val onClickHandlerMap:()->Unit = {
+
+        coroutineScope.launch {
+            if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
+                scaffoldState.bottomSheetState.expand()
+            } else {
+                scaffoldState.bottomSheetState.partialExpand()
+            }
+        }
+    }
+
     val onClickHandler:(data:SiteDefaultData?)->Unit = {
         it?.let {
             currentCampSiteData.value = it
@@ -277,11 +288,13 @@ fun ResultScreen(
                         }
                         SearchCampDestinations.mapScreen -> {
                             GoogleMapView(
-                                onOneClickHandler =   onClickHandler,
+                                onOneClickHandler =   onClickHandlerMap,
                                 onLongClickHandler = {
                                     currentCampSiteData.value = it
                                     isVisibleSiteDescriptionView = true
-
+                                },
+                                onSetSiteDefaultData = {
+                                    currentCampSiteData.value = it
                                 }
                             )
                         }

@@ -72,8 +72,9 @@ fun Location.toLatLng():LatLng{
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun GoogleMapView(
-    onOneClickHandler:(SiteDefaultData)->Unit,
-    onLongClickHandler:(SiteDefaultData)->Unit
+    onOneClickHandler:()->Unit,
+    onLongClickHandler:(SiteDefaultData)->Unit,
+    onSetSiteDefaultData:(SiteDefaultData)->Unit,
 ) {
 
 
@@ -102,6 +103,7 @@ fun GoogleMapView(
 
         val context = LocalContext.current
         val db = LocalSearchCampDB.current
+
 
         val viewModel = remember {
             GoogleMapViewModel(
@@ -157,6 +159,10 @@ fun GoogleMapView(
 
         var mapTypeIndex by rememberSaveable { mutableStateOf(0) }
 
+        var isVisibleSiteDefaultView by remember { mutableStateOf(false) }
+        var currentSiteDefaultData:SiteDefaultData? by remember {
+            mutableStateOf(null)
+        }
 
         Scaffold(
             modifier = Modifier.statusBarsPadding(),
@@ -167,14 +173,23 @@ fun GoogleMapView(
             contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
         ) {
 
-            Box(Modifier.fillMaxSize().padding(it)) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                contentAlignment = Alignment.BottomCenter,
+
+
+            ) {
 
                 GoogleMap(
                     cameraPositionState = cameraPositionState,
                     properties = mapProperties,
                     uiSettings = uiSettings,
                     onMapLongClick = onMapLongClickHandler,
-
+                    onMapClick = {
+                        isVisibleSiteDefaultView = false
+                    }
                     ) {
 
 /*
@@ -193,52 +208,20 @@ fun GoogleMapView(
 
                     currentSiteDataList.value.forEach { it ->
 
-
-                        val state =
-                            MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
-
-
-                        MarkerInfoWindowContent(
+                        val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
+                        Marker(
                             state = state,
-                            title = "lat/lng:(${
-                                String.format(
-                                    "%.5f",
-                                    it.mapY.toDouble()
-                                )
-                            },${String.format("%.5f", it.mapX.toDouble())})",
-                            //   snippet = "${it.snippets}\n${it.desc}",
-
-                            //  icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                            draggable = true,
-                            onInfoWindowClick = { marker ->
-                                //    hapticProcessing()
-                                onOneClickHandler(CampSite_TBL.toSiteDefaultData(it))
-                                //         siteDefaultData.value = CampSite_TBL.toSiteDefaultData(it)
-
+                            title =  it.facltNm,
+                            onClick = {marker ->
+                                isVisibleSiteDefaultView = true
+                                currentSiteDefaultData = CampSite_TBL.toSiteDefaultData(it)
+                                onSetSiteDefaultData(CampSite_TBL.toSiteDefaultData(it))
+                                false
                             },
-                            onInfoWindowClose = {},
-                            onInfoWindowLongClick = { marker ->
-                                onLongClickHandler(CampSite_TBL.toSiteDefaultData(it))
-                            },
-                        ) { marker ->
-
-                            Box(
-                                modifier = Modifier,
-                                contentAlignment = Alignment.Center,
-                            ) {
-
-                                SiteDefaultView(
-                                    siteData = CampSite_TBL.toSiteDefaultData(it),
-                                    allowHardware = false,
-                                    onClick = { },
-                                    onLongClick = {}
-                                )
-
-
+                            onInfoWindowClick = {
+                                isVisibleSiteDefaultView = false
                             }
-
-                        }
-
+                        )
 
                     }
 
@@ -251,8 +234,6 @@ fun GoogleMapView(
                         .align(Alignment.BottomStart),
                     cameraPositionState = cameraPositionState
                 )
-
-
 
                 Column(
                     modifier = Modifier
@@ -286,6 +267,35 @@ fun GoogleMapView(
                         }
                     }
                 }
+
+                currentSiteDefaultData?.let {
+
+                    AnimatedVisibility(visible = isVisibleSiteDefaultView) {
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 30.dp)
+                                .align(Alignment.BottomCenter),
+                            contentAlignment = Alignment.Center,
+                        ) {
+
+                            SiteDefaultView(
+                                siteData = it,
+                                onClick = {
+                                    onOneClickHandler()
+                                },
+                                onLongClick = {
+                                    onLongClickHandler(it)
+                                }
+                            )
+
+
+                        }
+
+                    }
+                }
+
+
+
 
 
             }
@@ -339,7 +349,7 @@ fun PrevViewMap(){
                         color = MaterialTheme.colorScheme.background
                     ) {
 
-                        GoogleMapView(onOneClickHandler =  {}, onLongClickHandler = {})
+                        GoogleMapView(onOneClickHandler =  {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
 
                     }
                 }

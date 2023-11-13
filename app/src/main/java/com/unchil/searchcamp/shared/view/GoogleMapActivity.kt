@@ -37,7 +37,7 @@ class GoogleMapActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GoogleMapView(onOneClickHandler =  {}, onLongClickHandler = {})
+                    GoogleMapView(onOneClickHandler =  {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
                 }
             }
 
