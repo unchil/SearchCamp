@@ -433,7 +433,7 @@ data class   GoCampingResponseImage(
 )
 
 data class    GoCampingResponseImageEmpty(
-    var response:GoCampingRecvDataImageEmpty
+    @SerializedName("response") var response:GoCampingRecvDataImageEmpty
 )
 
 

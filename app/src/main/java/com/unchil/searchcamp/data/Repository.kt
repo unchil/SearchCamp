@@ -24,7 +24,6 @@ import com.unchil.searchcamp.model.GoCampingResponseImage
 import com.unchil.searchcamp.model.GoCampingResponseStatus
 import com.unchil.searchcamp.model.GoCampingResponseStatusList
 import com.unchil.searchcamp.model.GoCampingSyncStatus
-import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.model.VWorldResponse
 import com.unchil.searchcamp.model.getDesc
 import com.unchil.searchcamp.model.toCURRENTWEATHER_TBL
@@ -34,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 

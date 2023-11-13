@@ -177,7 +177,7 @@ fun GoogleMapView(
 
                     ) {
 
-
+/*
                     Marker(
                         state = markerState,
                         title = "lat/lng:(${
@@ -188,6 +188,8 @@ fun GoogleMapView(
                         },${String.format("%.5f", markerState.position.longitude)})",
                     )
 
+
+ */
 
                     currentSiteDataList.value.forEach { it ->
 
@@ -225,18 +227,11 @@ fun GoogleMapView(
                                 contentAlignment = Alignment.Center,
                             ) {
 
-                                //    SiteDefaultViewNew(contentId = "2963", allowHardware = false, onEvent =  {})
-
-
                                 SiteDefaultView(
                                     siteData = CampSite_TBL.toSiteDefaultData(it),
                                     allowHardware = false,
-                                    onClick = {
-
-                                    },
-                                    onLongClick = {
-
-                                    }
+                                    onClick = { },
+                                    onLongClick = {}
                                 )
 
 

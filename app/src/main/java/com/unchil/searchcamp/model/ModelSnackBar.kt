@@ -24,7 +24,7 @@ val snackbarChannelList = listOf<SnackBarChannelData>(
         channelType = SnackBarChannelType.SEARCH_RESULT,
         channel = 3,
         message = R.string.snackbar_3,
-        duration = SnackbarDuration.Long,
+        duration = SnackbarDuration.Indefinite,
         actionLabel = "결과보기",
         withDismissAction = true,
     ),
