@@ -51,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -198,7 +199,7 @@ fun ResultScreen(
     ) { innerPadding ->
 
         Box(
-            modifier = Modifier.padding(horizontal = 10.dp),
+            modifier = Modifier.padding(horizontal = 0.dp),
             contentAlignment = Alignment.Center,
         ){
 
@@ -307,7 +308,12 @@ fun ResultScreen(
 
             }// Column
 
-
+            AnimatedVisibility(visible = isVisibleSiteDescriptionView) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .background(color = Color.DarkGray.copy(alpha = 0.7f))
+                )
+            }
 
             AnimatedVisibility(visible = isVisibleSiteDescriptionView,
                 enter = slideInVertically {
@@ -324,11 +330,19 @@ fun ResultScreen(
             ) {
 
                 currentCampSiteData.value?.let {
-                    SiteDescriptionView(
-                        siteData = it,
-                        onEvent = {
-                            isVisibleSiteDescriptionView = false
-                        })
+
+                    Box(
+                        modifier = Modifier  .clip(ShapeDefaults.ExtraSmall).padding(horizontal = 10.dp)
+
+                    ){
+                        SiteDescriptionView(
+                            siteData = it,
+                            onEvent = {
+                                isVisibleSiteDescriptionView = false
+                            })
+                    }
+
+
                 }
             }
 

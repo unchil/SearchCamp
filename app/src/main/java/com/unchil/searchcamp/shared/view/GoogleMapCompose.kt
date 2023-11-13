@@ -192,20 +192,6 @@ fun GoogleMapView(
                     }
                     ) {
 
-/*
-                    Marker(
-                        state = markerState,
-                        title = "lat/lng:(${
-                            String.format(
-                                "%.5f",
-                                markerState.position.latitude
-                            )
-                        },${String.format("%.5f", markerState.position.longitude)})",
-                    )
-
-
- */
-
                     currentSiteDataList.value.forEach { it ->
 
                         val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
@@ -224,7 +210,6 @@ fun GoogleMapView(
                         )
 
                     }
-
 
                 }
 
@@ -270,10 +255,12 @@ fun GoogleMapView(
 
                 currentSiteDefaultData?.let {
 
+
                     AnimatedVisibility(visible = isVisibleSiteDefaultView) {
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 30.dp)
+                                .padding(bottom = 70.dp)
+                                .padding(horizontal = 6.dp)
                                 .align(Alignment.BottomCenter),
                             contentAlignment = Alignment.Center,
                         ) {

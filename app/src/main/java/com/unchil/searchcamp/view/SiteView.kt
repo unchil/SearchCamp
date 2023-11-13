@@ -384,7 +384,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                     }
                     .fillMaxWidth(1f)
                     .height(500.dp)
-            //        .padding(6.dp)
+
      ,
                 contentAlignment = Alignment.Center
             ) {
