@@ -1,6 +1,7 @@
 package com.unchil.searchcamp.view
 
 import android.annotation.SuppressLint
+import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -13,7 +14,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.PaddingValues
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,11 +54,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -67,6 +72,7 @@ import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.model.SiteDefaultData
+
 import com.unchil.searchcamp.navigation.SearchCampDestinations
 import com.unchil.searchcamp.navigation.resultScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
@@ -111,7 +117,7 @@ fun ResultScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val coroutineScope = rememberCoroutineScope()
     val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
-    val sheetPeekHeightValue by remember { mutableStateOf(30.dp) }
+    val sheetPeekHeightValue by remember { mutableStateOf(50.dp) }
     var isVisibleSiteDescriptionView by remember{ mutableStateOf(false) }
     val density = LocalDensity.current
 
@@ -153,9 +159,9 @@ fun ResultScreen(
         sheetDragHandle = {
             Box(
                 modifier = Modifier
-                    .height(30.dp)
+                    .height(sheetPeekHeightValue)
                     .fillMaxWidth()
-                    .background(color = Color.LightGray.copy(alpha = 0.5f)),
+                    .background(color = Color.LightGray.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -198,7 +204,7 @@ fun ResultScreen(
     ) { innerPadding ->
 
         Box(
-            modifier = Modifier.padding(horizontal = 10.dp),
+            modifier = Modifier.padding(innerPadding),
             contentAlignment = Alignment.Center,
         ){
 
@@ -212,14 +218,11 @@ fun ResultScreen(
 
                 BottomNavigation(
                     modifier = Modifier
-                        .padding(top = 6.dp, bottom = 2.dp)
                         .fillMaxWidth()
                         .height(60.dp)
                         .shadow(elevation = 1.dp),
-                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                    backgroundColor = MaterialTheme.colorScheme.background
                 ) {
-
-                    Spacer( modifier = Modifier.padding(horizontal = 10.dp))
 
                     resultScreens.forEachIndexed { index, it ->
                         BottomNavigationItem(
@@ -227,21 +230,30 @@ fun ResultScreen(
                                 Icon(
                                     imageVector = it.icon ?: Icons.Outlined.Info,
                                     contentDescription = context.resources.getString(  it.name  ),
-                                    tint = if (selectedScreen == index) Color.Red else MaterialTheme.colorScheme.secondary)
+                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                )
                             },
                             label = {
-                                Text( text = context.resources.getString( it.name ) )
+
+                                Text(  context.resources.getString( it.name ) ,
+                                     modifier = Modifier,
+                                     textAlign = TextAlign.Center,
+                                     style  = MaterialTheme.typography.titleSmall,
+                                    color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                )
+
                             },
+                            alwaysShowLabel = false,
                             selected = selectedScreen == index,
                             onClick = {
                                 selectedScreen = index
                             },
-                            selectedContentColor = Color.Red,
-                            unselectedContentColor = MaterialTheme.colorScheme.secondary
+                            selectedContentColor =  MaterialTheme.colorScheme.onSurface,
+                     //      unselectedContentColor = Color.Gray
                         )
                     }
 
-                    Spacer( modifier = Modifier.padding(horizontal = 10.dp))
+
 
                 }
 
@@ -254,13 +266,13 @@ fun ResultScreen(
                     when(resultScreens[selectedScreen]){
                         SearchCampDestinations.listScreen -> {
                             LazyColumn(
-                                modifier = Modifier
+                                modifier = Modifier.background(color = Color.Black)
                                     .align(Alignment.TopCenter),
                                 state = lazyListState,
                                 userScrollEnabled = true,
                                 verticalArrangement = Arrangement.SpaceBetween,
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 2.dp)
+                                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 1.dp)
                             ) {
 
                                 items(campSiteStream.itemCount) {
@@ -277,6 +289,7 @@ fun ResultScreen(
                                             }
                                         )
 
+                                        Spacer(modifier = Modifier.padding(bottom = 1.dp))
 
                                     }
 
@@ -307,7 +320,12 @@ fun ResultScreen(
 
             }// Column
 
-
+            AnimatedVisibility(visible = isVisibleSiteDescriptionView) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .background(color = Color.White.copy(alpha = 0.9f))
+                )
+            }
 
             AnimatedVisibility(visible = isVisibleSiteDescriptionView,
                 enter = slideInVertically {
@@ -324,11 +342,19 @@ fun ResultScreen(
             ) {
 
                 currentCampSiteData.value?.let {
-                    SiteDescriptionView(
-                        siteData = it,
-                        onEvent = {
-                            isVisibleSiteDescriptionView = false
-                        })
+
+                    Box(
+                        modifier = Modifier  .clip(ShapeDefaults.ExtraSmall).padding(horizontal = 10.dp)
+
+                    ){
+                        SiteDescriptionView(
+                            siteData = it,
+                            onEvent = {
+                                isVisibleSiteDescriptionView = false
+                            })
+                    }
+
+
                 }
             }
 

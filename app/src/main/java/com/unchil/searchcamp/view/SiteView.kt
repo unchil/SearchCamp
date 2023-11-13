@@ -134,14 +134,12 @@ fun SiteDefaultView(siteData:SiteDefaultData,   allowHardware:Boolean = true, on
                         }
                     )
                     .fillMaxWidth()
-                    .height(180.dp)
-                    .padding(vertical = 2.dp)
+                    .height(170.dp)
                     .clip(ShapeDefaults.ExtraSmall)
-                    .background(color = MaterialTheme.colorScheme.secondaryContainer)
-
-                ,
+                    .background(color = MaterialTheme.colorScheme.background)  ,
                 contentAlignment = Alignment.Center
             ){
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -384,21 +382,16 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                     }
                     .fillMaxWidth(1f)
                     .height(500.dp)
-            //        .padding(6.dp)
+
      ,
                 contentAlignment = Alignment.Center
             ) {
 
-
-                Box(modifier = Modifier
-                    .background(color = Color.Black.copy(alpha = 0.5f))
-                    .padding(1.dp) ){
-                    ImageViewer(
-                        data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {R.drawable.forest2},
-                        size = Size.ORIGINAL,
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                ImageViewer(
+                    data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {R.drawable.forest2},
+                    size = Size.ORIGINAL,
+                    contentScale = ContentScale.Crop
+                )
 
 
                 Column(
@@ -421,7 +414,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                     )
                     Spacer(modifier = Modifier.size(20.dp))
 
-                    AnimatedVisibility(visible = siteData.tel.isNotEmpty()) {
+                    if( siteData.tel.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -446,7 +439,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                     }
 
 
-                    AnimatedVisibility(visible = siteData.addr1.isNotEmpty()) {
+                    if( siteData.addr1.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -468,7 +461,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                         }
                     }
 
-                    AnimatedVisibility(visible = siteData.resveCl.isNotEmpty()) {
+                    if( siteData.resveCl.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -490,7 +483,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                         }
                     }
 
-                    AnimatedVisibility(visible = siteData.sbrsCl.isNotEmpty()) {
+                    if( siteData.sbrsCl.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -514,7 +507,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                     }
 
 
-                    AnimatedVisibility(visible = siteData.eqpmnLendCl.isNotEmpty()) {
+                    if( siteData.eqpmnLendCl.isNotEmpty()) {
 
                         Row(
                             modifier = Modifier
@@ -538,7 +531,7 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
 
                     }
 
-                    AnimatedVisibility(visible = siteData.glampInnerFclty.isNotEmpty()) {
+                    if( siteData.glampInnerFclty.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -560,26 +553,6 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
                         }
 
                     }
-
-
-/*
-                    IconButton(
-                        onClick = {
-                            navController.navigateTo(SearchCampDestinations.createRoute(SearchCampDestinations.detailScreen, contentId = siteData.contentId, url =  siteData.homepage))
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Home,
-                            contentDescription = "home",
-                            modifier = Modifier
-                                .scale(1.5f)
-                                .padding(vertical = 10.dp)
-                        )
-                    }
-
- */
-
-
 
                 }
 
@@ -614,7 +587,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                 style = MaterialTheme.typography.titleMedium
             )
 
-            AnimatedVisibility(visible = siteData.firstImageUrl.isNotEmpty()) {
+            if( siteData.firstImageUrl.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -630,7 +603,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
 
             }
 
-            AnimatedVisibility(visible = siteData.intro.isNotEmpty()) {
+            if( siteData.intro.isNotEmpty()) {
                 Text(
                     text = siteData.intro,
                     modifier = Modifier
@@ -732,7 +705,7 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
                     Card(
                         Modifier
-                            .size(340.dp)
+                            .size(300.dp)
                             .graphicsLayer {
                                 // Calculate the absolute offset for the current page from the
                                 // scroll position. We use the absolute value which allows us to mirror
@@ -764,12 +737,20 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
                             }
                     ) {
-                        ImageViewer(
-                            data = (siteImageList.value.get(page).imageUrl),
-                            size = Size.ORIGINAL,
-                            isZoomable = false,
-                            contentScale = ContentScale.Fit
-                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize().padding(horizontal = 20.dp)
+                        ){
+                            ImageViewer(
+                                data = (siteImageList.value.get(page).imageUrl),
+                                size = Size.ORIGINAL,
+                                isZoomable = false,
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+
+
 
                     }
                 }

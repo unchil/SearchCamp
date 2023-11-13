@@ -64,9 +64,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-val LocalUsableHaptic = compositionLocalOf{ true }
-val LocalUsableDarkMode = compositionLocalOf{ false }
-val LocalUsableDynamicColor = compositionLocalOf{ false }
+val LocalUsableDarkMode =  compositionLocalOf{ false }
+
 
 class MainActivity : ComponentActivity() {
 
@@ -102,59 +101,75 @@ class MainActivity : ComponentActivity() {
             }
 
 
-            SearchCampTheme {
+            SearchCampTheme(
+                dynamicColor = true
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
 
-                    CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
-                        CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
+                        CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
+                            CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
 
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                if (isConnect) {
-                                    NavHost(
-                                        navController = navController,
-                                        startDestination = SearchCampDestinations.searchScreen.route
-                                    ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    if (isConnect) {
+                                        NavHost(
+                                            navController = navController,
+                                            startDestination = SearchCampDestinations.searchScreen.route
+                                        ) {
 
-                                        composable(
-                                            route = SearchCampDestinations.searchScreen.route
-                                        ){
-                                            SearchScreen(navController = navController)
-                                        }
+                                            composable(
+                                                route = SearchCampDestinations.searchScreen.route
+                                            ) {
+                                                SearchScreen(navController = navController)
+                                            }
 
-                                        composable(
-                                            route = SearchCampDestinations.resultScreen.route ,
-                                            arguments = listOf(
-                                                navArgument(SearchCampDestinations.ARG_NAME_SiDoCode){
-                                                    nullable = false
-                                                    type = NavType.StringType },
-                                                navArgument(SearchCampDestinations.ARG_NAME_SiGunGu){
-                                                    nullable = false
-                                                    type = NavType.StringType },
-                                                navArgument(SearchCampDestinations.ARG_NAME_SearchTitle){
-                                                    nullable = true
-                                                    type = NavType.StringType }
-                                            )
-                                        ){
-                                            ResultScreen(
-                                                navController = navController,
-                                                administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(it.arguments),
-                                                administrativeDistrictSiGunGu = SearchCampDestinations.getSiGunGuFromArgs(it.arguments),
-                                                searchTitle = SearchCampDestinations.getSearchTitleFromArgs(it.arguments)
+                                            composable(
+                                                route = SearchCampDestinations.resultScreen.route,
+                                                arguments = listOf(
+                                                    navArgument(SearchCampDestinations.ARG_NAME_SiDoCode) {
+                                                        nullable = false
+                                                        type = NavType.StringType
+                                                    },
+                                                    navArgument(SearchCampDestinations.ARG_NAME_SiGunGu) {
+                                                        nullable = false
+                                                        type = NavType.StringType
+                                                    },
+                                                    navArgument(SearchCampDestinations.ARG_NAME_SearchTitle) {
+                                                        nullable = true
+                                                        type = NavType.StringType
+                                                    }
                                                 )
+                                            ) {
+                                                ResultScreen(
+                                                    navController = navController,
+                                                    administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(
+                                                        it.arguments
+                                                    ),
+                                                    administrativeDistrictSiGunGu = SearchCampDestinations.getSiGunGuFromArgs(
+                                                        it.arguments
+                                                    ),
+                                                    searchTitle = SearchCampDestinations.getSearchTitleFromArgs(
+                                                        it.arguments
+                                                    )
+                                                )
+                                            }
+
                                         }
 
+                                    } else {
+                                        ChkNetWork(onCheckState = {
+                                            coroutineScope.launch {
+                                                isConnect = checkInternetConnected()
+                                            }
+                                        })
                                     }
-
-                                } else {
-                                    ChkNetWork(  onCheckState = {   coroutineScope.launch {   isConnect = checkInternetConnected() } }  )
                                 }
-                            }
 
+                            }
                         }
-                    }
+
 
                 }
             }

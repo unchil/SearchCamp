@@ -23,8 +23,11 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.google.maps.android.compose.widgets.ScaleBar
+import com.unchil.searchcamp.LocalUsableDarkMode
+import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.RepositoryProvider
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.entity.CampSite_TBL
@@ -127,13 +130,19 @@ fun GoogleMapView(
         val defaultCameraPosition = CameraPosition.fromLatLngZoom(currentLocation, 12f)
         var cameraPositionState = CameraPositionState(position = defaultCameraPosition)
 
+        val isUsableDarkMode by remember { mutableStateOf(false) }
 
         var mapProperties by remember {
             mutableStateOf(
                 MapProperties(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = true,
-                    //  mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
+                    mapStyleOptions = if(isUsableDarkMode) {
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.mapstyle_night
+                        )
+                    } else { null }
                 )
             )
         }
@@ -164,6 +173,8 @@ fun GoogleMapView(
             mutableStateOf(null)
         }
 
+
+
         Scaffold(
             modifier = Modifier.statusBarsPadding(),
             topBar = {},
@@ -192,20 +203,6 @@ fun GoogleMapView(
                     }
                     ) {
 
-/*
-                    Marker(
-                        state = markerState,
-                        title = "lat/lng:(${
-                            String.format(
-                                "%.5f",
-                                markerState.position.latitude
-                            )
-                        },${String.format("%.5f", markerState.position.longitude)})",
-                    )
-
-
- */
-
                     currentSiteDataList.value.forEach { it ->
 
                         val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
@@ -224,7 +221,6 @@ fun GoogleMapView(
                         )
 
                     }
-
 
                 }
 
@@ -270,10 +266,12 @@ fun GoogleMapView(
 
                 currentSiteDefaultData?.let {
 
+
                     AnimatedVisibility(visible = isVisibleSiteDefaultView) {
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 30.dp)
+                                .padding(bottom = 70.dp)
+                                .padding(horizontal = 6.dp)
                                 .align(Alignment.BottomCenter),
                             contentAlignment = Alignment.Center,
                         ) {

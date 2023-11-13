@@ -30,6 +30,7 @@ import com.unchil.searchcamp.model.toCURRENTWEATHER_TBL
 import com.unchil.searchcamp.shared.UnixTimeToString
 import com.unchil.searchcamp.shared.yyyyMMdd
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -437,6 +438,7 @@ class Repository {
 
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun recvGoCampingData(
         serviceType:GoCampingService,
         mapX:String? = null,
@@ -530,7 +532,7 @@ class Repository {
 
                                 if (resultStatus == GoCampingResponseStatus.OK){
                                     val resultList: MutableList<SiteImage_TBL> = mutableListOf()
-                                    siteImageListStateFlow.emit(resultList)
+                                  siteImageListStateFlow.emit(resultList)
                                 } else {
 
                                 }

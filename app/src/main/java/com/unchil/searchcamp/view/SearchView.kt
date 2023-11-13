@@ -241,7 +241,7 @@ fun SearchCampView(
                 .height(480.dp)
                 .clip(shape = ShapeDefaults.ExtraSmall)
                 .verticalScroll(scrollState)
-                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)),
+                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.unchil.gismemo.view.SiteWebView
@@ -97,11 +98,11 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                     .fillMaxWidth()
                     .height(60.dp)
                     .shadow(elevation = 1.dp),
-                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                backgroundColor = MaterialTheme.colorScheme.background,
             ) {
 
 
-                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+
 
                 detailScreens.forEachIndexed { index, it ->
 
@@ -113,22 +114,27 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                                 Icon(
                                     imageVector = it.icon ?: Icons.Outlined.Info,
                                     contentDescription = context.resources.getString(it.name),
-                                    tint = if (selectedScreen.value  == index) Color.Red else MaterialTheme.colorScheme.secondary
+                                    tint = if (selectedScreen.value == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
                                 )
                             },
                             label = {
-                                Text(
-                                    text = context.resources.getString(it.name),
-                                    style = MaterialTheme.typography.bodySmall
+
+                                Text(  context.resources.getString(it.name),
+                                    modifier = Modifier,
+                                    textAlign = TextAlign.Center,
+                                    style  = MaterialTheme.typography.titleSmall,
+                                    color =  if (selectedScreen.value == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
                                 )
+
+
                             },
                             alwaysShowLabel = false,
                             selected = selectedScreen.value == index,
                             onClick = {
                                 selectedScreen.value  = index
                             },
-                            selectedContentColor = Color.Red,
-                            unselectedContentColor = MaterialTheme.colorScheme.secondary
+                            selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                        //    unselectedContentColor = MaterialTheme.colorScheme.secondary
                         )
                     }
 
@@ -137,7 +143,7 @@ fun SiteDetailScreen(data:SiteDefaultData) {
 
                 }
 
-                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+
 
             }
 
