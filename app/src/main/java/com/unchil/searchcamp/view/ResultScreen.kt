@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
@@ -138,13 +141,16 @@ fun ResultScreen(
         sheetShape = ShapeDefaults.Small,
         sheetDragHandle = {
             Box(
-                modifier = Modifier.height(30.dp).fillMaxWidth().background(color = Color.LightGray.copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .height(30.dp)
+                    .fillMaxWidth()
+                    .background(color = Color.LightGray.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     modifier = Modifier
                         .scale(1f)
-                        .clickable {  onClickHandler.invoke(null) },
+                        .clickable { onClickHandler.invoke(null) },
                     imageVector =
                     if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded)
                         Icons.Outlined.KeyboardArrowDown
@@ -154,9 +160,24 @@ fun ResultScreen(
             }
         },
         sheetContent = {
+
             Box(
-                modifier = Modifier,
-                contentAlignment = Alignment.TopCenter
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(1f),
+                contentAlignment = Alignment.Center
+
+/*
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.8f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+
+ */
             ) {
                 currentCampSiteData.value?.let {
                     SiteDetailScreen(it)

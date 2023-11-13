@@ -4,12 +4,16 @@ package com.unchil.searchcamp.view
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
@@ -22,13 +26,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.unchil.gismemo.view.SiteWebViewNew
+import com.unchil.gismemo.view.SiteWebView
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.model.SiteDefaultData
@@ -47,7 +52,7 @@ fun SiteDetailScreen(data:SiteDefaultData) {
     val context = LocalContext.current
 
     Scaffold(
-        bottomBar = {
+        topBar = {
             BottomNavigation(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -61,35 +66,46 @@ fun SiteDetailScreen(data:SiteDefaultData) {
 
                 detailScreens.forEachIndexed { index, it ->
 
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                imageVector = it.icon ?: Icons.Outlined.Info,
-                                contentDescription = context.resources.getString(it.name),
-                                tint = if (selectedScreen.value  == index) Color.Red else MaterialTheme.colorScheme.secondary
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = context.resources.getString(it.name),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        },
-                        alwaysShowLabel = false,
-                        selected = selectedScreen.value == index,
-                        onClick = {
-                            selectedScreen.value  = index
-                       //     navControllerNew.navigateTo(SearchCampDestinations.createRoute(detailScreens[index], data.contentId, data.firstImageUrl))
+                    if( it == SearchCampDestinations.homepageScreen && data.homepage.isEmpty()) {
 
-                        },
-                        selectedContentColor = Color.Red,
-                        unselectedContentColor = MaterialTheme.colorScheme.secondary
-                    )
+                    }else {
+                        BottomNavigationItem(
+                            icon = {
+                                Icon(
+                                    imageVector = it.icon ?: Icons.Outlined.Info,
+                                    contentDescription = context.resources.getString(it.name),
+                                    tint = if (selectedScreen.value  == index) Color.Red else MaterialTheme.colorScheme.secondary
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = context.resources.getString(it.name),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            },
+                            alwaysShowLabel = false,
+                            selected = selectedScreen.value == index,
+                            onClick = {
+                                selectedScreen.value  = index
+                                //     navControllerNew.navigateTo(SearchCampDestinations.createRoute(detailScreens[index], data.contentId, data.firstImageUrl))
+
+                            },
+                            selectedContentColor = Color.Red,
+                            unselectedContentColor = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+
+
+
                 }
 
                 Spacer(modifier = Modifier.padding(horizontal = 10.dp))
 
             }
+
+        },
+        bottomBar = {
 
         }
     ) {
@@ -107,7 +123,17 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                     SiteImagePagerView(contentId = data.contentId)
                 }
                 SearchCampDestinations.homepageScreen -> {
-                    SiteWebViewNew( data.homepage)
+                    if( data.homepage.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(state = rememberScrollState()),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            SiteWebView(data.homepage)
+                        }
+                    }
                 }
 
                 else -> {}

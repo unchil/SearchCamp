@@ -618,7 +618,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(300.dp)
                         .clip(ShapeDefaults.ExtraSmall)
                 ) {
                     ImageViewer(
@@ -634,8 +634,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                 Text(
                     text = siteData.intro,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
+                        .fillMaxSize()
                         .verticalScroll(scrollState),
                     textAlign = TextAlign.Start,
                     style = MaterialTheme.typography.bodyMedium
