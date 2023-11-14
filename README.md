@@ -13,9 +13,10 @@ SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를
 
 
 ###  Video
-|Search
-|:-:|
-|[![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/SearchScreen.png)](https://youtu.be/0VKHSRMLa0M)|
+|Search|||
+|:-:|:-:|:-:|
+|[![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/SearchScreen.png)](https://youtu.be/0VKHSRMLa0M)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list1.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_map1.png)|
+
 
 ###  Screen Shot
 ||||
