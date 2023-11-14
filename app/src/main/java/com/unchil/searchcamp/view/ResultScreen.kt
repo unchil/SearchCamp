@@ -1,7 +1,6 @@
 package com.unchil.searchcamp.view
 
 import android.annotation.SuppressLint
-import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -14,9 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.PaddingValues
-
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,8 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
@@ -72,7 +67,6 @@ import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.model.SiteDefaultData
-
 import com.unchil.searchcamp.navigation.SearchCampDestinations
 import com.unchil.searchcamp.navigation.resultScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
