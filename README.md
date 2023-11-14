@@ -12,6 +12,11 @@ Weather information provided by OpenWeather: [OpenWeatherMap][openweatherlink].
 SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를 기반으로 한 캠핑장 검색 프로그램 입니다.
 
 
+###  Video
+|Search
+|:-:|
+|[![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/SearchScreen.png)](https://youtu.be/0VKHSRMLa0M)|
+
 ###  Screen Shot
 ||||
 |:-:|:-:|:-:|
