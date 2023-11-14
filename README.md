@@ -18,3 +18,10 @@ SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를
 |**Search Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/SearchScreen.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchScreen2.png) |
 |**Result Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list1.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_map1.png) |
 |**Detail Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list2.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list3.png) |
+
+##  License
+**SPDX-License-Identifier: MIT**
+
+
+[googlelink]: https://developers.google.com/maps "Go GoogleMap"
+[openweatherlink]: https://openweathermap.org/ "Go OpenWeatherMap"
