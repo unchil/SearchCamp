@@ -85,6 +85,10 @@ import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
+import com.unchil.searchcamp.shared.physicalScreenRectDp
+import com.unchil.searchcamp.shared.physicalScreenRectPx
+import com.unchil.searchcamp.shared.screenRectDp
+import com.unchil.searchcamp.shared.screenRectPx
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
@@ -671,6 +675,12 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
             initialPageOffsetFraction = 0f,
             pageCount = {  siteImageList.value.size } )
 
+        val widthDp = screenRectDp.width()
+
+        val cardWidthDp = 300.dp
+
+        val paddingDp = (widthDp.dp - cardWidthDp) / 2
+
 
         val threePagesPerViewport = object : PageSize {
             override fun Density.calculateMainAxisPageSize(
@@ -700,12 +710,12 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
                     pageSpacing = 0.dp,
                     pageSize = threePagesPerViewport,
                     beyondBoundsPageCount = 9,
-                    contentPadding = PaddingValues(start = 60.dp, end = 60.dp),
+                    contentPadding = PaddingValues(start = paddingDp, end = paddingDp),
                 ) { page ->
 
                     Card(
                         Modifier
-                            .size(300.dp)
+                            .size(cardWidthDp)
                             .graphicsLayer {
                                 // Calculate the absolute offset for the current page from the
                                 // scroll position. We use the absolute value which allows us to mirror
@@ -790,23 +800,27 @@ fun PrevSiteView(){
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
 
-               //     Column(modifier = Modifier.verticalScroll(scrollState)) {
+                    val widthPx = screenRectPx.width()
+                    val heightPx = screenRectPx.height()
+                    println("[PX] screen width: $widthPx , height: $heightPx")
+
+                    val widthDp = screenRectDp.width()
+                    val heightDp = screenRectDp.height()
+                    println("[DP] screen width: $widthDp , height: $heightDp")
+
+                    println()
+
+                    val physicalWidthPx = context.physicalScreenRectPx.width()
+                    val physicalHeightPx = context.physicalScreenRectPx.height()
+                    println("[PX] physical screen width: $physicalWidthPx , height: $physicalHeightPx")
 
 
+                    val physicalWidthDp = context.physicalScreenRectDp.width()
+                    val physicalHeightDp = context.physicalScreenRectDp.height()
+                    println("[DP] physical screen width: $physicalWidthDp , height: $physicalHeightDp")
 
-                        //     SiteIntroductionView( navController = navController, contentId = "92")
-
-                    Box(
-                        Modifier.fillMaxSize()) {
-               //         SiteImagePagerView(contentId = "92")
-                    }
-                        //       SiteWebView(navController = navController, "https://goldenvalleycamping.modoo.at/")
-                    }
-
-
-                //}
+                }
             }
-
 
         }
     }
