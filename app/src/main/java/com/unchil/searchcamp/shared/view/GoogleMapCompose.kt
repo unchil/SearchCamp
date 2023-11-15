@@ -14,19 +14,25 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.google.maps.android.compose.widgets.ScaleBar
 import com.unchil.searchcamp.LocalUsableDarkMode
+import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.RepositoryProvider
 import com.unchil.searchcamp.db.LocalSearchCampDB
@@ -40,6 +46,8 @@ import com.unchil.searchcamp.shared.view.PermissionRequiredComposeFuncName
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
 import com.unchil.searchcamp.view.SiteDefaultView
 import com.unchil.searchcamp.viewmodel.GoogleMapViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 enum class MapTypeMenu {
@@ -72,7 +80,7 @@ fun Location.toLatLng():LatLng{
 }
 
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, MapsComposeExperimentalApi::class)
 @Composable
 fun GoogleMapView(
     onOneClickHandler:()->Unit,
@@ -83,8 +91,14 @@ fun GoogleMapView(
 
 
     val permissions = listOf(
-        Manifest.permission.INTERNET
+        Manifest.permission.INTERNET,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
     )
+
+
+
+
 
     val multiplePermissionsState = rememberMultiplePermissionsState( permissions)
 
@@ -106,6 +120,24 @@ fun GoogleMapView(
 
         val context = LocalContext.current
         val db = LocalSearchCampDB.current
+        val isUsableHaptic = LocalUsableHaptic.current
+        val hapticFeedback = LocalHapticFeedback.current
+        val coroutineScope = rememberCoroutineScope()
+
+        var isDarkMode by remember { mutableStateOf(false) }
+
+
+        fun hapticProcessing(){
+            if(isUsableHaptic){
+                coroutineScope.launch {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+            }
+        }
+
+        val fusedLocationProviderClient = remember {
+            LocationServices.getFusedLocationProviderClient(context)
+        }
 
 
         val viewModel = remember {
@@ -115,8 +147,28 @@ fun GoogleMapView(
 
         val currentSiteDataList = viewModel.currentListDataStateFlow.collectAsState()
 
+        var isSetCurrentLocation by remember { mutableStateOf(false) }
 
-        val currentLocation by remember {
+        var currentLocation by remember {
+            mutableStateOf(LatLng(0.0,0.0))
+        }
+
+
+        LaunchedEffect( key1 =  currentLocation){
+            if( currentLocation == LatLng(0.0,0.0)) {
+                fusedLocationProviderClient.lastLocation.addOnCompleteListener( context.mainExecutor) { task ->
+                    if (task.isSuccessful && task.result != null ) {
+                        currentLocation = task.result.toLatLng()
+                        isSetCurrentLocation = true
+                    }
+                }
+            }
+        }
+
+
+        var isGoCampSiteLocation by remember { mutableStateOf(false) }
+
+        val campSiteLocation by remember {
             mutableStateOf(
                 LatLng(
                     currentSiteDataList.value.first().mapY.toDouble(),
@@ -126,9 +178,14 @@ fun GoogleMapView(
         }
 
 
-        val markerState = MarkerState(position = currentLocation)
-        val defaultCameraPosition = CameraPosition.fromLatLngZoom(currentLocation, 12f)
-        var cameraPositionState = CameraPositionState(position = defaultCameraPosition)
+
+
+
+        // No ~~~~ remember
+        val markerState =  MarkerState( position = currentLocation )
+        val defaultCameraPosition =  CameraPosition.fromLatLngZoom( currentLocation, 12f)
+        val cameraPositionState =  CameraPositionState(position = defaultCameraPosition)
+
 
         val isUsableDarkMode by remember { mutableStateOf(false) }
 
@@ -161,9 +218,8 @@ fun GoogleMapView(
 
 
         val onMapLongClickHandler: (LatLng) -> Unit = {
-            markerState.position = it
-            cameraPositionState =
-                CameraPositionState(position = CameraPosition.fromLatLngZoom(it, 12f))
+     //       markerState.position = it
+    //        cameraPositionState =   CameraPositionState(position = CameraPosition.fromLatLngZoom(it, 12f))
         }
 
         var mapTypeIndex by rememberSaveable { mutableStateOf(0) }
@@ -175,13 +231,14 @@ fun GoogleMapView(
 
 
 
+
         Scaffold(
             modifier = Modifier.statusBarsPadding(),
             topBar = {},
             bottomBar = {},
             snackbarHost = {},
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-            contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
 
             Box(
@@ -203,6 +260,42 @@ fun GoogleMapView(
                     }
                     ) {
 
+
+
+
+                    MapEffect(key1 = isGoCampSiteLocation, key2 = isSetCurrentLocation){
+
+                        if(isSetCurrentLocation){
+                            it.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16f))
+                            it.animateCamera(CameraUpdateFactory.zoomIn())
+                            it.animateCamera(CameraUpdateFactory.zoomTo(8f), 2000, null)
+                            isSetCurrentLocation = false
+                            isGoCampSiteLocation = true
+                        }
+
+                        if(isGoCampSiteLocation) {
+
+                            val cameraPosition = CameraPosition.Builder()
+                                .target(campSiteLocation) // Sets the center of the map to Mountain View
+                                .zoom(12f)            // Sets the zoom
+                                .bearing(0f)         // Sets the orientation of the camera to east
+                                .tilt(30f)            // Sets the tilt of the camera to 30 degrees
+                                .build()              // Creates a CameraPosition from the builder
+
+                            it.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                            isGoCampSiteLocation = false
+                        }
+
+
+
+                    }
+
+                    Marker(
+                        state = markerState,
+                        title = "lat/lng:(${String.format("%.5f", markerState.position.latitude)},${String.format("%.5f", markerState.position.longitude)})",
+                    )
+
+
                     currentSiteDataList.value.forEach { it ->
 
                         val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
@@ -223,6 +316,61 @@ fun GoogleMapView(
                     }
 
                 }
+
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(2.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
+                            shape = ShapeDefaults.ExtraSmall
+                        )
+                ) {
+
+
+                    IconButton(
+                        onClick = {
+                            hapticProcessing()
+                            isDarkMode = !isDarkMode
+                            if (isDarkMode) {
+                                mapProperties = mapProperties.copy(
+                                    mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
+                                        context,
+                                        R.raw.mapstyle_night
+                                    )
+                                )
+                            } else {
+                                mapProperties = mapProperties.copy(mapStyleOptions = null)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.scale(1f),
+                            imageVector = if (isDarkMode) Icons.Outlined.BedtimeOff else Icons.Outlined.DarkMode,
+                            contentDescription = "DarkMode",
+                        )
+                    }
+
+
+                    IconButton(
+                        onClick = {
+                            hapticProcessing()
+                            isGoCampSiteLocation = true
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.scale(1f),
+                            imageVector = Icons.Outlined.ModeOfTravel,
+                            contentDescription = "GoCampSiteLocationl",
+                        )
+                    }
+
+
+                }
+
+
+
 
                 ScaleBar(
                     modifier = Modifier
@@ -246,7 +394,7 @@ fun GoogleMapView(
                         ) {
                             IconButton(
                                 onClick = {
-                                    //   hapticProcessing()
+                                    hapticProcessing()
                                     val mapType = MapType.values().first { mapType ->
                                         mapType.name == it.name
                                     }
@@ -279,9 +427,11 @@ fun GoogleMapView(
                             SiteDefaultView(
                                 siteData = it,
                                 onClick = {
+                                    hapticProcessing()
                                     onOneClickHandler()
                                 },
                                 onLongClick = {
+                                    hapticProcessing()
                                     onLongClickHandler(it)
                                 }
                             )
