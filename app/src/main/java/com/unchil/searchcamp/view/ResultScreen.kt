@@ -262,6 +262,7 @@ fun ResultScreen(
 
                     when(resultScreens[selectedScreen]){
                         SearchCampDestinations.listScreen -> {
+
                             LazyColumn(
                                 modifier = Modifier.background(color = Color.Black)
                                     .align(Alignment.TopCenter),
@@ -295,6 +296,13 @@ fun ResultScreen(
 
                             }
 
+                            UpButton(
+                                modifier = Modifier
+                                    .padding(end = 10.dp, bottom = 30.dp)
+                                    .align(Alignment.BottomEnd),
+                                listState = lazyListState
+                            )
+
                         }
                         SearchCampDestinations.mapScreen -> {
                             GoogleMapView(
@@ -311,12 +319,7 @@ fun ResultScreen(
                         else -> {}
                     }
 
-                    UpButton(
-                        modifier = Modifier
-                            .padding(end = 10.dp, bottom = 30.dp)
-                            .align(Alignment.BottomEnd),
-                        listState = lazyListState
-                    )
+
                 }
 
             }// Column
