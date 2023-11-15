@@ -709,7 +709,7 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
                     state = pagerState,
                     pageSpacing = 0.dp,
                     pageSize = threePagesPerViewport,
-                    beyondBoundsPageCount = 9,
+                    beyondBoundsPageCount = 3,
                     contentPadding = PaddingValues(start = paddingDp, end = paddingDp),
                 ) { page ->
 
