@@ -271,7 +271,7 @@ fun GoogleMapView(
                         Box(
                             modifier = Modifier
                                 .padding(bottom = 70.dp)
-                                .padding(horizontal = 6.dp)
+                                .padding(horizontal = 20.dp)
                                 .align(Alignment.BottomCenter),
                             contentAlignment = Alignment.Center,
                         ) {

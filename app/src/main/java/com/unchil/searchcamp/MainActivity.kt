@@ -65,7 +65,7 @@ import kotlinx.coroutines.launch
 
 
 val LocalUsableDarkMode =  compositionLocalOf{ false }
-
+val LocalUsableHaptic = compositionLocalOf{ true }
 
 class MainActivity : ComponentActivity() {
 

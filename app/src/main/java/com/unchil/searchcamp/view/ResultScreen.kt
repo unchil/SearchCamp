@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -29,8 +30,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Publish
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
@@ -42,6 +46,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +58,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,6 +69,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.unchil.gismemo.view.GoogleMapView
+import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.data.RepositoryProvider
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
@@ -217,7 +225,6 @@ fun ResultScreen(
                         .shadow(elevation = 1.dp),
                     backgroundColor = MaterialTheme.colorScheme.background
                 ) {
-
                     resultScreens.forEachIndexed { index, it ->
                         BottomNavigationItem(
                             icon = {
@@ -246,16 +253,12 @@ fun ResultScreen(
                      //      unselectedContentColor = Color.Gray
                         )
                     }
-
-
-
                 }
 
 
                 Box (
                     modifier = Modifier
                 ){
-
 
                     when(resultScreens[selectedScreen]){
                         SearchCampDestinations.listScreen -> {
@@ -308,8 +311,12 @@ fun ResultScreen(
                         else -> {}
                     }
 
-
-
+                    UpButton(
+                        modifier = Modifier
+                            .padding(end = 10.dp, bottom = 30.dp)
+                            .align(Alignment.BottomEnd),
+                        listState = lazyListState
+                    )
                 }
 
             }// Column
@@ -361,6 +368,54 @@ fun ResultScreen(
 
 }
 
+
+@Composable
+fun UpButton(
+    modifier:Modifier,
+    listState: LazyListState
+){
+
+
+    val showButton by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0
+        }
+    }
+
+
+    val isUsableHaptic = LocalUsableHaptic.current
+    val hapticFeedback = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+
+    fun hapticProcessing(){
+        if(isUsableHaptic){
+            coroutineScope.launch {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+        }
+    }
+
+    if( showButton) {
+        FloatingActionButton(
+            modifier = Modifier.then(modifier),
+            elevation =  FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
+            onClick = {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(0)
+                    hapticProcessing()
+                }
+            }
+        ) {
+            Icon(
+                modifier = Modifier.scale(1f),
+                imageVector = Icons.Outlined.Publish,
+                contentDescription = "Up",
+
+                )
+
+        }
+    }
+}
 
 
 
