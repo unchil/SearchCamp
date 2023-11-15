@@ -321,7 +321,7 @@ fun GoogleMapView(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(2.dp)
+                        .padding(start = 10.dp)
                         .background(
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
                             shape = ShapeDefaults.ExtraSmall
@@ -382,7 +382,7 @@ fun GoogleMapView(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .padding(2.dp)
+                        .padding(end = 10.dp)
                         .background(
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
                             shape = ShapeDefaults.ExtraSmall
