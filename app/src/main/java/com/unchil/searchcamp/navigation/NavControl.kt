@@ -54,7 +54,7 @@ val mainScreens:List<SearchCampDestinations> = listOf(
 val detailScreens:List<SearchCampDestinations> = listOf(
     SearchCampDestinations.introductionScreen,
     SearchCampDestinations.imageScreen,
-    SearchCampDestinations.homepageScreen
+//    SearchCampDestinations.homepageScreen
 )
 
 sealed class SearchCampDestinations(

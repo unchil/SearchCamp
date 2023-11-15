@@ -7,6 +7,7 @@ import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.RectF
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.os.Build
 import android.speech.RecognizerIntent
 import android.util.DisplayMetrics
@@ -30,6 +31,15 @@ val recognizerIntent =  {
 
     intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Talk")
 
+}
+
+val chromeIntent: (context: Context, url:String)-> Unit = {context, url ->
+    val intent = Intent(Intent.ACTION_VIEW)
+
+    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+    intent.setPackage("com.android.chrome")
+    intent.data = Uri.parse(url)
+    context.startActivity(intent)
 }
 
 

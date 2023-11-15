@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.Countertops
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.EventAvailable
 import androidx.compose.material.icons.outlined.Forest
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.NaturePeople
 import androidx.compose.material.icons.outlined.OutdoorGrill
 import androidx.compose.material.icons.outlined.Pets
@@ -44,6 +45,7 @@ import androidx.compose.material.ripple.rememberRipple
 
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
@@ -85,6 +87,7 @@ import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
+import com.unchil.searchcamp.shared.chromeIntent
 import com.unchil.searchcamp.shared.physicalScreenRectDp
 import com.unchil.searchcamp.shared.physicalScreenRectPx
 import com.unchil.searchcamp.shared.screenRectDp
@@ -574,22 +577,51 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
 fun SiteIntroductionView( siteData:SiteDefaultData){
 
         val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .padding(30.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            Text(
-                text = siteData.facltNm,
-                modifier = Modifier.padding(vertical = 10.dp),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier,
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = siteData.facltNm ,
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+
+                if(siteData.homepage.isNotEmpty()){
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    IconButton(onClick = {
+                        chromeIntent.invoke(context, siteData.homepage)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Home,
+                            contentDescription = "홈페이지",
+                            modifier = Modifier
+                        )
+                    }
+
+                }
+                
+
+                
+            }
+
+
 
             if( siteData.firstImageUrl.isNotEmpty()) {
                 Box(
@@ -750,7 +782,8 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
                         Box(
                             modifier = Modifier
-                                .fillMaxSize().padding(horizontal = 20.dp)
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp)
                         ){
                             ImageViewer(
                                 data = (siteImageList.value.get(page).imageUrl),
@@ -800,24 +833,7 @@ fun PrevSiteView(){
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
 
-                    val widthPx = screenRectPx.width()
-                    val heightPx = screenRectPx.height()
-                    println("[PX] screen width: $widthPx , height: $heightPx")
-
-                    val widthDp = screenRectDp.width()
-                    val heightDp = screenRectDp.height()
-                    println("[DP] screen width: $widthDp , height: $heightDp")
-
-                    println()
-
-                    val physicalWidthPx = context.physicalScreenRectPx.width()
-                    val physicalHeightPx = context.physicalScreenRectPx.height()
-                    println("[PX] physical screen width: $physicalWidthPx , height: $physicalHeightPx")
-
-
-                    val physicalWidthDp = context.physicalScreenRectDp.width()
-                    val physicalHeightDp = context.physicalScreenRectDp.height()
-                    println("[DP] physical screen width: $physicalWidthDp , height: $physicalHeightDp")
+                    SiteIntroductionView(SiteDefaultData.setInitValue())
 
                 }
             }
