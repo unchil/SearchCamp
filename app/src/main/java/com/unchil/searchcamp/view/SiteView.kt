@@ -578,7 +578,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .padding(30.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
