@@ -3,6 +3,12 @@ package com.unchil.searchcamp.view
 import android.Manifest
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +50,7 @@ import androidx.compose.material.icons.outlined.Signpost
 import androidx.compose.material.ripple.rememberRipple
 
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,8 +71,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -579,6 +589,18 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
         val scrollState = rememberScrollState()
     val context = LocalContext.current
 
+
+    val hapticFeedback = LocalHapticFeedback.current
+
+    var isHapticProcessing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = isHapticProcessing) {
+        if (isHapticProcessing) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            isHapticProcessing = false
+        }
+    }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -606,6 +628,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                     Spacer(modifier = Modifier.size(10.dp))
 
                     IconButton(onClick = {
+                        isHapticProcessing = true
                         chromeIntent.invoke(context, siteData.homepage)
                     }) {
                         Icon(
@@ -686,7 +709,7 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
     ) {
 
 
-
+        val density = LocalDensity.current
         val context = LocalContext.current
 
         var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
@@ -698,6 +721,20 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
             }
         }
 
+        val hapticFeedback = LocalHapticFeedback.current
+
+        var isHapticProcessing by remember { mutableStateOf(false) }
+
+        LaunchedEffect(key1 = isHapticProcessing) {
+            if (isHapticProcessing) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                isHapticProcessing = false
+            }
+        }
+
+
+        var isVisibleImage by remember{ mutableStateOf(false) }
+        var imageUrl by remember { mutableStateOf("") }
 
         val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
 
@@ -778,6 +815,16 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
 
                             }
+                            .combinedClickable (
+                                onLongClick = {
+                                    isHapticProcessing = true
+                                    isVisibleImage = true
+                                    imageUrl = siteImageList.value.get(page).imageUrl
+                                },
+                                onClick = {
+
+                                }
+                            )
                     ) {
 
                         Box(
@@ -787,16 +834,64 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
                         ){
                             ImageViewer(
                                 data = (siteImageList.value.get(page).imageUrl),
-                                size = Size.ORIGINAL,
+                                size = Size(300,300),
                                 isZoomable = false,
                                 contentScale = ContentScale.Fit
                             )
                         }
 
-
-
                     }
+
                 }
+
+            //    if(imageUrl.isNotEmpty() && isVisibleImage) {
+
+/*
+                    AnimatedVisibility(visible = isVisibleImage) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .background(color = Color.White.copy(alpha = 0.9f))
+                        )
+                    }
+
+ */
+
+                    AnimatedVisibility(visible = isVisibleImage,
+                        enter = slideInVertically {
+                            // Slide in from 40 dp from the top.
+                            with(density) { 40.dp.roundToPx() }
+                        } + expandVertically(
+                            // Expand from the top.
+                            expandFrom = Alignment.Top
+                        ) + fadeIn(
+                            // Fade in with the initial alpha of 0.3f.
+                            initialAlpha = 0.3f
+                        ),
+                        exit = slideOutVertically() + shrinkVertically() + fadeOut()
+                    ) {
+
+
+
+                        Box(
+                            modifier = Modifier.clip(ShapeDefaults.ExtraSmall)
+                                .fillMaxSize()
+                                .background(color = Color.White.copy(alpha = 1f))
+                                .padding(horizontal = 10.dp)
+                                .clickable {
+                                    isHapticProcessing = true
+                                    isVisibleImage = false
+                                }
+                        ) {
+                            ImageViewer(
+                                data = imageUrl,
+                                size = Size.ORIGINAL,
+                                isZoomable = true,
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    }
+
+             //   }
 
 
             }

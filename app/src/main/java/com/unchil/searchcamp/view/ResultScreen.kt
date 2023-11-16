@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -150,6 +151,17 @@ fun ResultScreen(
         }
     }
 
+    val hapticFeedback = LocalHapticFeedback.current
+
+    var isHapticProcessing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = isHapticProcessing) {
+        if (isHapticProcessing) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            isHapticProcessing = false
+        }
+    }
+
 
     BottomSheetScaffold(
         modifier = Modifier
@@ -248,6 +260,7 @@ fun ResultScreen(
                             selected = selectedScreen == index,
                             onClick = {
                                 selectedScreen = index
+                    //            isHapticProcessing = true
                             },
                             selectedContentColor =  MaterialTheme.colorScheme.onSurface,
                      //      unselectedContentColor = Color.Gray

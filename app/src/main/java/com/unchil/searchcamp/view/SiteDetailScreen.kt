@@ -28,7 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,6 +84,16 @@ fun SiteDetailScreen(data:SiteDefaultData) {
         }
     }
 
+    val hapticFeedback = LocalHapticFeedback.current
+
+    var isHapticProcessing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = isHapticProcessing) {
+        if (isHapticProcessing) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            isHapticProcessing = false
+        }
+    }
 
 
     Scaffold(
@@ -93,10 +105,6 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                     .shadow(elevation = 1.dp),
                 backgroundColor = MaterialTheme.colorScheme.background,
             ) {
-
-
-
-
                 detailScreens.forEachIndexed { index, it ->
 
                         BottomNavigationItem(
@@ -121,28 +129,24 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                             alwaysShowLabel = false,
                             selected = selectedScreen.value == index,
                             onClick = {
+
                                 selectedScreen.value  = index
+                           //     isHapticProcessing = true
                             },
                             selectedContentColor = MaterialTheme.colorScheme.onSurface,
                         //    unselectedContentColor = MaterialTheme.colorScheme.secondary
                         )
 
                 }
-
-
-
             }
 
         },
-        bottomBar = {
-
-        }
+        bottomBar = {    }
     ) {
         Box(
             Modifier
                 .padding(it)
         ) {
-
 
             when(detailScreens[selectedScreen.value]){
                 SearchCampDestinations.introductionScreen -> {
@@ -151,11 +155,8 @@ fun SiteDetailScreen(data:SiteDefaultData) {
                 SearchCampDestinations.imageScreen -> {
                     SiteImagePagerView(viewModel)
                 }
-
                 else -> {}
             }
-
-
 
         }
 
