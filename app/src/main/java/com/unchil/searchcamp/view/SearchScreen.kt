@@ -2,7 +2,9 @@ package com.unchil.searchcamp.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +66,7 @@ fun SearchScreen(
     navController: NavHostController,
 ){
 
+
     val permissions = listOf(
         Manifest.permission.INTERNET,
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -83,9 +88,10 @@ fun SearchScreen(
         multiplePermissions = permissions
     ) {
 
-        val context = LocalContext.current
 
+        val context = LocalContext.current
         val db = LocalSearchCampDB.current
+
 
         val viewModel = remember {
             SearchScreenViewModel(
@@ -202,6 +208,7 @@ fun SearchScreen(
                                            administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
                                            searchTitle = searchTitle.value
                                        ))
+
                                    }
                             }
                             else -> {}
@@ -247,7 +254,9 @@ fun SearchScreen(
             )
 
             SearchCampView(
-                modifier = Modifier.align(Alignment.Center).padding(horizontal = 10.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 10.dp),
                 onSearchEventHandler = onSearchEventHandler
             )
 
@@ -281,6 +290,8 @@ fun PrevSearchScreen(){
     val context = LocalContext.current
     val permissionsManager = PermissionsManager()
     val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
+
+
 
     SearchCampTheme {
         Surface(

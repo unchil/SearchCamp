@@ -2,6 +2,7 @@ package com.unchil.gismemo.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.location.Location
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,6 +90,34 @@ fun GoogleMapView(
     onLongClickHandler:(SiteDefaultData)->Unit,
     onSetSiteDefaultData:(SiteDefaultData)->Unit,
 ) {
+
+
+    val configuration = LocalConfiguration.current
+    var isPortrait by remember { mutableStateOf(false) }
+    isPortrait = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            true
+        }
+        else ->{
+            false
+        }
+    }
+
+    var columnWidth by remember { mutableStateOf(1f) }
+    var bottomPadding by remember { mutableStateOf(0.dp) }
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            isPortrait = true
+            columnWidth = 9f
+            bottomPadding = 70.dp
+        }
+        else ->{
+            isPortrait = false
+            columnWidth = 0.5f
+            bottomPadding = 10.dp
+        }
+    }
 
 
 
@@ -384,8 +414,6 @@ Box(
     }
 
 
-
-
     ScaleBar(
         modifier = Modifier
             .padding(bottom = 30.dp)
@@ -427,12 +455,11 @@ Box(
     }
 
     currentSiteDefaultData?.let {
-
-
         AnimatedVisibility(visible = isVisibleSiteDefaultView) {
             Box(
                 modifier = Modifier
-                    .padding(bottom = 70.dp)
+                    .fillMaxWidth(columnWidth)
+                    .padding(bottom = bottomPadding)
                     .padding(horizontal = 20.dp)
                     .align(Alignment.BottomCenter),
                 contentAlignment = Alignment.Center,

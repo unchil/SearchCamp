@@ -134,7 +134,8 @@ fun PhotoPreview(
     modifier: Modifier = Modifier,
     data:Any,
     allowHardware:Boolean = true,
-    onPhotoPreviewTapped: (Any) -> Unit
+    onClick: (()->Unit )? = null ,
+    onLongClick:(()->Unit )? = null
 ) {
 
 
@@ -145,7 +146,10 @@ fun PhotoPreview(
             .width(100.dp)
             .border(width = 1.dp, color = Color.Black, shape = ShapeDefaults.Small)
             .clip(shape = ShapeDefaults.Small)
-            .combinedClickable { onPhotoPreviewTapped(data) }
+            .combinedClickable (
+                onLongClick= { onLongClick?.invoke() },
+                onClick = { onClick?.invoke()}
+            )
     ,
         contentAlignment = Alignment.Center
 

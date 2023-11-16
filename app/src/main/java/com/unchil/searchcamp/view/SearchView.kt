@@ -3,6 +3,7 @@ package com.unchil.searchcamp.view
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.res.Configuration
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +87,36 @@ fun SearchCampView(
                        searchTitle:String?)-> Unit,
     onMessage:(() -> Unit)? = null
 ){
+
+
+    val configuration = LocalConfiguration.current
+    var isPortrait by remember { mutableStateOf(false) }
+
+
+    var searchBoxWidth by remember { mutableStateOf(1f) }
+    var searchBoxHeight by remember { mutableStateOf(1f) }
+
+    var columnWidth by remember { mutableStateOf(1f) }
+    var columnHeight by remember { mutableStateOf(1f) }
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            isPortrait = true
+            searchBoxWidth = 0.95f
+            searchBoxHeight = 0.6f
+            columnWidth = 1f
+            columnHeight = 1f
+        }
+        else ->{
+            isPortrait = false
+            searchBoxWidth = 0.9f
+            searchBoxHeight = 0.85f
+            columnWidth = 0.5f
+            columnHeight = 1f
+        }
+    }
+
+
 
 
     val permissions = listOf(
@@ -231,25 +264,26 @@ fun SearchCampView(
 
         }
 
-
         val scrollState = rememberScrollState()
 
+
+
         Column(
-            modifier = Modifier
-                .then(other = modifier)
-                .width(400.dp)
-                .height(480.dp)
-                .clip(shape = ShapeDefaults.ExtraSmall)
-                .verticalScroll(scrollState)
-                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+                    modifier = Modifier
+                        .then(other = modifier)
+                        .fillMaxWidth(searchBoxWidth)
+                        .fillMaxHeight(searchBoxHeight)
+                        .clip(shape = ShapeDefaults.ExtraSmall)
+                        .verticalScroll(scrollState)
+                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
 
             Text(
-                text ="Search Camping Site",
-                modifier =  Modifier
+                text = "Search Camping Site",
+                modifier = Modifier
                     .padding(vertical = 10.dp),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineLarge
@@ -257,7 +291,159 @@ fun SearchCampView(
 
             HorizontalDivider()
 
-            WeatherContent()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(columnWidth),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    WeatherContent()
+
+                    AnimatedVisibility(isPortrait && sidoData.value.size > 0) {
+
+                        val dataList = mutableListOf<SiDo_TBL>()
+                        dataList.add(
+                            SiDo_TBL(
+                                ctprvn_cd = "0",
+                                ctp_kor_nm = "현위치",
+                                ctp_eng_nm = "CurrentLocation"
+                            )
+                        )
+                        dataList.addAll(1, sidoData.value)
+
+                        Column(
+                            modifier = Modifier
+                                .clip(shape = ShapeDefaults.ExtraSmall)
+                                .fillMaxWidth(columnWidth)
+                                .height(160.dp),
+                            //         .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = administrativeDistrictTitle,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.size(10.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+
+                                AdministrativeDistrictSiDoPicker(
+                                    //    dataList = sidoData.value,
+                                    dataList = dataList,
+                                    onSelectedHandler = onSelectedHandler,
+                                    //      onEvent = viewModel::onEvent
+                                )
+
+
+                                if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
+
+                                    Spacer(modifier = Modifier.size(10.dp))
+
+                                    AdministrativeDistrictSiGunGuPicker(
+                                        dataList = siggData.value,
+                                        onSelectedHandler = onSelectedHandler
+                                    )
+
+                                }
+
+                            }
+
+
+                        }
+
+
+                    }
+
+                }
+
+                AnimatedVisibility(!isPortrait && sidoData.value.size > 0) {
+
+                    val dataList = mutableListOf<SiDo_TBL>()
+                    dataList.add(
+                        SiDo_TBL(
+                            ctprvn_cd = "0",
+                            ctp_kor_nm = "현위치",
+                            ctp_eng_nm = "CurrentLocation"
+                        )
+                    )
+                    dataList.addAll(1, sidoData.value)
+
+                    Column(
+                        modifier = Modifier
+                            .clip(shape = ShapeDefaults.ExtraSmall)
+                            .width(400.dp)
+                            .height(160.dp),
+                        //         .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = administrativeDistrictTitle,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.size(10.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+
+                            AdministrativeDistrictSiDoPicker(
+                                //    dataList = sidoData.value,
+                                dataList = dataList,
+                                onSelectedHandler = onSelectedHandler,
+                                //      onEvent = viewModel::onEvent
+                            )
+
+
+                            if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
+
+                                Spacer(modifier = Modifier.size(10.dp))
+
+                                AdministrativeDistrictSiGunGuPicker(
+                                    dataList = siggData.value,
+                                    onSelectedHandler = onSelectedHandler
+                                )
+
+                            }
+
+                        }
+
+
+                    }
+
+
+                }
+
+            }
 
             HorizontalDivider()
 
@@ -266,7 +452,7 @@ fun SearchCampView(
                 onQueryChange = {
                     query_title = it
                 },
-                onSearch = {query_title ->
+                onSearch = { query_title ->
                     onSearchEventHandler(
                         administrativeDistrictSiDoCode,
                         administrativeDistrictSiGunGu,
@@ -284,7 +470,7 @@ fun SearchCampView(
                     )
                 },
                 modifier = Modifier
-                    .width(400.dp)
+                    .fillMaxWidth()
                     .height(70.dp)
                     .clip(shape = ShapeDefaults.ExtraSmall),
                 leadingIcon = {
@@ -352,83 +538,10 @@ fun SearchCampView(
                 },
                 tonalElevation = 2.dp,
                 colors = SearchBarDefaults.colors(
-                  //  containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+                    //  containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
                     containerColor = Color.Transparent
                 )
             ) { }
-
-
-            HorizontalDivider()
-
-            AnimatedVisibility(visible = sidoData.value.size > 0) {
-
-                val dataList = mutableListOf<SiDo_TBL>()
-
-                dataList.add(
-                    SiDo_TBL(
-                        ctprvn_cd = "0",
-                        ctp_kor_nm = "현위치",
-                        ctp_eng_nm = "CurrentLocation"
-                    )
-                )
-                dataList.addAll(1, sidoData.value)
-
-                Column(
-                    modifier = Modifier
-                        .clip(shape = ShapeDefaults.ExtraSmall)
-                        .width(400.dp)
-                        .height(160.dp),
-               //         .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = administrativeDistrictTitle,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                        ,
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-
-                        AdministrativeDistrictSiDoPicker(
-                            //    dataList = sidoData.value,
-                            dataList = dataList,
-                            onSelectedHandler = onSelectedHandler,
-                            //      onEvent = viewModel::onEvent
-                        )
-
-
-                        if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
-
-                            Spacer(modifier = Modifier.size(20.dp))
-
-                            AdministrativeDistrictSiGunGuPicker(
-                                dataList = siggData.value,
-                                onSelectedHandler = onSelectedHandler
-                            )
-
-                        }
-
-                    }
-
-
-                }
-
-
-            }
 
 
         }

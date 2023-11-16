@@ -1,6 +1,7 @@
 package com.unchil.searchcamp.view
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +24,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -37,6 +46,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -60,6 +71,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -94,6 +106,35 @@ fun ResultScreen(
     searchTitle:String? = null
 ){
 
+
+    val configuration = LocalConfiguration.current
+    var isPortrait by remember { mutableStateOf(false) }
+    isPortrait = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            true
+        }
+        else ->{
+            false
+        }
+    }
+
+
+    var columnWidth by remember { mutableStateOf(1f) }
+    var columnHeight by remember { mutableStateOf(1f) }
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            isPortrait = true
+            columnWidth = 1f
+            columnHeight = 1f
+        }
+        else ->{
+            isPortrait = false
+            columnWidth = 0.9f
+            columnHeight = 1f
+        }
+    }
+
     val context = LocalContext.current
     val db = LocalSearchCampDB.current
 
@@ -109,6 +150,7 @@ fun ResultScreen(
     val campSiteStream = viewModel.campSiteListPaging.collectAsLazyPagingItems()
 
     val lazyListState = rememberLazyListState()
+    val lazyGridState = rememberLazyGridState()
 
     val sheetState = SheetState(
         skipPartiallyExpanded = false,
@@ -120,7 +162,7 @@ fun ResultScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val coroutineScope = rememberCoroutineScope()
     val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
-    val sheetPeekHeightValue by remember { mutableStateOf(50.dp) }
+    val sheetPeekHeightValue by remember { mutableStateOf(0.dp) }
     var isVisibleSiteDescriptionView by remember{ mutableStateOf(false) }
     val density = LocalDensity.current
 
@@ -222,158 +264,318 @@ fun ResultScreen(
             contentAlignment = Alignment.Center,
         ){
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
 
-                BottomNavigation(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .shadow(elevation = 1.dp),
-                    backgroundColor = MaterialTheme.colorScheme.background
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    resultScreens.forEachIndexed { index, it ->
-                        BottomNavigationItem(
-                            icon = {
-                                Icon(
-                                    imageVector = it.icon ?: Icons.Outlined.Info,
-                                    contentDescription = context.resources.getString(  it.name  ),
-                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                )
-                            },
-                            label = {
 
-                                Text(  context.resources.getString( it.name ) ,
-                                     modifier = Modifier,
-                                     textAlign = TextAlign.Center,
-                                     style  = MaterialTheme.typography.titleSmall,
-                                    color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                )
+                    if(isPortrait){
+                        BottomNavigation(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .shadow(elevation = 1.dp),
+                            backgroundColor = MaterialTheme.colorScheme.background
+                        ) {
+                            resultScreens.forEachIndexed { index, it ->
+                                BottomNavigationItem(
+                                    icon = {
+                                        Icon(
+                                            imageVector = it.icon ?: Icons.Outlined.Info,
+                                            contentDescription = context.resources.getString(  it.name  ),
+                                            tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                        )
+                                    },
+                                    label = {
 
-                            },
-                            alwaysShowLabel = false,
-                            selected = selectedScreen == index,
-                            onClick = {
-                                selectedScreen = index
-                    //            isHapticProcessing = true
-                            },
-                            selectedContentColor =  MaterialTheme.colorScheme.onSurface,
-                     //      unselectedContentColor = Color.Gray
-                        )
-                    }
-                }
-
-
-                Box (
-                    modifier = Modifier
-                ){
-
-                    when(resultScreens[selectedScreen]){
-                        SearchCampDestinations.listScreen -> {
-
-                            LazyColumn(
-                                modifier = Modifier.background(color = Color.Black)
-                                    .align(Alignment.TopCenter),
-                                state = lazyListState,
-                                userScrollEnabled = true,
-                                verticalArrangement = Arrangement.SpaceBetween,
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 1.dp)
-                            ) {
-
-                                items(campSiteStream.itemCount) {
-
-                                    campSiteStream[it]?.let {
-
-                                        val siteDefaultData = CampSite_TBL.toSiteDefaultData(it)
-                                        SiteDefaultView(
-                                            siteData = siteDefaultData,
-                                            onClick = {  onClickHandler.invoke(siteDefaultData)  },
-                                            onLongClick = {
-                                                currentCampSiteData.value = siteDefaultData
-                                                isVisibleSiteDescriptionView = true
-                                            }
+                                        Text(  context.resources.getString( it.name ) ,
+                                            modifier = Modifier,
+                                            textAlign = TextAlign.Center,
+                                            style  = MaterialTheme.typography.titleSmall,
+                                            color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
                                         )
 
-                                        Spacer(modifier = Modifier.padding(bottom = 1.dp))
+                                    },
+                                    alwaysShowLabel = false,
+                                    selected = selectedScreen == index,
+                                    onClick = {
+                                        selectedScreen = index
+                                        //            isHapticProcessing = true
+                                    },
+                                    selectedContentColor =  MaterialTheme.colorScheme.onSurface,
+                                    //      unselectedContentColor = Color.Gray
+                                )
+                            }
+                        }
+
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxSize(1f),
+                        horizontalArrangement =  Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        Box (
+                            modifier = Modifier.fillMaxWidth(columnWidth)
+                        ){
+
+                            when(resultScreens[selectedScreen]){
+                                SearchCampDestinations.listScreen -> {
+
+                                    if(isPortrait){
+                                        LazyColumn(
+                                            modifier = Modifier
+                                                .align(Alignment.TopCenter),
+                                            state = lazyListState,
+                                            userScrollEnabled = true,
+                                            verticalArrangement = Arrangement.SpaceBetween,
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 1.dp)
+                                        ) {
+
+                                            items(campSiteStream.itemCount) {
+
+                                                campSiteStream[it]?.let {
+
+                                                    val siteDefaultData = CampSite_TBL.toSiteDefaultData(it)
+                                                    SiteDefaultView(
+                                                        siteData = siteDefaultData,
+                                                        onClick = {  onClickHandler.invoke(siteDefaultData)  },
+                                                        onLongClick = {
+                                                            currentCampSiteData.value = siteDefaultData
+                                                            isVisibleSiteDescriptionView = true
+                                                        }
+                                                    )
+
+                                                    Spacer(modifier = Modifier.padding(bottom = 1.dp))
+
+                                                }
+
+
+                                            }
+
+                                        }
+
+                                    }else {
+                                        LazyVerticalGrid(
+                                                columns = GridCells.Fixed(2),
+                                            modifier = Modifier
+                                                .align(Alignment.TopCenter),
+                                            state = lazyGridState,
+                                            userScrollEnabled = true,
+                                            verticalArrangement = Arrangement.SpaceBetween,
+                                            horizontalArrangement = Arrangement.Center,
+                                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp)
+                                        ) {
+
+                                            items(campSiteStream.itemCount) {
+
+                                                campSiteStream[it]?.let {
+
+                                                    val siteDefaultData = CampSite_TBL.toSiteDefaultData(it)
+                                                    SiteDefaultView(
+                                                        siteData = siteDefaultData,
+                                                        onClick = {  onClickHandler.invoke(siteDefaultData)  },
+                                                        onLongClick = {
+                                                            currentCampSiteData.value = siteDefaultData
+                                                            isVisibleSiteDescriptionView = true
+                                                        }
+                                                    )
+
+                                                    Spacer(modifier = Modifier.padding( 10.dp))
+
+                                                }
+
+
+                                            }
+
+                                        }
 
                                     }
 
 
+
+                                    if(isPortrait){
+                                        UpButton(
+                                            modifier = Modifier
+                                                .padding(end = 10.dp, bottom = 30.dp)
+                                                .align(Alignment.BottomEnd),
+                                            listState = lazyListState
+                                        )
+                                    }else{
+                                        UpButtonGrid(
+                                            modifier = Modifier
+                                                .padding(end = 10.dp, bottom = 10.dp)
+                                                .align(Alignment.BottomEnd),
+                                            listState = lazyGridState
+                                        )
+                                    }
+
+
+
+
+
+                                }
+                                SearchCampDestinations.mapScreen -> {
+                                    GoogleMapView(
+                                        onOneClickHandler =   onClickHandlerMap,
+                                        onLongClickHandler = {
+                                            currentCampSiteData.value = it
+                                            isVisibleSiteDescriptionView = true
+                                        },
+                                        onSetSiteDefaultData = {
+                                            currentCampSiteData.value = it
+                                        }
+                                    )
+                                }
+                                else -> {}
+                            }
+
+
+                        }
+
+
+                        if(!isPortrait){
+
+                            NavigationRail(
+                                modifier = Modifier
+                                    .shadow(elevation = 1.dp)
+                                    .width(80.dp),
+                         //       containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            ) {
+
+
+                                resultScreens.forEachIndexed { index, it ->
+                                    NavigationRailItem(
+                                        icon = {
+                                            Icon(
+                                                imageVector = it.icon ?: Icons.Outlined.Info,
+                                                contentDescription = context.resources.getString(  it.name  ),
+                                                tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                            )
+                                        },
+                                        label = {
+
+                                            Text(  context.resources.getString( it.name ) ,
+                                                modifier = Modifier,
+                                                textAlign = TextAlign.Center,
+                                                style  = MaterialTheme.typography.titleSmall,
+                                                color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                            )
+
+                                        },
+                                        alwaysShowLabel = false,
+                                        selected = selectedScreen == index,
+                                        onClick = {
+                                            selectedScreen = index
+                                            //            isHapticProcessing = true
+                                        },
+
+                                        //      unselectedContentColor = Color.Gray
+                                    )
                                 }
 
                             }
 
-                            UpButton(
+/*
+                            BottomNavigation(
                                 modifier = Modifier
-                                    .padding(end = 10.dp, bottom = 30.dp)
-                                    .align(Alignment.BottomEnd),
-                                listState = lazyListState
-                            )
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                                    .shadow(elevation = 1.dp),
+                                backgroundColor = MaterialTheme.colorScheme.background
+                            ) {
+                                resultScreens.forEachIndexed { index, it ->
+                                    BottomNavigationItem(
+                                        icon = {
+                                            Icon(
+                                                imageVector = it.icon ?: Icons.Outlined.Info,
+                                                contentDescription = context.resources.getString(  it.name  ),
+                                                tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                            )
+                                        },
+                                        label = {
 
-                        }
-                        SearchCampDestinations.mapScreen -> {
-                            GoogleMapView(
-                                onOneClickHandler =   onClickHandlerMap,
-                                onLongClickHandler = {
-                                    currentCampSiteData.value = it
-                                    isVisibleSiteDescriptionView = true
-                                },
-                                onSetSiteDefaultData = {
-                                    currentCampSiteData.value = it
+                                            Text(  context.resources.getString( it.name ) ,
+                                                modifier = Modifier,
+                                                textAlign = TextAlign.Center,
+                                                style  = MaterialTheme.typography.titleSmall,
+                                                color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                            )
+
+                                        },
+                                        alwaysShowLabel = false,
+                                        selected = selectedScreen == index,
+                                        onClick = {
+                                            selectedScreen = index
+                                            //            isHapticProcessing = true
+                                        },
+                                        selectedContentColor =  MaterialTheme.colorScheme.onSurface,
+                                        //      unselectedContentColor = Color.Gray
+                                    )
                                 }
-                            )
+                            }
+
+
+
+ */
                         }
-                        else -> {}
+
+
+
                     }
 
 
-                }
+                }// Column
 
-            }// Column
-
-            AnimatedVisibility(visible = isVisibleSiteDescriptionView) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                        .background(color = Color.White.copy(alpha = 0.9f))
-                )
-            }
-
-            AnimatedVisibility(visible = isVisibleSiteDescriptionView,
-                enter = slideInVertically {
-                    // Slide in from 40 dp from the top.
-                    with(density) { 40.dp.roundToPx() }
-                } + expandVertically(
-                    // Expand from the top.
-                    expandFrom = Alignment.Top
-                ) + fadeIn(
-                    // Fade in with the initial alpha of 0.3f.
-                    initialAlpha = 0.3f
-                ),
-                exit = slideOutVertically() + shrinkVertically() + fadeOut()
-            ) {
-
-                currentCampSiteData.value?.let {
-
+                AnimatedVisibility(visible = isVisibleSiteDescriptionView) {
                     Box(
-                        modifier = Modifier  .clip(ShapeDefaults.ExtraSmall).padding(horizontal = 10.dp)
-
-                    ){
-                        SiteDescriptionView(
-                            siteData = it,
-                            onEvent = {
-                                isVisibleSiteDescriptionView = false
-                            })
-                    }
-
-
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color.White.copy(alpha = 0.9f))
+                    )
                 }
-            }
+
+                AnimatedVisibility(visible = isVisibleSiteDescriptionView,
+                    enter = slideInVertically {
+                        // Slide in from 40 dp from the top.
+                        with(density) { 40.dp.roundToPx() }
+                    } + expandVertically(
+                        // Expand from the top.
+                        expandFrom = Alignment.Top
+                    ) + fadeIn(
+                        // Fade in with the initial alpha of 0.3f.
+                        initialAlpha = 0.3f
+                    ),
+                    exit = slideOutVertically() + shrinkVertically() + fadeOut()
+                ) {
+
+                    currentCampSiteData.value?.let {
+
+                        Box(
+                            modifier = Modifier
+                                .clip(ShapeDefaults.ExtraSmall)
+                                .padding(horizontal = 10.dp)
+
+                        ){
+                            SiteDescriptionView(
+                                siteData = it,
+                                onEvent = {
+                                    isVisibleSiteDescriptionView = false
+                                })
+                        }
+
+
+                    }
+                }
+
+
+
+
 
 
 
@@ -389,6 +591,55 @@ fun ResultScreen(
 fun UpButton(
     modifier:Modifier,
     listState: LazyListState
+){
+
+
+    val showButton by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0
+        }
+    }
+
+
+    val isUsableHaptic = LocalUsableHaptic.current
+    val hapticFeedback = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+
+    fun hapticProcessing(){
+        if(isUsableHaptic){
+            coroutineScope.launch {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+        }
+    }
+
+    if( showButton) {
+        FloatingActionButton(
+            modifier = Modifier.then(modifier),
+            elevation =  FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
+            onClick = {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(0)
+                    hapticProcessing()
+                }
+            }
+        ) {
+            Icon(
+                modifier = Modifier.scale(1f),
+                imageVector = Icons.Outlined.Publish,
+                contentDescription = "Up",
+
+                )
+
+        }
+    }
+}
+
+
+@Composable
+fun UpButtonGrid(
+    modifier:Modifier,
+    listState: LazyGridState
 ){
 
 

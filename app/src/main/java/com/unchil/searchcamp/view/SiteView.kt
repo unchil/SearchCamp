@@ -350,7 +350,13 @@ fun SiteDefaultView(siteData:SiteDefaultData,   allowHardware:Boolean = true, on
                             data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
                                 R.drawable.forest} ,
                             allowHardware = allowHardware,
-                            onPhotoPreviewTapped = { }
+                            onClick = {
+                                onClick.invoke()
+                            },
+                            onLongClick = {
+                                onLongClick.invoke()
+                            }
+
                         )
 
 
@@ -639,9 +645,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                     }
 
                 }
-                
 
-                
             }
 
 
@@ -815,7 +819,7 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
 
                             }
-                            .combinedClickable (
+                            .combinedClickable(
                                 onLongClick = {
                                     isHapticProcessing = true
                                     isVisibleImage = true
@@ -873,7 +877,8 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
 
                         Box(
-                            modifier = Modifier.clip(ShapeDefaults.ExtraSmall)
+                            modifier = Modifier
+                                .clip(ShapeDefaults.ExtraSmall)
                                 .fillMaxSize()
                                 .background(color = Color.White.copy(alpha = 1f))
                                 .padding(horizontal = 10.dp)
