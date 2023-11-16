@@ -3,10 +3,13 @@ package com.unchil.searchcamp.view
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
@@ -23,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +128,6 @@ fun SearchScreen(
             mutableStateOf("")
         }
 
-
         val searchTitle:MutableState<String?> = remember {
             mutableStateOf(null)
         }
@@ -163,6 +166,9 @@ fun SearchScreen(
             }
 
         }
+
+        var isVisibleResult by remember { mutableStateOf(false)}
+
 
         LaunchedEffect(channel) {
 
@@ -203,11 +209,15 @@ fun SearchScreen(
                             SnackBarChannelType.SEARCH_RESULT -> {
                                    if(currentListDataCntStateFlow.value > 0){
                                        //-> nav
+                              //         isVisibleResult = true
+
                                        navController.navigateTo(SearchCampDestinations.resultScreen.createRoute(
                                            administrativeDistrictSiDoCode = administrativeDistrictSiDoCode,
                                            administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
                                            searchTitle = searchTitle.value
                                        ))
+
+
 
                                    }
                             }
@@ -240,9 +250,10 @@ fun SearchScreen(
                 }
 
 
+
+
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         )  {
 
             Image(
@@ -272,7 +283,6 @@ fun SearchScreen(
                     )
                 }
             }
-
 
         }
 

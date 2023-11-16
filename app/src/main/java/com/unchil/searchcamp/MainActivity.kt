@@ -82,16 +82,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            val configuration = LocalConfiguration.current
-            var isPortrait by remember { mutableStateOf(false) }
-            isPortrait = when (configuration.orientation) {
-                Configuration.ORIENTATION_PORTRAIT -> {
-                    true
-                }
-                else ->{
-                    false
-                }
-            }
+
+
 
             val context = LocalContext.current
             val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
@@ -133,7 +125,6 @@ class MainActivity : ComponentActivity() {
                             CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
 
                                     Box(modifier = Modifier.fillMaxSize()
-                                        .background(color = if(isPortrait)Color.Transparent else Color.Transparent)
                                     ) {
                                         if (isConnect) {
 
@@ -146,9 +137,7 @@ class MainActivity : ComponentActivity() {
                                                 composable(
                                                     route = SearchCampDestinations.searchScreen.route
                                                 ) {
-
                                                     SearchScreen(navController = navController)
-
                                                 }
 
                                                 composable(
@@ -183,6 +172,7 @@ class MainActivity : ComponentActivity() {
                                                 }
 
                                             }
+
 
                                         } else {
                                             ChkNetWork(onCheckState = {

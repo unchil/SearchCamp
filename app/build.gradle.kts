@@ -133,7 +133,7 @@ dependencies {
     implementation ("androidx.paging:paging-compose:3.2.0")
 
     //Navigation
-    implementation ("androidx.navigation:navigation-compose:2.6.0-rc01")
+    implementation ("androidx.navigation:navigation-compose:2.7.5")
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.31.2-alpha")
 
     //WebView
