@@ -154,7 +154,7 @@ fun PhotoPreview(
         contentAlignment = Alignment.Center
 
     ) {
-            ImageViewer(data = data, size = Size(300, 300), isZoomable = false, contentScale = ContentScale.Crop, allowHardware = allowHardware)
+            ImageViewer(data = data, size = Size(600, 600), isZoomable = false, contentScale = ContentScale.Crop, allowHardware = allowHardware)
     }
 }
 

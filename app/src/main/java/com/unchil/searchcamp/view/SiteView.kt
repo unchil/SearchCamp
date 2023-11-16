@@ -2,6 +2,7 @@ package com.unchil.searchcamp.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +52,6 @@ import androidx.compose.material.icons.outlined.Signpost
 import androidx.compose.material.ripple.rememberRipple
 
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,6 +74,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -89,8 +91,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.unchil.searchcamp.R
-import com.unchil.searchcamp.data.GoCampingService
-import com.unchil.searchcamp.data.RepositoryProvider
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.model.SiteDefaultData
@@ -98,14 +98,11 @@ import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.chromeIntent
-import com.unchil.searchcamp.shared.physicalScreenRectDp
-import com.unchil.searchcamp.shared.physicalScreenRectPx
 import com.unchil.searchcamp.shared.screenRectDp
-import com.unchil.searchcamp.shared.screenRectPx
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
-import com.unchil.searchcamp.viewmodel.SiteImagePagerViewModel
+import com.unchil.searchcamp.viewmodel.ResultScreenViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
@@ -114,7 +111,13 @@ import kotlin.math.absoluteValue
     ExperimentalFoundationApi::class
 )
 @Composable
-fun SiteDefaultView(siteData:SiteDefaultData,   allowHardware:Boolean = true, onClick:()->Unit,  onLongClick:()->Unit){
+fun SiteDefaultView(
+    siteData:SiteDefaultData,
+    allowHardware:Boolean = true,
+    onClick:()->Unit,
+    onClickPhoto:()->Unit,
+    onLongClick:()->Unit
+){
 
     val permissions = listOf(
         Manifest.permission.INTERNET
@@ -351,7 +354,7 @@ fun SiteDefaultView(siteData:SiteDefaultData,   allowHardware:Boolean = true, on
                                 R.drawable.forest} ,
                             allowHardware = allowHardware,
                             onClick = {
-                                onClick.invoke()
+                                onClickPhoto.invoke()
                             },
                             onLongClick = {
                                 onLongClick.invoke()
@@ -374,7 +377,10 @@ fun SiteDefaultView(siteData:SiteDefaultData,   allowHardware:Boolean = true, on
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
+fun SiteDescriptionView(
+    siteData:SiteDefaultData,
+    onEvent: () -> Unit
+){
 
 
     val permissions = listOf(
@@ -590,9 +596,11 @@ fun SiteDescriptionView(siteData:SiteDefaultData, onEvent: () -> Unit){
 
 
 @Composable
-fun SiteIntroductionView( siteData:SiteDefaultData){
+fun SiteIntroductionView(
+    siteData:SiteDefaultData
+){
 
-        val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
     val context = LocalContext.current
 
 
@@ -610,7 +618,8 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp),
+                .verticalScroll(scrollState)
+                .padding(20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -629,7 +638,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
                 )
 
 
-                if(siteData.homepage.isNotEmpty()){
+                AnimatedVisibility(siteData.homepage.isNotEmpty()){
 
                     Spacer(modifier = Modifier.size(10.dp))
 
@@ -650,7 +659,7 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
 
 
 
-            if( siteData.firstImageUrl.isNotEmpty()) {
+            AnimatedVisibility( siteData.firstImageUrl.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -666,12 +675,10 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
 
             }
 
-            if( siteData.intro.isNotEmpty()) {
+            AnimatedVisibility( siteData.intro.isNotEmpty()) {
                 Text(
                     text = siteData.intro,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
+                    modifier = Modifier,
                     textAlign = TextAlign.Start,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -687,10 +694,40 @@ fun SiteIntroductionView( siteData:SiteDefaultData){
 }
 
 
+
+
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? = null){
+fun SiteImagePagerView(
+    viewModel: ResultScreenViewModel,
+    contentId: String? = null
+){
+
+    val configuration = LocalConfiguration.current
+    var isPortrait by remember { mutableStateOf(false) }
+    isPortrait = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            true
+        }
+        else ->{
+            false
+        }
+    }
+
+    var cardWidthDp by remember { mutableStateOf(300.dp) }
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            isPortrait = true
+            cardWidthDp = 300.dp
+        }
+        else ->{
+            isPortrait = false
+            cardWidthDp = 600.dp
+        }
+    }
+
 
     val permissions = listOf(
         Manifest.permission.INTERNET,
@@ -750,7 +787,6 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
         val widthDp = screenRectDp.width()
 
-        val cardWidthDp = 300.dp
 
         val paddingDp = (widthDp.dp - cardWidthDp) / 2
 
@@ -826,7 +862,9 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
                                     imageUrl = siteImageList.value.get(page).imageUrl
                                 },
                                 onClick = {
-
+                                    isHapticProcessing = true
+                                    isVisibleImage = true
+                                    imageUrl = siteImageList.value.get(page).imageUrl
                                 }
                             )
                     ) {
@@ -848,55 +886,46 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
                 }
 
-            //    if(imageUrl.isNotEmpty() && isVisibleImage) {
 
-/*
-                    AnimatedVisibility(visible = isVisibleImage) {
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                                .background(color = Color.White.copy(alpha = 0.9f))
+                AnimatedVisibility(visible = isVisibleImage,
+                    enter = slideInVertically {
+                        // Slide in from 40 dp from the top.
+                        with(density) { 40.dp.roundToPx() }
+                    } + expandVertically(
+                        // Expand from the top.
+                        expandFrom = Alignment.Top
+                    ) + fadeIn(
+                        // Fade in with the initial alpha of 0.3f.
+                        initialAlpha = 0.3f
+                    ),
+                    exit = slideOutVertically() + shrinkVertically() + fadeOut()
+                ) {
+
+
+
+                    Box(
+                        modifier = Modifier
+                            .clip(ShapeDefaults.ExtraSmall)
+                            .fillMaxSize()
+                            .background(color = Color.White.copy(alpha = 1f))
+                            .padding(horizontal = 10.dp)
+                            .clickable {
+                                isHapticProcessing = true
+                                isVisibleImage = false
+                            }
+                    ) {
+                        ImageViewer(
+                            data = imageUrl,
+                            size = Size.ORIGINAL,
+                            isZoomable = true,
+                            contentScale = ContentScale.Fit
                         )
                     }
-
- */
-
-                    AnimatedVisibility(visible = isVisibleImage,
-                        enter = slideInVertically {
-                            // Slide in from 40 dp from the top.
-                            with(density) { 40.dp.roundToPx() }
-                        } + expandVertically(
-                            // Expand from the top.
-                            expandFrom = Alignment.Top
-                        ) + fadeIn(
-                            // Fade in with the initial alpha of 0.3f.
-                            initialAlpha = 0.3f
-                        ),
-                        exit = slideOutVertically() + shrinkVertically() + fadeOut()
-                    ) {
+                }
 
 
 
-                        Box(
-                            modifier = Modifier
-                                .clip(ShapeDefaults.ExtraSmall)
-                                .fillMaxSize()
-                                .background(color = Color.White.copy(alpha = 1f))
-                                .padding(horizontal = 10.dp)
-                                .clickable {
-                                    isHapticProcessing = true
-                                    isVisibleImage = false
-                                }
-                        ) {
-                            ImageViewer(
-                                data = imageUrl,
-                                size = Size.ORIGINAL,
-                                isZoomable = true,
-                                contentScale = ContentScale.Fit
-                            )
-                        }
-                    }
 
-             //   }
 
 
             }
@@ -913,6 +942,8 @@ fun SiteImagePagerView(viewModel: SiteImagePagerViewModel,  contentId: String? =
 
     }
 }
+
+
 
 
 @Preview
@@ -937,6 +968,7 @@ fun PrevSiteView(){
 
                 }
             }
+
 
         }
     }

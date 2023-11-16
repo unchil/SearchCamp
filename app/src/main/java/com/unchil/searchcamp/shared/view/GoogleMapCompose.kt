@@ -86,7 +86,8 @@ fun Location.toLatLng():LatLng{
 @OptIn(ExperimentalPermissionsApi::class, MapsComposeExperimentalApi::class)
 @Composable
 fun GoogleMapView(
-    onOneClickHandler:()->Unit,
+    onClickHandler:(SiteDefaultData)->Unit,
+    onClickPhoto:(SiteDefaultData)->Unit,
     onLongClickHandler:(SiteDefaultData)->Unit,
     onSetSiteDefaultData:(SiteDefaultData)->Unit,
 ) {
@@ -469,7 +470,10 @@ Box(
                     siteData = it,
                     onClick = {
                         hapticProcessing()
-                        onOneClickHandler()
+                        onClickHandler.invoke(it)
+                    },
+                    onClickPhoto = {
+                                  onClickPhoto.invoke(it)
                     },
                     onLongClick = {
                         hapticProcessing()
@@ -538,7 +542,7 @@ SearchCampTheme {
             color = MaterialTheme.colorScheme.background
         ) {
 
-            GoogleMapView(onOneClickHandler =  {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
+            GoogleMapView(onClickHandler =  {}, onClickPhoto = {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
 
         }
     }

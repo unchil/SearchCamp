@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.data.Repository
 import com.unchil.searchcamp.db.entity.CampSite_TBL
+import com.unchil.searchcamp.db.entity.SiteImage_TBL
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,6 +32,9 @@ class ResultScreenViewModel   (
     val campSiteListPaging: Flow<PagingData<CampSite_TBL>>
     val searchQueryFlow: Flow<Event.Search>
     val eventHandler: (Event) -> Unit
+
+    val siteImageListStateFlow: MutableStateFlow<List<SiteImage_TBL>>
+            = repository.siteImageListStateFlow
 
 
     init{
