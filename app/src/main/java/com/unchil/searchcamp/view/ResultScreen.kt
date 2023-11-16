@@ -36,10 +36,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Publish
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -91,6 +93,7 @@ import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.navigation.SearchCampDestinations
+import com.unchil.searchcamp.navigation.navigateTo
 import com.unchil.searchcamp.navigation.resultScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
@@ -264,6 +267,7 @@ fun ResultScreen(
                 ) {
 
                     if(isPortrait){
+
                         BottomNavigation(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -271,6 +275,35 @@ fun ResultScreen(
                                 .shadow(elevation = 1.dp),
                             backgroundColor = MaterialTheme.colorScheme.background
                         ) {
+
+                            BottomNavigationItem(
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Replay,
+                                        contentDescription = "",
+                                        tint = Color.LightGray
+                                    )
+                                },
+                                label = {
+
+                                    Text("" ,
+                                        modifier = Modifier,
+                                        textAlign = TextAlign.Center,
+                                        style  = MaterialTheme.typography.titleSmall,
+                                        color = Color.LightGray
+                                    )
+
+                                },
+                                alwaysShowLabel = false,
+                                selected = false,
+                                onClick = {
+                                    navController.popBackStack()
+                                     //     navController.navigateTo(SearchCampDestinations.searchScreen.route)
+                                    //            isHapticProcessing = true
+                                },
+                                selectedContentColor =  MaterialTheme.colorScheme.onSurface,
+                            )
+
                             resultScreens.forEachIndexed { index, it ->
                                 BottomNavigationItem(
                                     icon = {
@@ -435,10 +468,35 @@ fun ResultScreen(
                             NavigationRail(
                                 modifier = Modifier
                                     .shadow(elevation = 1.dp)
-                                    .width(80.dp),
-                         //       containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    .width(80.dp)
+                                    .fillMaxHeight(),
                             ) {
 
+                                NavigationRailItem(
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Replay,
+                                            contentDescription = "",
+                                            tint = Color.LightGray
+                                        )
+                                    },
+                                    label = {
+                                        Text(  ""  ,
+                                            modifier = Modifier,
+                                            textAlign = TextAlign.Center,
+                                            style  = MaterialTheme.typography.titleSmall,
+                                            color =   Color.LightGray
+                                        )
+
+                                    },
+                                    alwaysShowLabel = false,
+                                    selected = false,
+                                    onClick = {
+                                        navController.popBackStack()
+                                    },
+                                )
+
+                                Spacer(modifier = Modifier.fillMaxHeight(0.15f))
 
                                 resultScreens.forEachIndexed { index, it ->
                                     NavigationRailItem(
@@ -469,6 +527,7 @@ fun ResultScreen(
                                         //      unselectedContentColor = Color.Gray
                                     )
                                 }
+
 
                             }
 
