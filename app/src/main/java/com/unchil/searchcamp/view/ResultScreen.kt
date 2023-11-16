@@ -60,9 +60,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -166,7 +168,7 @@ fun ResultScreen(
     var isVisibleSiteDescriptionView by remember{ mutableStateOf(false) }
     val density = LocalDensity.current
 
-    var selectedScreen by remember { mutableStateOf(0) }
+    var selectedScreen by rememberSaveable { mutableIntStateOf(0) }
 
 
     val onClickHandlerMap:()->Unit = {
@@ -240,17 +242,6 @@ fun ResultScreen(
                     .fillMaxHeight(1f),
                 contentAlignment = Alignment.Center
 
-/*
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.8f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-
-
- */
             ) {
                 currentCampSiteData.value?.let {
                     SiteDetailScreen(it)
@@ -481,48 +472,6 @@ fun ResultScreen(
 
                             }
 
-/*
-                            BottomNavigation(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp)
-                                    .shadow(elevation = 1.dp),
-                                backgroundColor = MaterialTheme.colorScheme.background
-                            ) {
-                                resultScreens.forEachIndexed { index, it ->
-                                    BottomNavigationItem(
-                                        icon = {
-                                            Icon(
-                                                imageVector = it.icon ?: Icons.Outlined.Info,
-                                                contentDescription = context.resources.getString(  it.name  ),
-                                                tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                            )
-                                        },
-                                        label = {
-
-                                            Text(  context.resources.getString( it.name ) ,
-                                                modifier = Modifier,
-                                                textAlign = TextAlign.Center,
-                                                style  = MaterialTheme.typography.titleSmall,
-                                                color =  if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                            )
-
-                                        },
-                                        alwaysShowLabel = false,
-                                        selected = selectedScreen == index,
-                                        onClick = {
-                                            selectedScreen = index
-                                            //            isHapticProcessing = true
-                                        },
-                                        selectedContentColor =  MaterialTheme.colorScheme.onSurface,
-                                        //      unselectedContentColor = Color.Gray
-                                    )
-                                }
-                            }
-
-
-
- */
                         }
 
 
