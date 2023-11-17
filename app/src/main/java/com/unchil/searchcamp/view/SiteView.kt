@@ -29,9 +29,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -715,16 +718,41 @@ fun SiteImagePagerView(
         }
     }
 
-    var cardWidthDp by remember { mutableStateOf(300.dp) }
+
+
+    var cardWidthDp by remember { mutableStateOf(0.dp) }
+    var cardHeightDp by remember { mutableStateOf(0.dp) }
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             isPortrait = true
-            cardWidthDp = 300.dp
+            cardWidthDp =  configuration.screenWidthDp.dp
+            cardHeightDp = configuration.screenHeightDp.dp / 2
         }
         else ->{
             isPortrait = false
-            cardWidthDp = 600.dp
+            cardWidthDp = configuration.screenWidthDp.dp / 2
+            cardHeightDp = configuration.screenHeightDp.dp
+        }
+    }
+
+    // 한 패이지 의 패딩값
+    val paddingValues by mutableStateOf ( if(isPortrait){
+            PaddingValues( vertical = (configuration.screenHeightDp.dp -  cardHeightDp) * 0.4f  , horizontal = 10.dp )
+        }else {
+            PaddingValues( vertical = 10.dp, horizontal =  (configuration.screenWidthDp.dp -  cardWidthDp) / 3)
+        }
+    )
+
+
+
+    // 화면에 정상적으로 표현할 패이지 수
+    val pagesPerViewport = object : PageSize {
+        override fun Density.calculateMainAxisPageSize(
+            availableSpace: Int,
+            pageSpacing: Int
+        ): Int {
+            return (availableSpace - 2 * pageSpacing) / 1
         }
     }
 
@@ -779,26 +807,15 @@ fun SiteImagePagerView(
 
         val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
 
-
         val pagerState  =   rememberPagerState(
             initialPage = 0,
             initialPageOffsetFraction = 0f,
             pageCount = {  siteImageList.value.size } )
 
-        val widthDp = screenRectDp.width()
 
 
-        val paddingDp = (widthDp.dp - cardWidthDp) / 2
+       // val paddingDp = if(isPortrait) { (heightDp.dp - cardHeightDp) / 2 }  else {(widthDp.dp - cardWidthDp) / 2}
 
-
-        val threePagesPerViewport = object : PageSize {
-            override fun Density.calculateMainAxisPageSize(
-                availableSpace: Int,
-                pageSpacing: Int
-            ): Int {
-                return (availableSpace - 2 * pageSpacing) / 1
-            }
-        }
 
 
         if( siteImageList.value.isNotEmpty() ) {
@@ -810,81 +827,157 @@ fun SiteImagePagerView(
                 contentAlignment = Alignment.Center,
             ){
 
+                if(isPortrait){
+                    VerticalPager(
+                        modifier = Modifier,
+                        state = pagerState,
+                        pageSpacing = 10.dp,
+                        pageSize = pagesPerViewport,
+                        beyondBoundsPageCount = 3,
+                        contentPadding = paddingValues,
+                    ) {page ->
+
+                        Card(
+                            Modifier
+                                //        .size(cardWidthDp)
+                                .height(cardHeightDp)
+                                .width(cardWidthDp)
+                                .graphicsLayer {
+                                    // Calculate the absolute offset for the current page from the
+                                    // scroll position. We use the absolute value which allows us to mirror
+                                    // any effects for both directions
+                                    val pageOffset = (
+                                            (pagerState.currentPage - page) + pagerState
+                                                .currentPageOffsetFraction
+                                            ).absoluteValue
 
 
+                                    alpha = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
 
-                HorizontalPager(
-                    modifier = Modifier,
-                    state = pagerState,
-                    pageSpacing = 0.dp,
-                    pageSize = threePagesPerViewport,
-                    beyondBoundsPageCount = 3,
-                    contentPadding = PaddingValues(start = paddingDp, end = paddingDp),
-                ) { page ->
+                                    scaleX = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
 
-                    Card(
-                        Modifier
-                            .size(cardWidthDp)
-                            .graphicsLayer {
-                                // Calculate the absolute offset for the current page from the
-                                // scroll position. We use the absolute value which allows us to mirror
-                                // any effects for both directions
-                                val pageOffset = (
-                                        (pagerState.currentPage - page) + pagerState
-                                            .currentPageOffsetFraction
-                                        ).absoluteValue
+                                    scaleY = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
 
 
-                                alpha = lerp(
-                                    start = 0.7f,
-                                    stop = 1f,
-                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                )
-
-                                scaleX = lerp(
-                                    start = 0.9f,
-                                    stop = 1f,
-                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                )
-
-                                scaleY = lerp(
-                                    start = 0.9f,
-                                    stop = 1f,
-                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                )
-
-
-                            }
-                            .combinedClickable(
-                                onLongClick = {
-                                    isHapticProcessing = true
-                                    isVisibleImage = true
-                                    imageUrl = siteImageList.value.get(page).imageUrl
-                                },
-                                onClick = {
-                                    isHapticProcessing = true
-                                    isVisibleImage = true
-                                    imageUrl = siteImageList.value.get(page).imageUrl
                                 }
-                            )
-                    ) {
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 20.dp)
-                        ){
-                            ImageViewer(
-                                data = (siteImageList.value.get(page).imageUrl),
-                                size = Size(300,300),
-                                isZoomable = false,
-                                contentScale = ContentScale.Fit
-                            )
+                                .combinedClickable(
+                                    onLongClick = {
+                                        isHapticProcessing = true
+                                        isVisibleImage = true
+                                        imageUrl = siteImageList.value.get(page).imageUrl
+                                    },
+                                    onClick = {
+                                        isHapticProcessing = true
+                                        isVisibleImage = true
+                                        imageUrl = siteImageList.value.get(page).imageUrl
+                                    }
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 0.dp)
+                            ){
+                                ImageViewer(
+                                    data = (siteImageList.value.get(page).imageUrl),
+                                    size = Size(600,600),
+                                    isZoomable = false,
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
 
                     }
 
+                }else {
+
+                        HorizontalPager(
+                            modifier = Modifier,
+                            state = pagerState,
+                            pageSpacing = 0.dp,
+                            pageSize = pagesPerViewport,
+                            beyondBoundsPageCount = 3,
+                            contentPadding = paddingValues,
+                        ) { page ->
+
+                            Card(
+                                Modifier
+                                    .size(cardWidthDp)
+                                    .graphicsLayer {
+                                        // Calculate the absolute offset for the current page from the
+                                        // scroll position. We use the absolute value which allows us to mirror
+                                        // any effects for both directions
+                                        val pageOffset = (
+                                                (pagerState.currentPage - page) + pagerState
+                                                    .currentPageOffsetFraction
+                                                ).absoluteValue
+
+
+                                        alpha = lerp(
+                                            start = 0.7f,
+                                            stop = 1f,
+                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                        )
+
+                                        scaleX = lerp(
+                                            start = 0.7f,
+                                            stop = 1f,
+                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                        )
+
+                                        scaleY = lerp(
+                                            start = 0.7f,
+                                            stop = 1f,
+                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                        )
+
+
+                                    }
+                                    .combinedClickable(
+                                        onLongClick = {
+                                            isHapticProcessing = true
+                                            isVisibleImage = true
+                                            imageUrl = siteImageList.value.get(page).imageUrl
+                                        },
+                                        onClick = {
+                                            isHapticProcessing = true
+                                            isVisibleImage = true
+                                            imageUrl = siteImageList.value.get(page).imageUrl
+                                        }
+                                    )
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding( 0.dp)
+                                ){
+                                    ImageViewer(
+                                        data = (siteImageList.value.get(page).imageUrl),
+                                        size = Size(600,600),
+                                        isZoomable = false,
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+
+                        }
+
+
+
                 }
+
 
 
                 AnimatedVisibility(visible = isVisibleImage,
@@ -900,9 +993,6 @@ fun SiteImagePagerView(
                     ),
                     exit = slideOutVertically() + shrinkVertically() + fadeOut()
                 ) {
-
-
-
                     Box(
                         modifier = Modifier
                             .clip(ShapeDefaults.ExtraSmall)
