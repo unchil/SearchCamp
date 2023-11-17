@@ -26,16 +26,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -53,6 +58,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,7 +95,11 @@ fun SearchCampView(
 ){
 
 
+    val keyboardController = LocalSoftwareKeyboardController.current
     val configuration = LocalConfiguration.current
+
+
+
     var isPortrait by remember { mutableStateOf(false) }
 
 
@@ -103,7 +113,7 @@ fun SearchCampView(
         Configuration.ORIENTATION_PORTRAIT -> {
             isPortrait = true
             searchBoxWidth = 0.95f
-            searchBoxHeight = 0.6f
+            searchBoxHeight = 0.55f
             columnWidth = 1f
             columnHeight = 1f
         }
@@ -458,6 +468,7 @@ fun SearchCampView(
                         administrativeDistrictSiGunGu,
                         query_title
                     )
+                    keyboardController?.hide()
                 },
                 active = isVisible.value,
                 onActiveChange = {
@@ -473,38 +484,21 @@ fun SearchCampView(
                     .fillMaxWidth()
                     .height(70.dp)
                     .clip(shape = ShapeDefaults.ExtraSmall),
-                leadingIcon = {
-                    IconButton(
-                        modifier = Modifier,
-                        onClick = {
-                            isHapticProcessing = true
-
-                            onSearchEventHandler(
-                                administrativeDistrictSiDoCode,
-                                administrativeDistrictSiGunGu,
-                                query_title
-                            )
-
-                        },
-                        content = {
-                            Icon(
-                                modifier = Modifier,
-                                imageVector = Icons.Outlined.Search,
-                                contentDescription = "Search"
-                            )
-                        }
-                    )
-
-
-                },
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+
                         IconButton(
                             modifier = Modifier,
                             onClick = {
                                 isHapticProcessing = true
                                 startLauncherRecognizerIntent.launch(recognizerIntent())
                             },
+                            colors =  IconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
+                                disabledContainerColor = Color.Gray,
+                                disabledContentColor = Color.Gray
+                            ),
                             content = {
                                 Icon(
                                     modifier = Modifier,
@@ -524,24 +518,64 @@ fun SearchCampView(
                                     it()
                                 }
                             },
+                            colors =  IconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
+                                disabledContainerColor = Color.Gray,
+                                disabledContentColor = Color.Gray
+                            ),
                             content = {
                                 Icon(
                                     modifier = Modifier,
-                                    imageVector = Icons.Outlined.Replay,
+                                    imageVector = Icons.Outlined.SearchOff,
                                     contentDescription = "Clear"
                                 )
                             }
                         )
+
+                           IconButton(
+                               modifier = Modifier,
+                               onClick = {
+
+                                   keyboardController?.hide()
+
+                                   isHapticProcessing = true
+
+                                   onSearchEventHandler(
+                                       administrativeDistrictSiDoCode,
+                                       administrativeDistrictSiGunGu,
+                                       query_title
+                                   )
+
+                               },
+                               colors =  IconButtonColors(
+                                   containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                   contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
+                                    disabledContainerColor = Color.Gray,
+                                    disabledContentColor = Color.Gray
+                               ),
+                               content = {
+                                   Icon(
+                                       modifier = Modifier,
+                                       imageVector = Icons.Outlined.Search,
+                                       contentDescription = "Search"
+                                   )
+                               }
+                           )
+
 
 
                     }
                 },
                 tonalElevation = 2.dp,
                 colors = SearchBarDefaults.colors(
-                    //  containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
-                    containerColor = Color.Transparent
+                    containerColor = Color.Transparent,
+                    dividerColor = Color.Black ,
+                    inputFieldColors  = TextFieldDefaults.colors()
+
                 )
-            ) { }
+            ) {}
+
 
 
         }

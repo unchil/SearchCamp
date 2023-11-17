@@ -57,6 +57,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
@@ -376,7 +377,7 @@ fun SiteDefaultView(
 }
 
 
-
+/*
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -597,6 +598,8 @@ fun SiteDescriptionView(
     }
 }
 
+ */
+
 
 @Composable
 fun SiteIntroductionView(
@@ -605,6 +608,33 @@ fun SiteIntroductionView(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+
+
+    val configuration = LocalConfiguration.current
+    var isPortrait by remember { mutableStateOf(false) }
+    isPortrait = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            true
+        }
+
+        else -> {
+            false
+        }
+    }
+
+    var columnHeight by remember { mutableStateOf(0.dp) }
+
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            isPortrait = true
+            columnHeight = configuration.screenHeightDp.dp / 2
+        }
+
+        else -> {
+            isPortrait = false
+            columnHeight = configuration.screenHeightDp.dp
+        }
+    }
 
 
     val hapticFeedback = LocalHapticFeedback.current
@@ -623,7 +653,7 @@ fun SiteIntroductionView(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
@@ -648,7 +678,15 @@ fun SiteIntroductionView(
                     IconButton(onClick = {
                         isHapticProcessing = true
                         chromeIntent.invoke(context, siteData.homepage)
-                    }) {
+                    },
+                        colors =  IconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
+                            disabledContainerColor = Color.Gray,
+                            disabledContentColor = Color.Gray
+                        ),
+
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Home,
                             contentDescription = "홈페이지",
@@ -662,21 +700,184 @@ fun SiteIntroductionView(
 
 
 
-            AnimatedVisibility( siteData.firstImageUrl.isNotEmpty()) {
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(columnHeight)
                         .clip(ShapeDefaults.ExtraSmall)
                 ) {
+
+
                     ImageViewer(
-                        data = siteData.firstImageUrl,
+                        data =    if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
+                    R.drawable.forest},
                         size = Size.ORIGINAL,
                         contentScale = ContentScale.Crop
                     )
+
+                    Column(
+                        modifier = Modifier.align(Alignment.Center)
+                            .clip(ShapeDefaults.ExtraSmall)
+                            .fillMaxWidth(0.8f)
+                            .fillMaxHeight(0.8f)
+                            .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
+                            .padding(horizontal = 10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+
+
+
+                        if( siteData.tel.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Phone,
+                                    contentDescription = "전화",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.tel,
+                                    modifier = Modifier,
+                                    //    fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                        }
+
+
+                        if( siteData.addr1.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Signpost,
+                                    contentDescription = "주소",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.addr1,
+                                    modifier = Modifier,
+                                    //   fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+
+                        if( siteData.resveCl.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.EventAvailable,
+                                    contentDescription = "예약",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.resveCl,
+                                    modifier = Modifier,
+                                    //       fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+
+                        if( siteData.sbrsCl.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Countertops,
+                                    contentDescription = "시설",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.sbrsCl,
+                                    modifier = Modifier,
+                                    //     fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                        }
+
+
+                        if( siteData.eqpmnLendCl.isNotEmpty()) {
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.OutdoorGrill,
+                                    contentDescription = "대여장비",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.eqpmnLendCl,
+                                    modifier = Modifier,
+                                    //        fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                        }
+
+                        if( siteData.glampInnerFclty.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Bungalow,
+                                    contentDescription = "글램핑시설",
+                                    modifier = Modifier.scale(0.7f)
+                                )
+                                Text(
+                                    text = siteData.glampInnerFclty,
+                                    modifier = Modifier,
+                                    //        fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Start,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                        }
+
+                    }
+
+
                 }
 
-            }
+
+
+
+
 
             AnimatedVisibility( siteData.intro.isNotEmpty()) {
                 Text(

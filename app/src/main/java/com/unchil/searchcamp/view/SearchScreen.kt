@@ -264,6 +264,8 @@ fun SearchScreen(
                 contentScale = ContentScale.Crop,
             )
 
+
+
             SearchCampView(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -271,8 +273,10 @@ fun SearchScreen(
                 onSearchEventHandler = onSearchEventHandler
             )
 
+
             Box(modifier = Modifier
-                .align(Alignment.BottomCenter),
+                .align(Alignment.Center)
+                .padding(top = 10.dp),
                 contentAlignment = Alignment.Center,
             ){
                 SnackbarHost(hostState = snackBarHostState){
@@ -280,9 +284,15 @@ fun SearchScreen(
                         snackbarData = it,
                         modifier = Modifier,
                         shape = ShapeDefaults.ExtraSmall,
+                        containerColor = Color.Yellow,
+                        contentColor = Color.Black,
+                        actionColor =Color.Red,
+
+                        dismissActionContentColor = Color.LightGray
                     )
                 }
             }
+
 
         }
 

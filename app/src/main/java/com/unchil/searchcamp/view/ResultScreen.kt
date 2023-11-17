@@ -212,8 +212,8 @@ fun ResultScreen(
         val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         val coroutineScope = rememberCoroutineScope()
         val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
-        val sheetPeekHeightValue by remember { mutableStateOf(30.dp) }
-        var isVisibleSiteDescriptionView by remember { mutableStateOf(false) }
+        val sheetPeekHeightValue by remember { mutableStateOf(40.dp) }
+      //  var isVisibleSiteDescriptionView by remember { mutableStateOf(false) }
 
         val density = LocalDensity.current
 
@@ -449,9 +449,9 @@ fun ResultScreen(
                                                             )
                                                         },
                                                         onLongClick = {
-                                                            currentCampSiteData.value =
+                                                            onClickHandler.invoke(
                                                                 siteDefaultData
-                                                            isVisibleSiteDescriptionView = true
+                                                            )
                                                         }
                                                     )
 
@@ -498,9 +498,9 @@ fun ResultScreen(
                                                             )
                                                         },
                                                         onLongClick = {
-                                                            currentCampSiteData.value =
+                                                            onClickHandler.invoke(
                                                                 siteDefaultData
-                                                            isVisibleSiteDescriptionView = true
+                                                            )
                                                         }
                                                     )
 
@@ -545,8 +545,9 @@ fun ResultScreen(
                                             onClickPhotoHandler.invoke(it)
                                         },
                                         onLongClickHandler = {
-                                            currentCampSiteData.value = it
-                                            isVisibleSiteDescriptionView = true
+                                            onClickHandler.invoke(
+                                                it
+                                            )
                                         },
                                         onSetSiteDefaultData = {
                                             currentCampSiteData.value = it
@@ -637,6 +638,8 @@ fun ResultScreen(
 
                 }// Column
 
+
+                /*
                 AnimatedVisibility(
                     visible = isVisibleSiteDescriptionView
                 ) {
@@ -680,6 +683,8 @@ fun ResultScreen(
 
                     }
                 }
+
+                 */
 
 
 
@@ -803,8 +808,6 @@ fun PrevResultScreen(){
     val permissionsManager = PermissionsManager()
     val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
 
-    var selectedTab by mutableStateOf(false)
-
     SearchCampTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -813,93 +816,16 @@ fun PrevResultScreen(){
 
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
-/*
+
                     ResultScreen(
                         navController =  navController,
                         administrativeDistrictSiDoCode = "0",
                         administrativeDistrictSiGunGu = ""
                     )
 
- */
+
                 }
-
-
-                val sheetState = SheetState(
-                    skipPartiallyExpanded = false,
-                    density = LocalDensity.current,
-                    initialValue = SheetValue.PartiallyExpanded,
-                    skipHiddenState = true
-                )
-                val sheetPeekHeightValue by remember { mutableStateOf(30.dp) }
-                val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-
-                BottomSheetScaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding(),
-                    scaffoldState = scaffoldState,
-                    sheetPeekHeight = sheetPeekHeightValue,
-                    sheetShape = ShapeDefaults.Small,
-                    sheetDragHandle = {
-                        Box(
-                            modifier = Modifier
-                                .height(sheetPeekHeightValue)
-                                .fillMaxWidth()
-                                .background(color = Color.LightGray.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .scale(1f)
-                                    .clickable { },
-                                imageVector =
-                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded)
-                                    Icons.Outlined.KeyboardArrowDown
-                                else Icons.Outlined.KeyboardArrowUp,
-                                contentDescription = "SiteDetailScreen",
-                            )
-                        }
-                    },
-                    sheetContent = {
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(color = Color.LightGray),
-                            contentAlignment = Alignment.Center
-
-                        ) {
-
-                            if (selectedTab) {
-                                SiteIntroductionView(siteData = SiteDefaultData.setInitValue())
-                            } else {
-                                SiteDescriptionView(siteData = SiteDefaultData.setInitValue()) {
-                                }
-                            }
-
-
-                        }
-
-
-                    }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.DarkGray),
-                        contentAlignment = Alignment.Center
-
-                    ) {
-                        Button(onClick = {
-                            selectedTab = !selectedTab
-                        }) {
-                            Text("SheetContent Change")
-                        }
-                    }
-                }
-
             }
-
         }
 
     }

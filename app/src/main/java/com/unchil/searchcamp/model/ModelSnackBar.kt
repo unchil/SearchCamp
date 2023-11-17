@@ -25,7 +25,7 @@ val snackbarChannelList = listOf<SnackBarChannelData>(
         channel = 3,
         message = R.string.snackbar_3,
         duration = SnackbarDuration.Indefinite,
-        actionLabel = "결과보기",
+        actionLabel = "결과 화면으로 이동",
         withDismissAction = true,
     ),
 
