@@ -566,6 +566,7 @@ fun ResultMapScreen(
                         }
                     }
 
+                    /*
                     currentSiteDefaultData?.let {
                         AnimatedVisibility(visible = isVisibleSiteDefaultView) {
                             Box(
@@ -580,15 +581,12 @@ fun ResultMapScreen(
                                 SiteDefaultView(
                                     siteData = it,
                                     onClick = {
-
                                         onClickHandler.invoke(it)
                                     },
                                     onClickPhoto = {
-
                                       onClickPhotoHandler.invoke(it)
                                     },
                                     onLongClick = {
-
                                         onClickHandler.invoke(it)
                                     }
                                 )
@@ -598,8 +596,38 @@ fun ResultMapScreen(
 
                         }
                     }
+*/
 
 
+                        currentSiteDefaultData?.let {
+
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth(columnWidth)
+                                    .padding(bottom = 2.dp)
+                                    .padding(horizontal = 10.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+
+                                AnimatedVisibility(visible = isVisibleSiteDefaultView) {
+                                    SiteDefaultView(
+                                        siteData = it,
+                                        onClick = {
+                                            onClickHandler.invoke(it)
+                                        },
+                                        onClickPhoto = {
+                                            onClickPhotoHandler.invoke(it)
+                                        },
+                                        onLongClick = {
+                                            onClickHandler.invoke(it)
+                                        }
+                                    )
+                                }
+
+
+                            }
+                        }
 
 
 
