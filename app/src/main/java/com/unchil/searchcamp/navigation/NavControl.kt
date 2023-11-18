@@ -50,7 +50,7 @@ val resultScreens:List<SearchCampDestinations> = listOf(
 
 val mainScreens:List<SearchCampDestinations> = listOf(
     SearchCampDestinations.searchScreen,
-    SearchCampDestinations.resultScreen
+    SearchCampDestinations.resultNavScreen
 )
 
 

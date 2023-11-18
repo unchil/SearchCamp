@@ -171,7 +171,7 @@ fun ResultListScreen(
         val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
 
         val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
-        val sheetPeekHeightValue by remember { mutableStateOf(40.dp) }
+        val sheetPeekHeightValue by remember { mutableStateOf(0.dp) }
 
         val dragHandlerAction:()->Unit = {
             coroutineScope.launch {
@@ -279,7 +279,7 @@ fun ResultListScreen(
                     sheetDragHandle = {
                         Box(
                             modifier = Modifier
-                                .height(sheetPeekHeightValue)
+                                .height(30.dp)
                                 .fillMaxWidth()
                                 .background(color = Color.LightGray.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center

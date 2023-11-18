@@ -5,17 +5,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.Icon
@@ -41,6 +45,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -51,6 +56,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.unchil.searchcamp.LocalUsableHaptic
+import com.unchil.searchcamp.R
 import com.unchil.searchcamp.navigation.SearchCampDestinations
 import com.unchil.searchcamp.navigation.mainScreens
 import com.unchil.searchcamp.navigation.navigateTo
@@ -115,8 +121,86 @@ fun ResultNavScreen(
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
-        topBar = {},
-        bottomBar = {},
+        topBar = {
+            if(isPortrait) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    IconButton(
+                        onClick = {
+                            hapticProcessing()
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier.align(Alignment.CenterStart),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBackIosNew,
+                            contentDescription = "이전화면",
+                            tint = Color.LightGray
+                        )
+                    }
+
+
+                    Text(
+                        text = context.getString(R.string.mainmenu_result),
+                        modifier = Modifier.align(Alignment.Center),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                }
+            }
+        },
+        bottomBar = {
+            if (isPortrait) {
+                BottomNavigation(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .shadow(elevation = 1.dp),
+                    backgroundColor = MaterialTheme.colorScheme.background
+                ) {
+
+                    resultScreens.forEachIndexed { index, it ->
+                        BottomNavigationItem(
+                            icon = {
+                                Icon(
+                                    imageVector = it.icon ?: Icons.Outlined.Info,
+                                    contentDescription = context.resources.getString(it.name),
+                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                )
+                            },
+                            label = {
+
+                                Text(
+                                    context.resources.getString(it.name),
+                                    modifier = Modifier,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                )
+
+                            },
+                            alwaysShowLabel = true,
+                            selected = selectedScreen == index,
+                            onClick = {
+                                hapticProcessing()
+                                selectedScreen = index
+
+                            },
+                            selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                            //      unselectedContentColor = Color.Gray
+                        )
+                    }
+                }
+
+
+            }
+        },
         snackbarHost = {},
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -125,58 +209,59 @@ fun ResultNavScreen(
         Box(
             modifier = Modifier.padding(it),
             contentAlignment = Alignment.Center,
-        ) {
+        ){
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                modifier = Modifier.fillMaxSize(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
 
 
-
-                if (isPortrait) {
-
-                    BottomNavigation(
+                if (!isPortrait) {
+                    NavigationRail(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp)
-                            .shadow(elevation = 1.dp),
-                        backgroundColor = MaterialTheme.colorScheme.background
-                    ) {
+                            .shadow(elevation = 1.dp)
+                            .width(80.dp)
+                            .fillMaxHeight(),
+                        header = {
+                            Column(
+                                modifier = Modifier,
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment =  Alignment.CenterHorizontally,
+                            ) {
 
-                        BottomNavigationItem(
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Replay,
-                                    contentDescription = "",
-                                    tint = Color.LightGray
-                                )
-                            },
-                            label = {
+                                IconButton(
+                                    onClick = {
+                                        hapticProcessing()
+                                        navController.popBackStack()
+                                    },
+                                    modifier = Modifier,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ArrowBackIosNew,
+                                        contentDescription = "이전화면",
+                                        tint = Color.LightGray
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.size(20.dp))
 
                                 Text(
-                                    "",
+                                    text = context.getString(R.string.mainmenu_result),
                                     modifier = Modifier,
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = Color.LightGray
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
 
-                            },
-                            alwaysShowLabel = false,
-                            selected = false,
-                            onClick = {
-                                hapticProcessing()
-                                navController.popBackStack()
-                                //     navController.navigateTo(SearchCampDestinations.searchScreen.route)
-                            },
-                            selectedContentColor = MaterialTheme.colorScheme.onSurface,
-                        )
+                            }
+                        }
+                    ) {
+
+
 
                         resultScreens.forEachIndexed { index, it ->
-                            BottomNavigationItem(
+                            NavigationRailItem(
                                 icon = {
                                     Icon(
                                         imageVector = it.icon ?: Icons.Outlined.Info,
@@ -195,20 +280,73 @@ fun ResultNavScreen(
                                     )
 
                                 },
-                                alwaysShowLabel = false,
+                                alwaysShowLabel = true,
                                 selected = selectedScreen == index,
                                 onClick = {
                                     hapticProcessing()
                                     selectedScreen = index
-
                                 },
-                                selectedContentColor = MaterialTheme.colorScheme.onSurface,
                                 //      unselectedContentColor = Color.Gray
                             )
                         }
-                    }
 
+
+                    }
                 }
+
+
+                Box(
+                    modifier = Modifier
+                 //       .fillMaxWidth(columnWidth)
+                        .fillMaxWidth()
+                ) {
+                    when (resultScreens[selectedScreen]) {
+                        SearchCampDestinations.resultListScreen -> {
+
+                            ResultListScreen(
+                                navController,
+                                administrativeDistrictSiDoCode,
+                                administrativeDistrictSiGunGu,
+                                searchTitle
+                            )
+
+                        }
+
+                        SearchCampDestinations.resultMapScreen -> {
+
+                            ResultMapScreen(
+                                navController,
+                                administrativeDistrictSiDoCode,
+                                administrativeDistrictSiGunGu,
+                                searchTitle
+                            )
+                        }
+
+                        else -> {}
+                    }
+                }
+
+
+            }
+
+
+
+        }
+
+       /*
+        Box(
+            modifier = Modifier.padding(it),
+            contentAlignment = Alignment.Center,
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+
+
 
                 Row(
                     modifier = Modifier.fillMaxSize(1f),
@@ -219,7 +357,6 @@ fun ResultNavScreen(
                     Box(
                         modifier = Modifier.fillMaxWidth(columnWidth)
                     ) {
-
 
                         when (resultScreens[selectedScreen]) {
                             SearchCampDestinations.resultListScreen -> {
@@ -245,23 +382,21 @@ fun ResultNavScreen(
 
                             else -> {}
                         }
-
-
-
                     }
 
                     if (!isPortrait) {
+
                         NavigationRail(
                             modifier = Modifier
                                 .shadow(elevation = 1.dp)
-                                .width(80.dp)
+                                .width(70.dp)
                                 .fillMaxHeight(),
                         ) {
 
                             NavigationRailItem(
                                 icon = {
                                     Icon(
-                                        imageVector = Icons.Outlined.Replay,
+                                        imageVector = Icons.Outlined.ArrowBackIosNew,
                                         contentDescription = "",
                                         tint = Color.LightGray
                                     )
@@ -328,7 +463,7 @@ fun ResultNavScreen(
 
         }
 
-
+        */
 
 
     }
