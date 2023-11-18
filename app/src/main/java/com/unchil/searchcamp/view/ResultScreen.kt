@@ -43,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -75,7 +76,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -278,6 +283,7 @@ fun ResultScreen(
 
                 var selectedScreen by rememberSaveable { mutableIntStateOf(0) }
 
+
                 BottomSheetScaffold(
                     modifier = Modifier
                         .fillMaxSize()
@@ -326,6 +332,7 @@ fun ResultScreen(
                         }
                     }
                 ) { innerPadding ->
+
 
                     Box(
                         modifier = Modifier.padding(innerPadding),
@@ -376,7 +383,7 @@ fun ResultScreen(
                                         onClick = {
                                             navController.popBackStack()
                                             //     navController.navigateTo(SearchCampDestinations.searchScreen.route)
-                                            //            isHapticProcessing = true
+
                                         },
                                         selectedContentColor = MaterialTheme.colorScheme.onSurface,
                                     )
@@ -405,7 +412,7 @@ fun ResultScreen(
                                             selected = selectedScreen == index,
                                             onClick = {
                                                 selectedScreen = index
-                                                //            isHapticProcessing = true
+
                                             },
                                             selectedContentColor = MaterialTheme.colorScheme.onSurface,
                                             //      unselectedContentColor = Color.Gray
@@ -426,7 +433,7 @@ fun ResultScreen(
                                 ) {
 
                                     when (resultScreens[selectedScreen]) {
-                                        SearchCampDestinations.listScreen -> {
+                                        SearchCampDestinations.resultListScreen -> {
 
                                             if (isPortrait) {
                                                 LazyColumn(
@@ -524,10 +531,7 @@ fun ResultScreen(
                                                     }
 
                                                 }
-
                                             }
-
-
 
                                             if (isPortrait) {
                                                 UpButton(
@@ -546,9 +550,12 @@ fun ResultScreen(
                                             }
 
 
+
+
                                         }
 
-                                        SearchCampDestinations.mapScreen -> {
+                                        SearchCampDestinations.resultMapScreen -> {
+
                                             GoogleMapView(
                                                 onClickHandler = {
                                                     onClickHandler.invoke(it)
@@ -565,6 +572,8 @@ fun ResultScreen(
                                                     currentCampSiteData.value = it
                                                 }
                                             )
+
+
                                         }
 
                                         else -> {}
@@ -572,7 +581,6 @@ fun ResultScreen(
 
 
                                 }
-
 
                                 if (!isPortrait) {
                                     NavigationRail(
@@ -643,7 +651,6 @@ fun ResultScreen(
 
                                     }
                                 }
-
 
                             }
 
@@ -775,9 +782,12 @@ fun SearchingProgressIndicator(
 ){
     if(isVisibility) {
         Box(modifier = Modifier.fillMaxSize()) {
+            /*
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
+
+             */
         }
     }
 }

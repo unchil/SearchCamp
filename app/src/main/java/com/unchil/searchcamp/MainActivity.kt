@@ -61,6 +61,7 @@ import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
+import com.unchil.searchcamp.view.ResultNavScreen
 import com.unchil.searchcamp.view.ResultScreen
 import com.unchil.searchcamp.view.SearchScreen
 import kotlinx.coroutines.delay
@@ -158,6 +159,39 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 ) {
                                                     ResultScreen(
+                                                        navController = navController,
+                                                        administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(
+                                                            it.arguments
+                                                        ),
+                                                        administrativeDistrictSiGunGu = SearchCampDestinations.getSiGunGuFromArgs(
+                                                            it.arguments
+                                                        ),
+                                                        searchTitle = SearchCampDestinations.getSearchTitleFromArgs(
+                                                            it.arguments
+                                                        )
+                                                    )
+                                                }
+
+
+
+                                                composable(
+                                                    route = SearchCampDestinations.resultNavScreen.route,
+                                                    arguments = listOf(
+                                                        navArgument(SearchCampDestinations.ARG_NAME_SiDoCode) {
+                                                            nullable = false
+                                                            type = NavType.StringType
+                                                        },
+                                                        navArgument(SearchCampDestinations.ARG_NAME_SiGunGu) {
+                                                            nullable = false
+                                                            type = NavType.StringType
+                                                        },
+                                                        navArgument(SearchCampDestinations.ARG_NAME_SearchTitle) {
+                                                            nullable = true
+                                                            type = NavType.StringType
+                                                        }
+                                                    )
+                                                ) {
+                                                    ResultNavScreen(
                                                         navController = navController,
                                                         administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(
                                                             it.arguments

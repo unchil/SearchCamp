@@ -36,6 +36,9 @@ class ResultScreenViewModel   (
     val siteImageListStateFlow: MutableStateFlow<List<SiteImage_TBL>>
             = repository.siteImageListStateFlow
 
+    val currentListDataStateFlow  = repository.currentListDataStateFlow
+
+
 
     init{
         val eventStateFlow = MutableSharedFlow<Event>()

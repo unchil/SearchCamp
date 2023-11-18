@@ -5,8 +5,8 @@
 
     <string name="mainmenu_search">검색</string>
     <string name="mainmenu_result">결과</string>
-    <string name="resultmenu_list">리스트</string>
-    <string name="resultmenu_map" >지도</string>
+    <string name="resultmenu_list">검색결과 리스트</string>
+    <string name="resultmenu_map" >검색결과 지도</string>
 
     <string name="main_detail" >상세보기</string>
 
@@ -33,5 +33,6 @@
 
     <string name="snackbar_3">검색된 데이터 </string>
     <string name="snackbar_2">검색 조건을 클리어 하였습니다.</string>
+    <string name="snackbar_4">결과 화면으로 이동 </string>
 
 </resources>

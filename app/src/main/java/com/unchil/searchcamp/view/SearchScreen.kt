@@ -211,12 +211,21 @@ fun SearchScreen(
                                        //-> nav
                               //         isVisibleResult = true
 
+                                       navController.navigateTo(SearchCampDestinations.resultNavScreen.createRoute(
+                                           administrativeDistrictSiDoCode = administrativeDistrictSiDoCode,
+                                           administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
+                                           searchTitle = searchTitle.value
+                                       ))
+
+
+/*
                                        navController.navigateTo(SearchCampDestinations.resultScreen.createRoute(
                                            administrativeDistrictSiDoCode = administrativeDistrictSiDoCode,
                                            administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
                                            searchTitle = searchTitle.value
                                        ))
 
+ */
 
 
                                    }

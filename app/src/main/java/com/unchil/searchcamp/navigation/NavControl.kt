@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PhotoLibrary
@@ -42,8 +44,8 @@ fun NavHostController.navigateToNotSave(route: String) =
 
 
 val resultScreens:List<SearchCampDestinations> = listOf(
-    SearchCampDestinations.listScreen,
-    SearchCampDestinations.mapScreen
+    SearchCampDestinations.resultListScreen,
+    SearchCampDestinations.resultMapScreen
 )
 
 val mainScreens:List<SearchCampDestinations> = listOf(
@@ -51,11 +53,7 @@ val mainScreens:List<SearchCampDestinations> = listOf(
     SearchCampDestinations.resultScreen
 )
 
-val detailScreens:List<SearchCampDestinations> = listOf(
-    SearchCampDestinations.introductionScreen,
-    SearchCampDestinations.imageScreen,
-//    SearchCampDestinations.homepageScreen
-)
+
 
 sealed class SearchCampDestinations(
     val route:String,
@@ -82,46 +80,58 @@ sealed class SearchCampDestinations(
         ):String{
          return    "resultScreen?${ARG_NAME_SiDoCode}=${administrativeDistrictSiDoCode}&${ARG_NAME_SiGunGu}=${administrativeDistrictSiGunGu}&${ARG_NAME_SearchTitle}=${searchTitle}"
         }
+
     }
 
 
-    object listScreen : SearchCampDestinations(
-        route = "listScreen",
-        name = R.string.resultmenu_list,
-        icon = Icons.AutoMirrored.Outlined.FormatListBulleted
-    )
 
-    object mapScreen : SearchCampDestinations(
-        route = "mapScreen",
+    object resultNavScreen : SearchCampDestinations(
+        route = "resultNavScreen?${ARG_NAME_SiDoCode}={$ARG_NAME_SiDoCode}&${ARG_NAME_SiGunGu}={$ARG_NAME_SiGunGu}&${ARG_NAME_SearchTitle}={$ARG_NAME_SearchTitle}",
+        name = R.string.mainmenu_result,
+        icon = Icons.AutoMirrored.Outlined.Article
+    ){
+        fun createRoute(
+            administrativeDistrictSiDoCode:String,
+            administrativeDistrictSiGunGu:String,
+            searchTitle:String? = null
+        ):String{
+            return    "resultNavScreen?${ARG_NAME_SiDoCode}=${administrativeDistrictSiDoCode}&${ARG_NAME_SiGunGu}=${administrativeDistrictSiGunGu}&${ARG_NAME_SearchTitle}=${searchTitle}"
+        }
+
+    }
+
+
+
+    object resultListScreen : SearchCampDestinations(
+        route = "resultListScreen?${ARG_NAME_SiDoCode}={$ARG_NAME_SiDoCode}&${ARG_NAME_SiGunGu}={$ARG_NAME_SiGunGu}&${ARG_NAME_SearchTitle}={$ARG_NAME_SearchTitle}",
+        name = R.string.resultmenu_list,
+        icon = Icons.AutoMirrored.Outlined.List
+    ){
+        fun createRoute(
+            administrativeDistrictSiDoCode:String,
+            administrativeDistrictSiGunGu:String,
+            searchTitle:String? = null
+        ):String{
+            return    "resultListScreen?${ARG_NAME_SiDoCode}=${administrativeDistrictSiDoCode}&${ARG_NAME_SiGunGu}=${administrativeDistrictSiGunGu}&${ARG_NAME_SearchTitle}=${searchTitle}"
+        }
+
+    }
+
+    object resultMapScreen : SearchCampDestinations(
+        route = "resultMapScreen?${ARG_NAME_SiDoCode}={$ARG_NAME_SiDoCode}&${ARG_NAME_SiGunGu}={$ARG_NAME_SiGunGu}&${ARG_NAME_SearchTitle}={$ARG_NAME_SearchTitle}",
         name = R.string.resultmenu_map,
         icon = Icons.Outlined.Map
-    )
+    ){
+        fun createRoute(
+            administrativeDistrictSiDoCode:String,
+            administrativeDistrictSiGunGu:String,
+            searchTitle:String? = null
+        ):String{
+            return    "resultMapScreen?${ARG_NAME_SiDoCode}=${administrativeDistrictSiDoCode}&${ARG_NAME_SiGunGu}=${administrativeDistrictSiGunGu}&${ARG_NAME_SearchTitle}=${searchTitle}"
+        }
 
-    object detailScreen : SearchCampDestinations(
-        route = "detailScreen",
-        name = R.string.main_detail,
-        icon = Icons.AutoMirrored.Outlined.Article
-    )
+    }
 
-
-    object introductionScreen : SearchCampDestinations(
-        route = "introductionScreen",
-        name = R.string.detailmenu_introduction,
-        icon = Icons.AutoMirrored.Outlined.Article
-    )
-
-
-    object imageScreen : SearchCampDestinations(
-        route = "imageScreen",
-        name = R.string.detailmenu_imageview,
-        icon = Icons.Outlined.PhotoLibrary
-    )
-
-    object homepageScreen : SearchCampDestinations(
-        route = "homepageScreen",
-        name = R.string.detailmenu_homepage,
-        icon = Icons.Outlined.Home
-    )
 
     companion object {
         const val ARG_NAME_SiDoCode:String = "administrativeDistrictSiDoCode"
