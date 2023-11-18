@@ -3,13 +3,6 @@ package com.unchil.searchcamp.view
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +35,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Publish
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -71,7 +63,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -85,6 +76,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -143,48 +135,6 @@ fun ResultScreen(
     ) {
 
 
-        val configuration = LocalConfiguration.current
-        var isPortrait by remember { mutableStateOf(false) }
-        isPortrait = when (configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-                true
-            }
-
-            else -> {
-                false
-            }
-        }
-
-
-        var columnWidth by remember { mutableStateOf(1f) }
-        var columnHeight by remember { mutableStateOf(1f) }
-
-        when (configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-                isPortrait = true
-                columnWidth = 1f
-                columnHeight = 1f
-            }
-
-            else -> {
-                isPortrait = false
-                columnWidth = 0.9f
-                columnHeight = 1f
-            }
-        }
-
-
-        val context = LocalContext.current
-
-        var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
-
-        LaunchedEffect(key1 = isConnect) {
-            while (!isConnect) {
-                delay(500)
-                isConnect = context.checkInternetConnected()
-            }
-        }
-
 
         val db = LocalSearchCampDB.current
 
@@ -199,501 +149,525 @@ fun ResultScreen(
 
         val campSiteStream = viewModel.campSiteListPaging.collectAsLazyPagingItems()
 
-        val lazyListState = rememberLazyListState()
-        val lazyGridState = rememberLazyGridState()
-
-        val sheetState = SheetState(
-            skipPartiallyExpanded = false,
-            density = LocalDensity.current,
-            initialValue = SheetValue.PartiallyExpanded,
-            skipHiddenState = true
-        )
-
-        val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-        val coroutineScope = rememberCoroutineScope()
-        val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
-        val sheetPeekHeightValue by remember { mutableStateOf(40.dp) }
-      //  var isVisibleSiteDescriptionView by remember { mutableStateOf(false) }
-
-        val density = LocalDensity.current
-
-        var selectedScreen by rememberSaveable { mutableIntStateOf(0) }
+        var isLoading by remember { mutableStateOf(true) }
 
 
-        val dragHandlerAction:()->Unit = {
-            coroutineScope.launch {
-                if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
-                    scaffoldState.bottomSheetState.expand()
-                } else {
-                    scaffoldState.bottomSheetState.partialExpand()
-                }
+        when (campSiteStream.loadState.source.refresh) {
+            is LoadState.Error -> {
+                isLoading = false
+                ErrorProgressView()
             }
-        }
+            LoadState.Loading -> {
+                SearchingProgressIndicator(isLoading)
+            }
+            is LoadState.NotLoading -> {
+                isLoading = false
+
+                val configuration = LocalConfiguration.current
+                var isPortrait by remember { mutableStateOf(false) }
+                isPortrait = when (configuration.orientation) {
+                    Configuration.ORIENTATION_PORTRAIT -> {
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+
+                var columnWidth by remember { mutableStateOf(1f) }
+                var columnHeight by remember { mutableStateOf(1f) }
+
+                when (configuration.orientation) {
+                    Configuration.ORIENTATION_PORTRAIT -> {
+                        isPortrait = true
+                        columnWidth = 1f
+                        columnHeight = 1f
+                    }
+
+                    else -> {
+                        isPortrait = false
+                        columnWidth = 0.9f
+                        columnHeight = 1f
+                    }
+                }
 
 
-        var isFirstTab by mutableStateOf(true)
-
-        val onClickHandler: (data: SiteDefaultData) -> Unit = {
-            currentCampSiteData.value = it
-            isFirstTab = true
-            dragHandlerAction.invoke()
-        }
+                val context = LocalContext.current
 
 
-        val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
 
-            currentCampSiteData.value = it
+                var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
 
-            if (isConnect) {
-                viewModel.onEvent(
-                    ResultScreenViewModel.Event.RecvGoCampingData(
-                        servicetype = GoCampingService.SITEIMAGE,
-                        contentId = it.contentId
-                    )
+                LaunchedEffect(key1 = isConnect) {
+                    while (!isConnect) {
+                        delay(500)
+                        isConnect = context.checkInternetConnected()
+                    }
+
+
+                }
+
+
+
+
+                val lazyListState = rememberLazyListState()
+                val lazyGridState = rememberLazyGridState()
+
+                val sheetState = SheetState(
+                    skipPartiallyExpanded = false,
+                    density = LocalDensity.current,
+                    initialValue = SheetValue.PartiallyExpanded,
+                    skipHiddenState = true
                 )
-            }
-            isFirstTab = false
-            dragHandlerAction.invoke()
-        }
 
-        val hapticFeedback = LocalHapticFeedback.current
+                val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+                val coroutineScope = rememberCoroutineScope()
+                val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
+                val sheetPeekHeightValue by remember { mutableStateOf(40.dp) }
+                //  var isVisibleSiteDescriptionView by remember { mutableStateOf(false) }
 
-        var isHapticProcessing by remember { mutableStateOf(false) }
-
-        LaunchedEffect(key1 = isHapticProcessing) {
-            if (isHapticProcessing) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                isHapticProcessing = false
-            }
-        }
+                val density = LocalDensity.current
 
 
-        BottomSheetScaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
-            scaffoldState = scaffoldState,
-            sheetPeekHeight = sheetPeekHeightValue,
-            sheetShape = ShapeDefaults.Small,
-            sheetDragHandle = {
-                Box(
-                    modifier = Modifier
-                        .height(sheetPeekHeightValue)
-                        .fillMaxWidth()
-                        .background(color = Color.LightGray.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .scale(1f)
-                            .clickable {
-                                dragHandlerAction.invoke()
-                            },
-                        imageVector =
-                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded)
-                            Icons.Outlined.KeyboardArrowDown
-                        else Icons.Outlined.KeyboardArrowUp,
-                        contentDescription = "SiteDetailScreen",
-                    )
-                }
-            },
-            sheetContent = {
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(1f),
-                    contentAlignment = Alignment.Center
 
-                ) {
-                    currentCampSiteData.value?.let {
-                        if (isFirstTab) {
-                            SiteIntroductionView(it)
+                val dragHandlerAction:()->Unit = {
+                    coroutineScope.launch {
+                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
+                            scaffoldState.bottomSheetState.expand()
                         } else {
-                            SiteImagePagerView(viewModel = viewModel)
+                            scaffoldState.bottomSheetState.partialExpand()
                         }
                     }
                 }
-            }
-        ) { innerPadding ->
-
-            Box(
-                modifier = Modifier.padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
 
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                var isFirstTab by mutableStateOf(true)
 
-                    if (isPortrait) {
+                val onClickHandler: (data: SiteDefaultData) -> Unit = {
+                    currentCampSiteData.value = it
+                    isFirstTab = true
+                    dragHandlerAction.invoke()
+                }
 
-                        BottomNavigation(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                                .shadow(elevation = 1.dp),
-                            backgroundColor = MaterialTheme.colorScheme.background
-                        ) {
 
-                            BottomNavigationItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Replay,
-                                        contentDescription = "",
-                                        tint = Color.LightGray
-                                    )
-                                },
-                                label = {
-
-                                    Text(
-                                        "",
-                                        modifier = Modifier,
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = Color.LightGray
-                                    )
-
-                                },
-                                alwaysShowLabel = false,
-                                selected = false,
-                                onClick = {
-                                    navController.popBackStack()
-                                    //     navController.navigateTo(SearchCampDestinations.searchScreen.route)
-                                    //            isHapticProcessing = true
-                                },
-                                selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
+                    currentCampSiteData.value = it
+                    if (isConnect) {
+                        viewModel.onEvent(
+                            ResultScreenViewModel.Event.RecvGoCampingData(
+                                servicetype = GoCampingService.SITEIMAGE,
+                                contentId = it.contentId
                             )
-
-                            resultScreens.forEachIndexed { index, it ->
-                                BottomNavigationItem(
-                                    icon = {
-                                        Icon(
-                                            imageVector = it.icon ?: Icons.Outlined.Info,
-                                            contentDescription = context.resources.getString(it.name),
-                                            tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                        )
-                                    },
-                                    label = {
-
-                                        Text(
-                                            context.resources.getString(it.name),
-                                            modifier = Modifier,
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                        )
-
-                                    },
-                                    alwaysShowLabel = false,
-                                    selected = selectedScreen == index,
-                                    onClick = {
-                                        selectedScreen = index
-                                        //            isHapticProcessing = true
-                                    },
-                                    selectedContentColor = MaterialTheme.colorScheme.onSurface,
-                                    //      unselectedContentColor = Color.Gray
-                                )
-                            }
-                        }
-
+                        )
                     }
+                    isFirstTab = false
+                    dragHandlerAction.invoke()
+                }
 
-                    Row(
-                        modifier = Modifier.fillMaxSize(1f),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                val hapticFeedback = LocalHapticFeedback.current
+
+                var isHapticProcessing by remember { mutableStateOf(false) }
+
+                LaunchedEffect(key1 = isHapticProcessing) {
+                    if (isHapticProcessing) {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        isHapticProcessing = false
+                    }
+                }
+
+                var selectedScreen by rememberSaveable { mutableIntStateOf(0) }
+
+                BottomSheetScaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding(),
+                    scaffoldState = scaffoldState,
+                    sheetPeekHeight = sheetPeekHeightValue,
+                    sheetShape = ShapeDefaults.Small,
+                    sheetDragHandle = {
+                        Box(
+                            modifier = Modifier
+                                .height(sheetPeekHeightValue)
+                                .fillMaxWidth()
+                                .background(color = Color.LightGray.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .scale(1f)
+                                    .clickable {
+                                        dragHandlerAction.invoke()
+                                    },
+                                imageVector =
+                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded)
+                                    Icons.Outlined.KeyboardArrowDown
+                                else Icons.Outlined.KeyboardArrowUp,
+                                contentDescription = "SiteDetailScreen",
+                            )
+                        }
+                    },
+                    sheetContent = {
 
                         Box(
-                            modifier = Modifier.fillMaxWidth(columnWidth)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(1f),
+                            contentAlignment = Alignment.Center
+
+                        ) {
+                            currentCampSiteData.value?.let {
+                                if (isFirstTab) {
+                                    SiteIntroductionView(it)
+                                } else {
+                                    SiteImagePagerView(viewModel = viewModel)
+                                }
+                            }
+                        }
+                    }
+                ) { innerPadding ->
+
+                    Box(
+                        modifier = Modifier.padding(innerPadding),
+                        contentAlignment = Alignment.Center,
+                    ) {
+
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
 
-                            when (resultScreens[selectedScreen]) {
-                                SearchCampDestinations.listScreen -> {
-
-                                    if (isPortrait) {
-                                        LazyColumn(
-                                            modifier = Modifier
-                                                .align(Alignment.TopCenter),
-                                            state = lazyListState,
-                                            userScrollEnabled = true,
-                                            verticalArrangement = Arrangement.SpaceBetween,
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            contentPadding = PaddingValues(
-                                                horizontal = 0.dp,
-                                                vertical = 1.dp
-                                            )
-                                        ) {
-
-                                            items(campSiteStream.itemCount) {
-
-                                                campSiteStream[it]?.let {
-
-                                                    val siteDefaultData =
-                                                        CampSite_TBL.toSiteDefaultData(it)
-                                                    SiteDefaultView(
-                                                        siteData = siteDefaultData,
-                                                        onClick = {
-                                                            onClickHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        },
-                                                        onClickPhoto = {
-                                                            onClickPhotoHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        },
-                                                        onLongClick = {
-                                                            onClickHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        }
-                                                    )
-
-                                                    Spacer(modifier = Modifier.padding(bottom = 1.dp))
-
-                                                }
 
 
-                                            }
+                            if (isPortrait) {
 
-                                        }
+                                BottomNavigation(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(60.dp)
+                                        .shadow(elevation = 1.dp),
+                                    backgroundColor = MaterialTheme.colorScheme.background
+                                ) {
 
-                                    } else {
-                                        LazyVerticalGrid(
-                                            columns = GridCells.Fixed(2),
-                                            modifier = Modifier
-                                                .align(Alignment.TopCenter),
-                                            state = lazyGridState,
-                                            userScrollEnabled = true,
-                                            verticalArrangement = Arrangement.SpaceBetween,
-                                            horizontalArrangement = Arrangement.Center,
-                                            contentPadding = PaddingValues(
-                                                horizontal = 2.dp,
-                                                vertical = 2.dp
-                                            )
-                                        ) {
-
-                                            items(campSiteStream.itemCount) {
-
-                                                campSiteStream[it]?.let {
-
-                                                    val siteDefaultData =
-                                                        CampSite_TBL.toSiteDefaultData(it)
-                                                    SiteDefaultView(
-                                                        siteData = siteDefaultData,
-                                                        onClick = {
-                                                            onClickHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        },
-                                                        onClickPhoto = {
-                                                            onClickPhotoHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        },
-                                                        onLongClick = {
-                                                            onClickHandler.invoke(
-                                                                siteDefaultData
-                                                            )
-                                                        }
-                                                    )
-
-                                                    Spacer(modifier = Modifier.padding(10.dp))
-
-                                                }
-
-
-                                            }
-
-                                        }
-
-                                    }
-
-
-
-                                    if (isPortrait) {
-                                        UpButton(
-                                            modifier = Modifier
-                                                .padding(end = 10.dp, bottom = 30.dp)
-                                                .align(Alignment.BottomEnd),
-                                            listState = lazyListState
-                                        )
-                                    } else {
-                                        UpButtonGrid(
-                                            modifier = Modifier
-                                                .padding(end = 10.dp, bottom = 10.dp)
-                                                .align(Alignment.BottomEnd),
-                                            listState = lazyGridState
-                                        )
-                                    }
-
-
-                                }
-
-                                SearchCampDestinations.mapScreen -> {
-                                    GoogleMapView(
-                                        onClickHandler = {
-                                            onClickHandler.invoke(it)
-                                        },
-                                        onClickPhoto = {
-                                            onClickPhotoHandler.invoke(it)
-                                        },
-                                        onLongClickHandler = {
-                                            onClickHandler.invoke(
-                                                it
-                                            )
-                                        },
-                                        onSetSiteDefaultData = {
-                                            currentCampSiteData.value = it
-                                        }
-                                    )
-                                }
-
-                                else -> {}
-                            }
-
-
-                        }
-
-
-                        if (!isPortrait) {
-                            NavigationRail(
-                                modifier = Modifier
-                                    .shadow(elevation = 1.dp)
-                                    .width(80.dp)
-                                    .fillMaxHeight(),
-                            ) {
-
-                                NavigationRailItem(
-                                    icon = {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Replay,
-                                            contentDescription = "",
-                                            tint = Color.LightGray
-                                        )
-                                    },
-                                    label = {
-                                        Text(
-                                            "",
-                                            modifier = Modifier,
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = Color.LightGray
-                                        )
-
-                                    },
-                                    alwaysShowLabel = false,
-                                    selected = false,
-                                    onClick = {
-                                        navController.popBackStack()
-                                    },
-                                )
-
-                                Spacer(modifier = Modifier.fillMaxHeight(0.15f))
-
-                                resultScreens.forEachIndexed { index, it ->
-                                    NavigationRailItem(
+                                    BottomNavigationItem(
                                         icon = {
                                             Icon(
-                                                imageVector = it.icon ?: Icons.Outlined.Info,
-                                                contentDescription = context.resources.getString(it.name),
-                                                tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                imageVector = Icons.Outlined.Replay,
+                                                contentDescription = "",
+                                                tint = Color.LightGray
                                             )
                                         },
                                         label = {
 
                                             Text(
-                                                context.resources.getString(it.name),
+                                                "",
                                                 modifier = Modifier,
                                                 textAlign = TextAlign.Center,
                                                 style = MaterialTheme.typography.titleSmall,
-                                                color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                color = Color.LightGray
                                             )
 
                                         },
                                         alwaysShowLabel = false,
-                                        selected = selectedScreen == index,
+                                        selected = false,
                                         onClick = {
-                                            selectedScreen = index
+                                            navController.popBackStack()
+                                            //     navController.navigateTo(SearchCampDestinations.searchScreen.route)
                                             //            isHapticProcessing = true
                                         },
-
-                                        //      unselectedContentColor = Color.Gray
+                                        selectedContentColor = MaterialTheme.colorScheme.onSurface,
                                     )
+
+                                    resultScreens.forEachIndexed { index, it ->
+                                        BottomNavigationItem(
+                                            icon = {
+                                                Icon(
+                                                    imageVector = it.icon ?: Icons.Outlined.Info,
+                                                    contentDescription = context.resources.getString(it.name),
+                                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                )
+                                            },
+                                            label = {
+
+                                                Text(
+                                                    context.resources.getString(it.name),
+                                                    modifier = Modifier,
+                                                    textAlign = TextAlign.Center,
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                )
+
+                                            },
+                                            alwaysShowLabel = false,
+                                            selected = selectedScreen == index,
+                                            onClick = {
+                                                selectedScreen = index
+                                                //            isHapticProcessing = true
+                                            },
+                                            selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                                            //      unselectedContentColor = Color.Gray
+                                        )
+                                    }
+                                }
+
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxSize(1f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(columnWidth)
+                                ) {
+
+                                    when (resultScreens[selectedScreen]) {
+                                        SearchCampDestinations.listScreen -> {
+
+                                            if (isPortrait) {
+                                                LazyColumn(
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopCenter),
+                                                    state = lazyListState,
+                                                    userScrollEnabled = true,
+                                                    verticalArrangement = Arrangement.SpaceBetween,
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 0.dp,
+                                                        vertical = 1.dp
+                                                    )
+                                                ) {
+
+                                                    items(campSiteStream.itemCount) {
+
+                                                        campSiteStream[it]?.let {
+
+                                                            val siteDefaultData =
+                                                                CampSite_TBL.toSiteDefaultData(it)
+                                                            SiteDefaultView(
+                                                                siteData = siteDefaultData,
+                                                                onClick = {
+                                                                    onClickHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                },
+                                                                onClickPhoto = {
+                                                                    onClickPhotoHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                },
+                                                                onLongClick = {
+                                                                    onClickHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                }
+                                                            )
+
+                                                            Spacer(modifier = Modifier.padding(bottom = 1.dp))
+
+                                                        }
+
+
+                                                    }
+
+                                                }
+
+                                            } else {
+                                                LazyVerticalGrid(
+                                                    columns = GridCells.Fixed(2),
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopCenter),
+                                                    state = lazyGridState,
+                                                    userScrollEnabled = true,
+                                                    verticalArrangement = Arrangement.SpaceBetween,
+                                                    horizontalArrangement = Arrangement.Center,
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 2.dp,
+                                                        vertical = 2.dp
+                                                    )
+                                                ) {
+
+                                                    items(campSiteStream.itemCount) {
+
+                                                        campSiteStream[it]?.let {
+
+                                                            val siteDefaultData =
+                                                                CampSite_TBL.toSiteDefaultData(it)
+                                                            SiteDefaultView(
+                                                                siteData = siteDefaultData,
+                                                                onClick = {
+                                                                    onClickHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                },
+                                                                onClickPhoto = {
+                                                                    onClickPhotoHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                },
+                                                                onLongClick = {
+                                                                    onClickHandler.invoke(
+                                                                        siteDefaultData
+                                                                    )
+                                                                }
+                                                            )
+
+                                                            Spacer(modifier = Modifier.padding(10.dp))
+
+                                                        }
+
+
+                                                    }
+
+                                                }
+
+                                            }
+
+
+
+                                            if (isPortrait) {
+                                                UpButton(
+                                                    modifier = Modifier
+                                                        .padding(end = 10.dp, bottom = 30.dp)
+                                                        .align(Alignment.BottomEnd),
+                                                    listState = lazyListState
+                                                )
+                                            } else {
+                                                UpButtonGrid(
+                                                    modifier = Modifier
+                                                        .padding(end = 10.dp, bottom = 10.dp)
+                                                        .align(Alignment.BottomEnd),
+                                                    listState = lazyGridState
+                                                )
+                                            }
+
+
+                                        }
+
+                                        SearchCampDestinations.mapScreen -> {
+                                            GoogleMapView(
+                                                onClickHandler = {
+                                                    onClickHandler.invoke(it)
+                                                },
+                                                onClickPhoto = {
+                                                    onClickPhotoHandler.invoke(it)
+                                                },
+                                                onLongClickHandler = {
+                                                    onClickHandler.invoke(
+                                                        it
+                                                    )
+                                                },
+                                                onSetSiteDefaultData = {
+                                                    currentCampSiteData.value = it
+                                                }
+                                            )
+                                        }
+
+                                        else -> {}
+                                    }
+
+
+                                }
+
+
+                                if (!isPortrait) {
+                                    NavigationRail(
+                                        modifier = Modifier
+                                            .shadow(elevation = 1.dp)
+                                            .width(80.dp)
+                                            .fillMaxHeight(),
+                                    ) {
+
+                                        NavigationRailItem(
+                                            icon = {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.Replay,
+                                                    contentDescription = "",
+                                                    tint = Color.LightGray
+                                                )
+                                            },
+                                            label = {
+                                                Text(
+                                                    "",
+                                                    modifier = Modifier,
+                                                    textAlign = TextAlign.Center,
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = Color.LightGray
+                                                )
+
+                                            },
+                                            alwaysShowLabel = false,
+                                            selected = false,
+                                            onClick = {
+                                                navController.popBackStack()
+                                            },
+                                        )
+
+                                        Spacer(modifier = Modifier.fillMaxHeight(0.15f))
+
+                                        resultScreens.forEachIndexed { index, it ->
+                                            NavigationRailItem(
+                                                icon = {
+                                                    Icon(
+                                                        imageVector = it.icon ?: Icons.Outlined.Info,
+                                                        contentDescription = context.resources.getString(it.name),
+                                                        tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                    )
+                                                },
+                                                label = {
+
+                                                    Text(
+                                                        context.resources.getString(it.name),
+                                                        modifier = Modifier,
+                                                        textAlign = TextAlign.Center,
+                                                        style = MaterialTheme.typography.titleSmall,
+                                                        color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                                    )
+
+                                                },
+                                                alwaysShowLabel = false,
+                                                selected = selectedScreen == index,
+                                                onClick = {
+                                                    selectedScreen = index
+                                                    //            isHapticProcessing = true
+                                                },
+
+                                                //      unselectedContentColor = Color.Gray
+                                            )
+                                        }
+
+
+                                    }
                                 }
 
 
                             }
-                        }
 
 
-                    }
-
-
-                }// Column
-
-
-                /*
-                AnimatedVisibility(
-                    visible = isVisibleSiteDescriptionView
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.White.copy(alpha = 0.9f))
-                    )
-                }
-
-                AnimatedVisibility(
-                    visible = isVisibleSiteDescriptionView,
-                    enter = slideInVertically {
-                        // Slide in from 40 dp from the top.
-                        with(density) { 40.dp.roundToPx() }
-                    } + expandVertically(
-                        // Expand from the top.
-                        expandFrom = Alignment.Top
-                    ) + fadeIn(
-                        // Fade in with the initial alpha of 0.3f.
-                        initialAlpha = 0.3f
-                    ),
-                    exit = slideOutVertically() + shrinkVertically() + fadeOut()
-                ) {
-
-                    currentCampSiteData.value?.let {
-
-                        Box(
-                            modifier = Modifier
-                                .clip(ShapeDefaults.ExtraSmall)
-                                .padding(horizontal = 10.dp)
-
-                        ) {
-                            SiteDescriptionView(
-                                siteData = it,
-                                onEvent = {
-                                    isVisibleSiteDescriptionView = false
-                                })
-                        }
-
-
-                    }
-                }
-
-                 */
+                        }// Column
 
 
 
-            }// Box
 
-        }// BottomSheetScaffold
+                    }// Box
+
+                }// BottomSheetScaffold
 
 
-    }
+
+
+
+            }
+
+
+        }// when
+
+
+    } // Permission
 
 }
 
@@ -794,6 +768,33 @@ fun UpButtonGrid(
         }
     }
 }
+
+@Composable
+fun SearchingProgressIndicator(
+    isVisibility:Boolean
+){
+    if(isVisibility) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
+}
+
+@Composable
+fun ErrorProgressView(){
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text( "Error",
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+}
+
+
+
 
 
 

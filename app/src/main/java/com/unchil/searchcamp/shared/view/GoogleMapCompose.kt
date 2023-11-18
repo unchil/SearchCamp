@@ -194,6 +194,8 @@ fun GoogleMapView(
                         isSetCurrentLocation = true
                     }
                 }
+            }else {
+                isSetCurrentLocation = true
             }
         }
 
@@ -217,286 +219,281 @@ fun GoogleMapView(
     }
 
 
-// No ~~~~ remember
-val markerState =  MarkerState( position = currentLocation )
-val defaultCameraPosition =  CameraPosition.fromLatLngZoom( currentLocation, 12f)
-val cameraPositionState =  CameraPositionState(position = defaultCameraPosition)
+    // No ~~~~ remember
+    val markerState =  MarkerState( position = currentLocation )
+    val defaultCameraPosition =  CameraPosition.fromLatLngZoom( currentLocation, 12f)
+    val cameraPositionState =  CameraPositionState(position = defaultCameraPosition)
 
 
-val isUsableDarkMode by remember { mutableStateOf(false) }
+    val isUsableDarkMode by remember { mutableStateOf(false) }
 
-var mapProperties by remember {
-mutableStateOf(
-    MapProperties(
-        mapType = MapType.NORMAL,
-        isMyLocationEnabled = true,
-        mapStyleOptions = if(isUsableDarkMode) {
-            MapStyleOptions.loadRawResourceStyle(
-                context,
-                R.raw.mapstyle_night
-            )
-        } else { null }
-    )
-)
-}
-
-val uiSettings by remember {
-mutableStateOf(
-    MapUiSettings(
-        compassEnabled = true,
-        myLocationButtonEnabled = true,
-        mapToolbarEnabled = true,
-        zoomControlsEnabled = false
-
-    )
-)
-}
-
-
-val onMapLongClickHandler: (LatLng) -> Unit = {
-//       markerState.position = it
-//        cameraPositionState =   CameraPositionState(position = CameraPosition.fromLatLngZoom(it, 12f))
-}
-
-var mapTypeIndex by rememberSaveable { mutableStateOf(0) }
-
-var isVisibleSiteDefaultView by remember { mutableStateOf(false) }
-var currentSiteDefaultData:SiteDefaultData? by remember {
-mutableStateOf(null)
-}
-
-
-
-Scaffold(
-modifier = Modifier.statusBarsPadding(),
-topBar = {},
-bottomBar = {},
-snackbarHost = {},
-containerColor = MaterialTheme.colorScheme.surface,
-contentColor = MaterialTheme.colorScheme.onSurface,
-) {
-
-Box(
-    Modifier
-        .fillMaxSize()
-        .padding(it),
-    contentAlignment = Alignment.BottomCenter,
-
-
-) {
-
-    GoogleMap(
-        cameraPositionState = cameraPositionState,
-        properties = mapProperties,
-        uiSettings = uiSettings,
-        onMapLongClick = onMapLongClickHandler,
-        onMapClick = {
-            isVisibleSiteDefaultView = false
-        }
-        ) {
-
-
-
-
-        MapEffect(key1 = isGoCampSiteLocation, key2 = isSetCurrentLocation){ googleMap ->
-
-            if(isSetCurrentLocation){
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16f))
-                googleMap.animateCamera(CameraUpdateFactory.zoomIn())
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(8f), 2000, null)
-
-                val cameraPosition = CameraPosition.Builder()
-                    .target(campSiteBound(currentSiteDataList.value).center)
-                    .zoom(10f)
-                    .bearing(0f)
-                    .tilt(30f)
-                    .build()
-
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-
-                isSetCurrentLocation = false
-            }
-
-            if(isGoCampSiteLocation) {
-
-                val cameraPosition = CameraPosition.Builder()
-                    .target(campSiteBound(currentSiteDataList.value).center)
-                    .zoom(10f)
-                    .bearing(0f)
-                    .tilt(30f)
-                    .build()
-
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-
-                isGoCampSiteLocation = false
-            }
-
-
-
-        }
-
-        Marker(
-            state = markerState,
-            title = "lat/lng:(${String.format("%.5f", markerState.position.latitude)},${String.format("%.5f", markerState.position.longitude)})",
+    var mapProperties by remember {
+    mutableStateOf(
+        MapProperties(
+            mapType = MapType.NORMAL,
+            isMyLocationEnabled = true,
+            mapStyleOptions = if(isUsableDarkMode) {
+                MapStyleOptions.loadRawResourceStyle(
+                    context,
+                    R.raw.mapstyle_night
+                )
+            } else { null }
         )
-
-
-        currentSiteDataList.value.forEach { it ->
-
-            val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
-            Marker(
-                state = state,
-                title =  it.facltNm,
-                onClick = {marker ->
-                    isVisibleSiteDefaultView = true
-                    currentSiteDefaultData = CampSite_TBL.toSiteDefaultData(it)
-                    onSetSiteDefaultData(CampSite_TBL.toSiteDefaultData(it))
-                    false
-                },
-                onInfoWindowClick = {
-                    isVisibleSiteDefaultView = false
-                }
-            )
-
-        }
-
-    }
-
-
-    Column(
-        modifier = Modifier
-            .align(Alignment.CenterStart)
-            .padding(start = 10.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-                shape = ShapeDefaults.ExtraSmall
-            )
-    ) {
-
-
-        IconButton(
-            onClick = {
-                hapticProcessing()
-                isDarkMode = !isDarkMode
-                if (isDarkMode) {
-                    mapProperties = mapProperties.copy(
-                        mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.mapstyle_night
-                        )
-                    )
-                } else {
-                    mapProperties = mapProperties.copy(mapStyleOptions = null)
-                }
-            }
-        ) {
-            Icon(
-                modifier = Modifier.scale(1f),
-                imageVector = if (isDarkMode) Icons.Outlined.BedtimeOff else Icons.Outlined.DarkMode,
-                contentDescription = "DarkMode",
-            )
-        }
-
-
-        IconButton(
-            onClick = {
-                hapticProcessing()
-                isGoCampSiteLocation = true
-            }
-        ) {
-            Icon(
-                modifier = Modifier.scale(1f),
-                imageVector = Icons.Outlined.ModeOfTravel,
-                contentDescription = "GoCampSiteLocationl",
-            )
-        }
-
-
-    }
-
-
-    ScaleBar(
-        modifier = Modifier
-            .padding(bottom = 30.dp)
-            .align(Alignment.BottomStart),
-        cameraPositionState = cameraPositionState
     )
-
-    Column(
-        modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .padding(end = 10.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-                shape = ShapeDefaults.ExtraSmall
-            )
-    ) {
-        MapTypeMenuList.forEachIndexed { index, it ->
-            AnimatedVisibility(
-                visible = true,
-            ) {
-                IconButton(
-                    onClick = {
-                        hapticProcessing()
-                        val mapType = MapType.values().first { mapType ->
-                            mapType.name == it.name
-                        }
-                        mapProperties = mapProperties.copy(mapType = mapType)
-                        mapTypeIndex = index
-
-                    }) {
-
-                    Icon(
-                        imageVector = it.getDesc().first,
-                        contentDescription = it.name,
-                    )
-                }
-            }
-        }
     }
 
-    currentSiteDefaultData?.let {
-        AnimatedVisibility(visible = isVisibleSiteDefaultView) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(columnWidth)
-                    .padding(bottom = bottomPadding)
-                    .padding(horizontal = 20.dp)
-                    .align(Alignment.BottomCenter),
-                contentAlignment = Alignment.Center,
+    val uiSettings by remember {
+    mutableStateOf(
+        MapUiSettings(
+            compassEnabled = true,
+            myLocationButtonEnabled = true,
+            mapToolbarEnabled = true,
+            zoomControlsEnabled = false
+
+        )
+    )
+    }
+
+
+    val onMapLongClickHandler: (LatLng) -> Unit = {
+    //       markerState.position = it
+    //        cameraPositionState =   CameraPositionState(position = CameraPosition.fromLatLngZoom(it, 12f))
+    }
+
+    var mapTypeIndex by rememberSaveable { mutableStateOf(0) }
+
+    var isVisibleSiteDefaultView by remember { mutableStateOf(false) }
+    var currentSiteDefaultData:SiteDefaultData? by remember {
+        mutableStateOf(null)
+    }
+
+
+
+    Scaffold(
+        modifier = Modifier.statusBarsPadding(),
+        topBar = {},
+        bottomBar = {},
+        snackbarHost = {},
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(it),
+            contentAlignment = Alignment.BottomCenter,
+
+
+        ) {
+
+            GoogleMap(
+                cameraPositionState = cameraPositionState,
+                properties = mapProperties,
+                uiSettings = uiSettings,
+                onMapLongClick = onMapLongClickHandler,
+                onMapClick = {
+                    isVisibleSiteDefaultView = false }
             ) {
 
-                SiteDefaultView(
-                    siteData = it,
-                    onClick = {
-                        hapticProcessing()
-                        onClickHandler.invoke(it)
-                    },
-                    onClickPhoto = {
-                                  onClickPhoto.invoke(it)
-                    },
-                    onLongClick = {
-                        hapticProcessing()
-                        onLongClickHandler(it)
-                    }
+                Marker(
+                    state = markerState,
+                    title = "lat/lng:(${String.format("%.5f", markerState.position.latitude)},${String.format("%.5f", markerState.position.longitude)})",
                 )
 
 
+                MapEffect(key1 = isGoCampSiteLocation, key2 = isSetCurrentLocation){ googleMap ->
+
+                    if(isSetCurrentLocation){
+
+                        val cameraPosition = CameraPosition.Builder()
+                            .target(campSiteBound(currentSiteDataList.value).center)
+                            .zoom(10f)
+                            .bearing(0f)
+                            .tilt(30f)
+                            .build()
+
+                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+
+                        isSetCurrentLocation = false
+                    }
+
+                    if(isGoCampSiteLocation) {
+
+                        val cameraPosition = CameraPosition.Builder()
+                            .target(campSiteBound(currentSiteDataList.value).center)
+                            .zoom(10f)
+                            .bearing(0f)
+                            .tilt(30f)
+                            .build()
+
+                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+
+                        isGoCampSiteLocation = false
+                    }
+
+
+
+                }
+
+
+
+                currentSiteDataList.value.forEach { it ->
+
+                    val state = MarkerState(position = LatLng(it.mapY.toDouble(), it.mapX.toDouble()))
+                    Marker(
+                        state = state,
+                        title =  it.facltNm,
+                        onClick = {marker ->
+                            isVisibleSiteDefaultView = true
+                            currentSiteDefaultData = CampSite_TBL.toSiteDefaultData(it)
+                            onSetSiteDefaultData(CampSite_TBL.toSiteDefaultData(it))
+                            false
+                        },
+                        onInfoWindowClick = {
+                            isVisibleSiteDefaultView = false
+                        }
+                    )
+
+                }
+
             }
 
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 10.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
+                        shape = ShapeDefaults.ExtraSmall
+                    )
+            ) {
+
+
+                IconButton(
+                    onClick = {
+                        hapticProcessing()
+                        isDarkMode = !isDarkMode
+                        if (isDarkMode) {
+                            mapProperties = mapProperties.copy(
+                                mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
+                                    context,
+                                    R.raw.mapstyle_night
+                                )
+                            )
+                        } else {
+                            mapProperties = mapProperties.copy(mapStyleOptions = null)
+                        }
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.scale(1f),
+                        imageVector = if (isDarkMode) Icons.Outlined.BedtimeOff else Icons.Outlined.DarkMode,
+                        contentDescription = "DarkMode",
+                    )
+                }
+
+
+                IconButton(
+                    onClick = {
+                        hapticProcessing()
+                        isGoCampSiteLocation = true
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.scale(1f),
+                        imageVector = Icons.Outlined.ModeOfTravel,
+                        contentDescription = "GoCampSiteLocationl",
+                    )
+                }
+
+
+            }
+
+
+            ScaleBar(
+                modifier = Modifier
+                    .padding(bottom = 30.dp)
+                    .align(Alignment.BottomStart),
+                cameraPositionState = cameraPositionState
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 10.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
+                        shape = ShapeDefaults.ExtraSmall
+                    )
+            ) {
+                MapTypeMenuList.forEachIndexed { index, it ->
+                    AnimatedVisibility(
+                        visible = true,
+                    ) {
+                        IconButton(
+                            onClick = {
+                                hapticProcessing()
+                                val mapType = MapType.values().first { mapType ->
+                                    mapType.name == it.name
+                                }
+                                mapProperties = mapProperties.copy(mapType = mapType)
+                                mapTypeIndex = index
+
+                            }) {
+
+                            Icon(
+                                imageVector = it.getDesc().first,
+                                contentDescription = it.name,
+                            )
+                        }
+                    }
+                }
+            }
+
+            currentSiteDefaultData?.let {
+                AnimatedVisibility(visible = isVisibleSiteDefaultView) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(columnWidth)
+                            .padding(bottom = bottomPadding)
+                            .padding(horizontal = 20.dp)
+                            .align(Alignment.BottomCenter),
+                        contentAlignment = Alignment.Center,
+                    ) {
+
+                        SiteDefaultView(
+                            siteData = it,
+                            onClick = {
+                                hapticProcessing()
+                                onClickHandler.invoke(it)
+                            },
+                            onClickPhoto = {
+                                          onClickPhoto.invoke(it)
+                            },
+                            onLongClick = {
+                                hapticProcessing()
+                                onLongClickHandler(it)
+                            }
+                        )
+
+
+                    }
+
+                }
+            }
+
+
+
+
+
         }
+
+        }
+
+
     }
-
-
-
-
-
-}
-
-}
-
-
-}
 
 }
 
