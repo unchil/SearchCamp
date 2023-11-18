@@ -566,38 +566,6 @@ fun ResultMapScreen(
                         }
                     }
 
-                    /*
-                    currentSiteDefaultData?.let {
-                        AnimatedVisibility(visible = isVisibleSiteDefaultView) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(columnWidth)
-                                    .padding(bottom = bottomPadding)
-                                    .padding(horizontal = 20.dp)
-                                    .align(Alignment.BottomCenter),
-                                contentAlignment = Alignment.Center,
-                            ) {
-
-                                SiteDefaultView(
-                                    siteData = it,
-                                    onClick = {
-                                        onClickHandler.invoke(it)
-                                    },
-                                    onClickPhoto = {
-                                      onClickPhotoHandler.invoke(it)
-                                    },
-                                    onLongClick = {
-                                        onClickHandler.invoke(it)
-                                    }
-                                )
-
-
-                            }
-
-                        }
-                    }
-*/
-
 
                         currentSiteDefaultData?.let {
 
