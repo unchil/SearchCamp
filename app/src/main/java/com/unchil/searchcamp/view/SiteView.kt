@@ -432,6 +432,8 @@ fun SiteIntroductionView(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
+
+        /*
         Row(
             modifier = Modifier,
             horizontalArrangement = Arrangement.Center,
@@ -472,6 +474,8 @@ fun SiteIntroductionView(
             }
 
         }
+
+         */
 
 
 

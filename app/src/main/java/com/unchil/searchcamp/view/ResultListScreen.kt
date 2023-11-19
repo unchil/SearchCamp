@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Publish
@@ -32,6 +34,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -55,6 +60,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -66,6 +73,7 @@ import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.shared.checkInternetConnected
+import com.unchil.searchcamp.shared.chromeIntent
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
@@ -380,11 +388,12 @@ fun ResultListScreen(
                     sheetDragHandle = {
                         Box(
                             modifier = Modifier
-                                .height(30.dp)
+                                .height(60.dp)
                                 .fillMaxWidth()
                                 .background(color = Color.LightGray.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
+                            /*
                             Icon(
                                 modifier = Modifier
                                     .scale(1f)
@@ -397,6 +406,44 @@ fun ResultListScreen(
                                 else Icons.Outlined.KeyboardArrowUp,
                                 contentDescription = "SiteDetailScreen",
                             )
+
+                             */
+
+                            currentCampSiteData.value?.let {
+
+                                Row (
+                                    horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                ){
+
+                                    Text(
+                                        text = it.facltNm,
+                                        modifier = Modifier.padding(vertical = 2.dp),
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+
+                                    if(it.homepage.isNotEmpty()){
+                                        IconButton(onClick = {  chromeIntent.invoke(context, it.homepage)  }    ) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Home,
+                                                contentDescription = "홈페이지",
+                                                modifier = Modifier
+                                            )
+                                        }
+                                    }
+
+
+
+
+                                }
+
+
+
+
+                            }
+
                         }
                     },
                     sheetContent = {
