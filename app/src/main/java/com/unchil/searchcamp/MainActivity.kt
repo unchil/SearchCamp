@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,14 +38,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
-import com.unchil.searchcamp.navigation.mainScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
@@ -81,16 +77,6 @@ class MainActivity : ComponentActivity() {
             var isConnect  by remember { mutableStateOf(context.checkInternetConnected()) }
 
             val coroutineScope = rememberCoroutineScope()
-            val navController = rememberNavController()
-            val currentBackStack by navController.currentBackStackEntryAsState()
-            var selectedScreen by rememberSaveable { mutableStateOf(0) }
-
-            LaunchedEffect(key1 = currentBackStack){
-                val currentScreen = mainScreens.find {
-                    it.route ==  currentBackStack?.destination?.route
-                }
-                selectedScreen =  mainScreens.indexOf(currentScreen)
-            }
 
 
             LaunchedEffect(key1 = isConnect ){
@@ -100,7 +86,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            
+
             SearchCampTheme(
                 dynamicColor = true
             ) {

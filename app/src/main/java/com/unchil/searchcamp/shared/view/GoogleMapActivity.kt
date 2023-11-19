@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.unchil.gismemo.view.GoogleMapView
+
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
 
 
@@ -37,7 +36,7 @@ class GoogleMapActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GoogleMapView(onClickHandler =  {}, onClickPhoto = {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
+                //    GoogleMapView(onClickHandler =  {}, onClickPhoto = {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
                 }
             }
 

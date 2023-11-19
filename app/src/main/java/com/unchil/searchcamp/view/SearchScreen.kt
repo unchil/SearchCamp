@@ -175,9 +175,9 @@ fun SearchScreen(){
             viewModel.effect.collect {
                 when (it) {
                     is SearchScreenViewModel.Effect.QueryResultCount -> {
-                                channel.trySend(snackbarChannelList.first {
-                                    it.channelType == SnackBarChannelType.SEARCH_RESULT
-                                }.channel)
+                        channel.trySend(snackbarChannelList.first {
+                            it.channelType == SnackBarChannelType.SEARCH_RESULT
+                        }.channel)
 
                     }
 
@@ -371,14 +371,14 @@ fun SearchScreen(){
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                        ResultNavScreen(viewModel = viewModel){
-                            if(scaffoldState.isConcealed){
-                                scope.launch { scaffoldState.reveal() }
-                            }else{
-                                scope.launch { scaffoldState.conceal() }
-                            }
+                    ResultNavScreen(viewModel = viewModel){
+                        if(scaffoldState.isConcealed){
+                            scope.launch { scaffoldState.reveal() }
+                        }else{
+                            scope.launch { scaffoldState.conceal() }
                         }
-                    
+                    }
+
                     AnimatedVisibility(visible = scaffoldState.isConcealed) {
                         Spacer(modifier = Modifier
                             .fillMaxSize()
@@ -397,7 +397,7 @@ fun SearchScreen(){
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.TopCenter,
                 ) {
-                    
+
                     SearchCampView(
                         modifier = Modifier
                             .align(Alignment.Center)

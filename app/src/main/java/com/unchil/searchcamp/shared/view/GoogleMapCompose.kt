@@ -34,7 +34,6 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.google.maps.android.compose.widgets.ScaleBar
-import com.unchil.searchcamp.LocalUsableDarkMode
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.RepositoryProvider
@@ -48,8 +47,6 @@ import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.shared.view.PermissionRequiredComposeFuncName
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
 import com.unchil.searchcamp.view.SiteDefaultView
-import com.unchil.searchcamp.viewmodel.GoogleMapViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -81,7 +78,7 @@ fun MapTypeMenu.getDesc():Pair<ImageVector, ImageVector?> {
 fun Location.toLatLng():LatLng{
     return LatLng(this.latitude, this.longitude)
 }
-
+/*
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class, MapsComposeExperimentalApi::class)
 @Composable
@@ -497,6 +494,8 @@ fun GoogleMapView(
 
 }
 
+ */
+
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -539,7 +538,7 @@ SearchCampTheme {
             color = MaterialTheme.colorScheme.background
         ) {
 
-            GoogleMapView(onClickHandler =  {}, onClickPhoto = {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
+          //  GoogleMapView(onClickHandler =  {}, onClickPhoto = {}, onLongClickHandler = {}, onSetSiteDefaultData = {})
 
         }
     }

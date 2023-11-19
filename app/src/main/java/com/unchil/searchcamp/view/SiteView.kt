@@ -143,231 +143,231 @@ fun SiteDefaultView(
     ) {
 
 
-            Box(
+        Box(
+            modifier = Modifier
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(bounded = true),
+                    onClick = {
+                        onClick.invoke()
+                    },
+                    onLongClick = {
+                        onLongClick.invoke()
+                    }
+                )
+                .fillMaxWidth()
+                .height(170.dp)
+                .clip(ShapeDefaults.ExtraSmall)
+                .background(color = MaterialTheme.colorScheme.background)  ,
+            contentAlignment = Alignment.Center
+        ){
+
+            Column(
                 modifier = Modifier
-                    .combinedClickable(
-                        interactionSource = interactionSource,
-                        indication = rememberRipple(bounded = true),
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+            ) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.Cabin,
+                        contentDescription = "cabin",
+                        modifier = Modifier.scale(0.7f)
+                    )
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Text(
+                        text = siteData.facltNm,
+                        modifier = Modifier,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                }
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+
+
+                    Column (
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.Start
+                    ){
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.Description,
+                                contentDescription = "description",
+                                modifier = Modifier.scale(0.7f)
+                            )
+
+
+                            Text(
+                                text =  siteData.lineIntro,
+                                modifier = Modifier.fillMaxWidth(),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+                        }
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.Cottage,
+                                contentDescription = "Cottage",
+                                modifier = Modifier.scale(0.7f)
+                            )
+
+
+
+                            Text(
+                                text =  siteData.induty,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+                        }
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.NaturePeople,
+                                contentDescription = "NaturePeople",
+                                modifier = Modifier.scale(0.7f)
+                            )
+
+
+
+
+                            Text(
+                                text =  siteData.facltDivNm,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+                        }
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.Forest,
+                                contentDescription = "Forest",
+                                modifier = Modifier.scale(0.7f)
+                            )
+
+                            Text(
+                                text =  siteData.lctCl,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+                        }
+
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.Pets,
+                                contentDescription = "Pets",
+                                modifier = Modifier.scale(0.7f)
+                            )
+
+                            Text(
+                                text =  siteData.animalCmgCl,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+
+                        }
+
+
+
+                    }
+
+
+
+                    PhotoPreview(
+                        data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
+                            R.drawable.forest} ,
+                        allowHardware = allowHardware,
                         onClick = {
-                            onClick.invoke()
+                            onClickPhoto.invoke()
                         },
                         onLongClick = {
                             onLongClick.invoke()
                         }
+
                     )
-                    .fillMaxWidth()
-                    .height(170.dp)
-                    .clip(ShapeDefaults.ExtraSmall)
-                    .background(color = MaterialTheme.colorScheme.background)  ,
-                contentAlignment = Alignment.Center
-            ){
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.Outlined.Cabin,
-                            contentDescription = "cabin",
-                            modifier = Modifier.scale(0.7f)
-                        )
-
-                        Spacer(modifier = Modifier.size(10.dp))
-
-                        Text(
-                            text = siteData.facltNm,
-                            modifier = Modifier,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                    }
 
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-
-                    ) {
-
-
-                        Column (
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.Start
-                        ){
-
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Outlined.Description,
-                                    contentDescription = "description",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-
-
-                                Text(
-                                    text =  siteData.lineIntro,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                            }
-
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Outlined.Cottage,
-                                    contentDescription = "Cottage",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-
-
-
-                                Text(
-                                    text =  siteData.induty,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                            }
-
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Outlined.NaturePeople,
-                                    contentDescription = "NaturePeople",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-
-
-
-
-                                Text(
-                                    text =  siteData.facltDivNm,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                            }
-
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Outlined.Forest,
-                                    contentDescription = "Forest",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-
-                                Text(
-                                    text =  siteData.lctCl,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                            }
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Outlined.Pets,
-                                    contentDescription = "Pets",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-
-                                Text(
-                                    text =  siteData.animalCmgCl,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-
-                            }
-
-
-
-                        }
-
-
-
-                        PhotoPreview(
-                            data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
-                                R.drawable.forest} ,
-                            allowHardware = allowHardware,
-                            onClick = {
-                                onClickPhoto.invoke()
-                            },
-                            onLongClick = {
-                                onLongClick.invoke()
-                            }
-
-                        )
-
-
-                    }
                 }
             }
+        }
 
 
     }
@@ -423,49 +423,223 @@ fun SiteIntroductionView(
         }
     }
 
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = siteData.facltNm ,
+                modifier = Modifier.padding(vertical = 10.dp),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+
+            AnimatedVisibility(siteData.homepage.isNotEmpty()){
+
+                Spacer(modifier = Modifier.size(10.dp))
+
+                IconButton(onClick = {
+                    isHapticProcessing = true
+                    chromeIntent.invoke(context, siteData.homepage)
+                },
+                    colors =  IconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.Gray
+                    ),
+
+                    ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "홈페이지",
+                        modifier = Modifier
+                    )
+                }
+
+            }
+
+        }
+
+
+
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxWidth()
+                .height(columnHeight)
+                .clip(ShapeDefaults.ExtraSmall)
         ) {
 
-            Row(
-                modifier = Modifier,
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+
+            ImageViewer(
+                data =    if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
+                    R.drawable.forest},
+                size = Size.ORIGINAL,
+                contentScale = ContentScale.Crop
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .clip(ShapeDefaults.ExtraSmall)
+                    .fillMaxWidth(0.8f)
+                    .fillMaxHeight(0.8f)
+                    .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
+                    .padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = siteData.facltNm ,
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
 
 
-                AnimatedVisibility(siteData.homepage.isNotEmpty()){
 
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    IconButton(onClick = {
-                        isHapticProcessing = true
-                        chromeIntent.invoke(context, siteData.homepage)
-                    },
-                        colors =  IconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
-                            disabledContainerColor = Color.Gray,
-                            disabledContentColor = Color.Gray
-                        ),
+                if( siteData.tel.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
 
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Home,
-                            contentDescription = "홈페이지",
-                            modifier = Modifier
+                            imageVector = Icons.Outlined.Phone,
+                            contentDescription = "전화",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.tel,
+                            modifier = Modifier,
+                            //    fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                }
+
+
+                if( siteData.addr1.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Signpost,
+                            contentDescription = "주소",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.addr1,
+                            modifier = Modifier,
+                            //   fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                if( siteData.resveCl.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.EventAvailable,
+                            contentDescription = "예약",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.resveCl,
+                            modifier = Modifier,
+                            //       fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                if( siteData.sbrsCl.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Countertops,
+                            contentDescription = "시설",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.sbrsCl,
+                            modifier = Modifier,
+                            //     fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                }
+
+
+                if( siteData.eqpmnLendCl.isNotEmpty()) {
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.OutdoorGrill,
+                            contentDescription = "대여장비",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.eqpmnLendCl,
+                            modifier = Modifier,
+                            //        fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                }
+
+                if( siteData.glampInnerFclty.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Bungalow,
+                            contentDescription = "글램핑시설",
+                            modifier = Modifier.scale(0.7f)
+                        )
+                        Text(
+                            text = siteData.glampInnerFclty,
+                            modifier = Modifier,
+                            //        fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
 
@@ -474,199 +648,25 @@ fun SiteIntroductionView(
             }
 
 
-
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(columnHeight)
-                        .clip(ShapeDefaults.ExtraSmall)
-                ) {
-
-
-                    ImageViewer(
-                        data =    if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
-                    R.drawable.forest},
-                        size = Size.ORIGINAL,
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .clip(ShapeDefaults.ExtraSmall)
-                            .fillMaxWidth(0.8f)
-                            .fillMaxHeight(0.8f)
-                            .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
-                            .padding(horizontal = 10.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-
-
-
-                        if( siteData.tel.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Phone,
-                                    contentDescription = "전화",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.tel,
-                                    modifier = Modifier,
-                                    //    fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                        }
-
-
-                        if( siteData.addr1.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Signpost,
-                                    contentDescription = "주소",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.addr1,
-                                    modifier = Modifier,
-                                    //   fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-
-                        if( siteData.resveCl.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.EventAvailable,
-                                    contentDescription = "예약",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.resveCl,
-                                    modifier = Modifier,
-                                    //       fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-
-                        if( siteData.sbrsCl.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Countertops,
-                                    contentDescription = "시설",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.sbrsCl,
-                                    modifier = Modifier,
-                                    //     fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                        }
-
-
-                        if( siteData.eqpmnLendCl.isNotEmpty()) {
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.OutdoorGrill,
-                                    contentDescription = "대여장비",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.eqpmnLendCl,
-                                    modifier = Modifier,
-                                    //        fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                        }
-
-                        if( siteData.glampInnerFclty.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Bungalow,
-                                    contentDescription = "글램핑시설",
-                                    modifier = Modifier.scale(0.7f)
-                                )
-                                Text(
-                                    text = siteData.glampInnerFclty,
-                                    modifier = Modifier,
-                                    //        fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Start,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                        }
-
-                    }
-
-
-                }
+        }
 
 
 
 
 
 
-            AnimatedVisibility( siteData.intro.isNotEmpty()) {
-                Text(
-                    text = siteData.intro,
-                    modifier = Modifier,
-                    textAlign = TextAlign.Start,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-            }
-
+        AnimatedVisibility( siteData.intro.isNotEmpty()) {
+            Text(
+                text = siteData.intro,
+                modifier = Modifier,
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
         }
+
+
+    }
 
 
 
@@ -715,10 +715,10 @@ fun SiteImagePagerView(
 
     // 한 패이지 의 패딩값
     val paddingValues by mutableStateOf ( if(isPortrait){
-            PaddingValues( vertical = (configuration.screenHeightDp.dp -  cardHeightDp) * 0.4f  , horizontal = 10.dp )
-        }else {
-            PaddingValues( vertical = 10.dp, horizontal =  (configuration.screenWidthDp.dp -  cardWidthDp) / 3)
-        }
+        PaddingValues( vertical = (configuration.screenHeightDp.dp -  cardHeightDp) * 0.4f  , horizontal = 10.dp )
+    }else {
+        PaddingValues( vertical = 10.dp, horizontal =  (configuration.screenWidthDp.dp -  cardWidthDp) / 3)
+    }
     )
 
 
@@ -798,7 +798,7 @@ fun SiteImagePagerView(
 
 
 
-       // val paddingDp = if(isPortrait) { (heightDp.dp - cardHeightDp) / 2 }  else {(widthDp.dp - cardWidthDp) / 2}
+        // val paddingDp = if(isPortrait) { (heightDp.dp - cardHeightDp) / 2 }  else {(widthDp.dp - cardWidthDp) / 2}
 
 
 
@@ -887,76 +887,76 @@ fun SiteImagePagerView(
 
                 }else {
 
-                        HorizontalPager(
-                            modifier = Modifier,
-                            state = pagerState,
-                            pageSpacing = 0.dp,
-                            pageSize = pagesPerViewport,
-                            beyondBoundsPageCount = 3,
-                            contentPadding = paddingValues,
-                        ) { page ->
+                    HorizontalPager(
+                        modifier = Modifier,
+                        state = pagerState,
+                        pageSpacing = 0.dp,
+                        pageSize = pagesPerViewport,
+                        beyondBoundsPageCount = 3,
+                        contentPadding = paddingValues,
+                    ) { page ->
 
-                            Card(
-                                Modifier
-                                    .size(cardWidthDp)
-                                    .graphicsLayer {
-                                        // Calculate the absolute offset for the current page from the
-                                        // scroll position. We use the absolute value which allows us to mirror
-                                        // any effects for both directions
-                                        val pageOffset = (
-                                                (pagerState.currentPage - page) + pagerState
-                                                    .currentPageOffsetFraction
-                                                ).absoluteValue
-
-
-                                        alpha = lerp(
-                                            start = 0.7f,
-                                            stop = 1f,
-                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                        )
-
-                                        scaleX = lerp(
-                                            start = 0.7f,
-                                            stop = 1f,
-                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                        )
-
-                                        scaleY = lerp(
-                                            start = 0.7f,
-                                            stop = 1f,
-                                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                        )
+                        Card(
+                            Modifier
+                                .size(cardWidthDp)
+                                .graphicsLayer {
+                                    // Calculate the absolute offset for the current page from the
+                                    // scroll position. We use the absolute value which allows us to mirror
+                                    // any effects for both directions
+                                    val pageOffset = (
+                                            (pagerState.currentPage - page) + pagerState
+                                                .currentPageOffsetFraction
+                                            ).absoluteValue
 
 
-                                    }
-                                    .combinedClickable(
-                                        onLongClick = {
-                                            isHapticProcessing = true
-                                            isVisibleImage = true
-                                            imageUrl = siteImageList.value.get(page).imageUrl
-                                        },
-                                        onClick = {
-                                            isHapticProcessing = true
-                                            isVisibleImage = true
-                                            imageUrl = siteImageList.value.get(page).imageUrl
-                                        }
+                                    alpha = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                     )
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(0.dp)
-                                ){
-                                    ImageViewer(
-                                        data = (siteImageList.value.get(page).imageUrl),
-                                        size = Size(600,600),
-                                        isZoomable = false,
-                                        contentScale = ContentScale.Crop
+
+                                    scaleX = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                     )
+
+                                    scaleY = lerp(
+                                        start = 0.7f,
+                                        stop = 1f,
+                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                    )
+
+
                                 }
+                                .combinedClickable(
+                                    onLongClick = {
+                                        isHapticProcessing = true
+                                        isVisibleImage = true
+                                        imageUrl = siteImageList.value.get(page).imageUrl
+                                    },
+                                    onClick = {
+                                        isHapticProcessing = true
+                                        isVisibleImage = true
+                                        imageUrl = siteImageList.value.get(page).imageUrl
+                                    }
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(0.dp)
+                            ){
+                                ImageViewer(
+                                    data = (siteImageList.value.get(page).imageUrl),
+                                    size = Size(600,600),
+                                    isZoomable = false,
+                                    contentScale = ContentScale.Crop
+                                )
                             }
-
                         }
+
+                    }
 
 
 
