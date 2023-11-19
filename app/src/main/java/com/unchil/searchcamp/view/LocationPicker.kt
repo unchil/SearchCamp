@@ -56,7 +56,7 @@ fun AdministrativeDistrictSiDoPicker(
 
     LaunchedEffect(key1 =sido_state.isScrollInProgress) {
         if (sido_state.isScrollInProgress) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+    //        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }else {
             onSelectedHandler(VWorldService.LT_C_ADSIDO_INFO, dataList[sido_state.selectedOption].ctprvn_cd, dataList[sido_state.selectedOption].ctp_kor_nm)
         }
@@ -113,7 +113,7 @@ fun AdministrativeDistrictSiGunGuPicker(
 
     LaunchedEffect(key1 =siggState.isScrollInProgress) {
         if (siggState.isScrollInProgress) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+       //     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         } else {
             onSelectedHandler(
                 VWorldService.LT_C_ADSIGG_INFO,
