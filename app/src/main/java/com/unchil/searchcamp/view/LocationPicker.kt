@@ -37,7 +37,7 @@ fun AdministrativeDistrictSiDoPicker(
 
     val hapticFeedback = LocalHapticFeedback.current
     val sido_state = rememberPickerState(dataList.size, repeatItems = false)
-    val sido_contentDescription by remember { derivedStateOf { "${sido_state.selectedOption + 1}" } }
+    //val sido_contentDescription by remember { derivedStateOf { "${sido_state.selectedOption + 1}" } }
 
     LaunchedEffect(key1 =sido_state.isScrollInProgress) {
         if (sido_state.isScrollInProgress) {
@@ -52,7 +52,7 @@ fun AdministrativeDistrictSiDoPicker(
             .clip(shape = ShapeDefaults.ExtraSmall)
             .size(width = 160.dp, height = 100.dp),
         state = sido_state,
-        contentDescription = sido_contentDescription,
+        contentDescription = null,
         gradientColor =  MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 
@@ -78,7 +78,7 @@ fun AdministrativeDistrictSiGunGuPicker(
 
     val hapticFeedback = LocalHapticFeedback.current
     val siggState = rememberPickerState(dataList.size, repeatItems = false)
-    val sido_contentDescription by remember { derivedStateOf { "${siggState.selectedOption + 1}" } }
+//    val sido_contentDescription by remember { derivedStateOf { "${siggState.selectedOption + 1}" } }
 
     LaunchedEffect(key1 =siggState.isScrollInProgress) {
         if (siggState.isScrollInProgress) {
@@ -93,7 +93,7 @@ fun AdministrativeDistrictSiGunGuPicker(
             .clip(shape = ShapeDefaults.ExtraSmall)
             .size(width = 160.dp, height = 100.dp),
         state = siggState,
-        contentDescription = sido_contentDescription,
+        contentDescription = null,
         gradientColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 

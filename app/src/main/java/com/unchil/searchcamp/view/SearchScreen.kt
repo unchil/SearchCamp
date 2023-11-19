@@ -309,16 +309,15 @@ fun SearchScreen(){
             headerHeight = headerHeight,
             snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState) {
+
                     Snackbar(
                         snackbarData = it,
                         modifier = Modifier,
                         shape = ShapeDefaults.ExtraSmall,
-                        containerColor = Color.Yellow,
-                        contentColor = Color.Black,
-                        actionColor = Color.Red,
-
                         dismissActionContentColor = Color.LightGray
                     )
+
+
                 }
             },
             appBar = {
