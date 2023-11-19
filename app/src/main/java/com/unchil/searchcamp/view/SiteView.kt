@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.width
 
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -102,11 +101,10 @@ import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.chromeIntent
-import com.unchil.searchcamp.shared.screenRectDp
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
-import com.unchil.searchcamp.viewmodel.ResultScreenViewModel
+import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
@@ -494,7 +492,8 @@ fun SiteIntroductionView(
                     )
 
                     Column(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier
+                            .align(Alignment.Center)
                             .clip(ShapeDefaults.ExtraSmall)
                             .fillMaxWidth(0.8f)
                             .fillMaxHeight(0.8f)
@@ -681,7 +680,7 @@ fun SiteIntroductionView(
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SiteImagePagerView(
-    viewModel: ResultScreenViewModel,
+    viewModel: SearchScreenViewModel,
     contentId: String? = null
 ){
 
@@ -789,6 +788,13 @@ fun SiteImagePagerView(
             initialPage = 0,
             initialPageOffsetFraction = 0f,
             pageCount = {  siteImageList.value.size } )
+
+
+        LaunchedEffect(key1 = siteImageList.value ){
+
+            pagerState.scrollToPage(0)
+
+        }
 
 
 
@@ -939,7 +945,7 @@ fun SiteImagePagerView(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding( 0.dp)
+                                        .padding(0.dp)
                                 ){
                                     ImageViewer(
                                         data = (siteImageList.value.get(page).imageUrl),

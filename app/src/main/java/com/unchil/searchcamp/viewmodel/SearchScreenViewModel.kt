@@ -2,22 +2,81 @@ package com.unchil.searchcamp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.data.Repository
-import com.unchil.searchcamp.model.CURRENTWEATHER_TBL
+import com.unchil.searchcamp.db.entity.CampSite_TBL
+import com.unchil.searchcamp.db.entity.SiteImage_TBL
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class SearchScreenViewModel   (val repository: Repository) : ViewModel() {
 
+    private val _isRefreshing = MutableStateFlow(false)
 
     val currentListDataCntStateFlow: MutableStateFlow<Int> = MutableStateFlow(0)
 
+    val currentListDataStateFlow  = repository.currentListDataStateFlow
+
+    val siteImageListStateFlow: MutableStateFlow<List<SiteImage_TBL>>
+            = repository.siteImageListStateFlow
+
     private val _effect = MutableSharedFlow<Effect>()
     val effect: SharedFlow<Effect> = _effect
+
+    val campSiteListPaging: Flow<PagingData<CampSite_TBL>>
+    val searchQueryFlow: Flow<Event.Search>
+    val eventHandler: (Event) -> Unit
+
+
+
+    init{
+        val eventStateFlow = MutableSharedFlow<Event>()
+
+        //  1. fun onEvent(event: Event)
+        eventHandler = {
+            viewModelScope.launch {
+                eventStateFlow.emit(it)
+            }
+        }
+
+        //  2.   when (event) { is Event.Search ->   }
+        searchQueryFlow = eventStateFlow
+            .filterIsInstance<Event.Search>()
+            .distinctUntilChanged()
+            .onStart {
+                emit(
+                    Event.Search(
+                        administrativeDistrictSiDoCode = "0",
+                        administrativeDistrictSiGunGu = "현위치",
+                        searchTitle = ""
+                    )
+                )
+            }
+
+
+
+
+        //  3.  viewModelScope.launch { searchMemo() }
+        campSiteListPaging = searchQueryFlow
+            .flatMapLatest {
+                searchCampSite(
+                    it.administrativeDistrictSiDoCode,
+                    it.administrativeDistrictSiGunGu,
+                    it.searchTitle
+                )
+            }.cachedIn(viewModelScope)
+    }
+
+
 
     fun onEvent(event: Event){
         when(event){
@@ -40,6 +99,22 @@ class SearchScreenViewModel   (val repository: Repository) : ViewModel() {
 
         }
     }
+
+    private fun searchCampSite(
+        administrativeDistrictSiDoCode:String,
+        administrativeDistrictSiGunGu:String,
+        searchTitle:String? = null
+    ): Flow<PagingData<CampSite_TBL>> {
+        _isRefreshing.value = true
+        val result = repository.getCampSiteListStream(
+            administrativeDistrictSiDoCode,
+            administrativeDistrictSiGunGu,
+            searchTitle
+        )
+        _isRefreshing.value = false
+        return result
+    }
+
 
     fun getCampSiteListFlow(
         administrativeDistrictSiDoCode:String,

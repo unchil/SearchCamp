@@ -50,11 +50,10 @@ fun AdministrativeDistrictSiDoPicker(
     Picker(
         modifier = Modifier
             .clip(shape = ShapeDefaults.ExtraSmall)
-            .size(width = 160.dp, height = 100.dp)
-            .background(Color.Transparent),
+            .size(width = 160.dp, height = 100.dp),
         state = sido_state,
         contentDescription = sido_contentDescription,
-        gradientColor = MaterialTheme.colorScheme.secondaryContainer,
+        gradientColor =  MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 
         Text(
@@ -92,11 +91,10 @@ fun AdministrativeDistrictSiGunGuPicker(
     Picker(
         modifier = Modifier
             .clip(shape = ShapeDefaults.ExtraSmall)
-            .size(width = 160.dp, height = 100.dp)
-            .background(Color.Transparent),
+            .size(width = 160.dp, height = 100.dp),
         state = siggState,
         contentDescription = sido_contentDescription,
-        gradientColor = MaterialTheme.colorScheme.secondaryContainer,
+        gradientColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 
         Text(

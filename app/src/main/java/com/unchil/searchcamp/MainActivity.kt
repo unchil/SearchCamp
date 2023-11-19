@@ -2,12 +2,10 @@ package com.unchil.searchcamp
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,24 +34,18 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
-import com.unchil.searchcamp.navigation.SearchCampDestinations
 import com.unchil.searchcamp.navigation.mainScreens
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
@@ -61,8 +53,6 @@ import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
-import com.unchil.searchcamp.view.ResultNavScreen
-import com.unchil.searchcamp.view.ResultScreen
 import com.unchil.searchcamp.view.SearchScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -110,10 +100,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-
-
-
-
+            
             SearchCampTheme(
                 dynamicColor = true
             ) {
@@ -128,86 +115,7 @@ class MainActivity : ComponentActivity() {
                                     Box(modifier = Modifier.fillMaxSize()
                                     ) {
                                         if (isConnect) {
-
-
-                                            NavHost(
-                                                navController = navController,
-                                                startDestination = SearchCampDestinations.searchScreen.route
-                                            ) {
-
-                                                composable(
-                                                    route = SearchCampDestinations.searchScreen.route
-                                                ) {
-                                                    SearchScreen(navController = navController)
-                                                }
-
-                                                composable(
-                                                    route = SearchCampDestinations.resultScreen.route,
-                                                    arguments = listOf(
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SiDoCode) {
-                                                            nullable = false
-                                                            type = NavType.StringType
-                                                        },
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SiGunGu) {
-                                                            nullable = false
-                                                            type = NavType.StringType
-                                                        },
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SearchTitle) {
-                                                            nullable = true
-                                                            type = NavType.StringType
-                                                        }
-                                                    )
-                                                ) {
-                                                    ResultScreen(
-                                                        navController = navController,
-                                                        administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(
-                                                            it.arguments
-                                                        ),
-                                                        administrativeDistrictSiGunGu = SearchCampDestinations.getSiGunGuFromArgs(
-                                                            it.arguments
-                                                        ),
-                                                        searchTitle = SearchCampDestinations.getSearchTitleFromArgs(
-                                                            it.arguments
-                                                        )
-                                                    )
-                                                }
-
-
-
-                                                composable(
-                                                    route = SearchCampDestinations.resultNavScreen.route,
-                                                    arguments = listOf(
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SiDoCode) {
-                                                            nullable = false
-                                                            type = NavType.StringType
-                                                        },
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SiGunGu) {
-                                                            nullable = false
-                                                            type = NavType.StringType
-                                                        },
-                                                        navArgument(SearchCampDestinations.ARG_NAME_SearchTitle) {
-                                                            nullable = true
-                                                            type = NavType.StringType
-                                                        }
-                                                    )
-                                                ) {
-                                                    ResultNavScreen(
-                                                        navController = navController,
-                                                        administrativeDistrictSiDoCode = SearchCampDestinations.getSiDoCodeFromArgs(
-                                                            it.arguments
-                                                        ),
-                                                        administrativeDistrictSiGunGu = SearchCampDestinations.getSiGunGuFromArgs(
-                                                            it.arguments
-                                                        ),
-                                                        searchTitle = SearchCampDestinations.getSearchTitleFromArgs(
-                                                            it.arguments
-                                                        )
-                                                    )
-                                                }
-
-                                            }
-
-
+                                            SearchScreen()
                                         } else {
                                             ChkNetWork(onCheckState = {
                                                 coroutineScope.launch {

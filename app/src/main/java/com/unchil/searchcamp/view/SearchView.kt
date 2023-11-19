@@ -8,7 +8,6 @@ import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,29 +18,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -71,6 +63,7 @@ import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.db.entity.SiDo_TBL
+import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.recognizerIntent
@@ -79,7 +72,6 @@ import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
 import com.unchil.searchcamp.viewmodel.LocationPickerViewModel
 import kotlinx.coroutines.delay
-
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
@@ -109,22 +101,32 @@ fun SearchCampView(
     var columnWidth by remember { mutableStateOf(1f) }
     var columnHeight by remember { mutableStateOf(1f) }
 
+    val searchBarHeight by remember { mutableStateOf(70.dp) }
+
+    val administrativeDistrictPickerHeight by remember { mutableStateOf(160.dp) }
+
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             isPortrait = true
-            searchBoxWidth = 0.95f
-            searchBoxHeight = 0.55f
+
+            searchBoxWidth = 1f
+            searchBoxHeight = 1f
             columnWidth = 1f
             columnHeight = 1f
+
         }
         else ->{
             isPortrait = false
-            searchBoxWidth = 0.9f
-            searchBoxHeight = 0.85f
+
+            searchBoxWidth = 1f
+            searchBoxHeight = 1f
             columnWidth = 0.5f
             columnHeight = 1f
+
         }
     }
+
+
 
 
 
@@ -284,22 +286,12 @@ fun SearchCampView(
                         .fillMaxWidth(searchBoxWidth)
                         .fillMaxHeight(searchBoxHeight)
                         .clip(shape = ShapeDefaults.ExtraSmall)
-                        .verticalScroll(scrollState)
-                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)),
+                        .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
 
-            Text(
-                text = "Search Camping Site",
-                modifier = Modifier
-                    .padding(vertical = 10.dp),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineLarge
-            )
-
-            HorizontalDivider()
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -312,6 +304,19 @@ fun SearchCampView(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
+
+
+                        Text(
+                            text = "Search Camping Site",
+                            modifier = Modifier
+                                .padding(vertical = 10.dp),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineLarge
+                        )
+
+
+
 
                     WeatherContent()
 
@@ -331,8 +336,7 @@ fun SearchCampView(
                             modifier = Modifier
                                 .clip(shape = ShapeDefaults.ExtraSmall)
                                 .fillMaxWidth(columnWidth)
-                                .height(160.dp),
-                            //         .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)),
+                                .height(administrativeDistrictPickerHeight),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -340,7 +344,6 @@ fun SearchCampView(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = administrativeDistrictTitle,
-                                color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center
@@ -357,10 +360,8 @@ fun SearchCampView(
 
 
                                 AdministrativeDistrictSiDoPicker(
-                                    //    dataList = sidoData.value,
                                     dataList = dataList,
                                     onSelectedHandler = onSelectedHandler,
-                                    //      onEvent = viewModel::onEvent
                                 )
 
 
@@ -400,9 +401,8 @@ fun SearchCampView(
                     Column(
                         modifier = Modifier
                             .clip(shape = ShapeDefaults.ExtraSmall)
-                            .width(400.dp)
-                            .height(160.dp),
-                        //         .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)),
+                            .fillMaxWidth( 1f)
+                            .height(administrativeDistrictPickerHeight),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -427,10 +427,8 @@ fun SearchCampView(
 
 
                             AdministrativeDistrictSiDoPicker(
-                                //    dataList = sidoData.value,
                                 dataList = dataList,
                                 onSelectedHandler = onSelectedHandler,
-                                //      onEvent = viewModel::onEvent
                             )
 
 
@@ -455,9 +453,14 @@ fun SearchCampView(
 
             }
 
-            HorizontalDivider()
+
 
             SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(searchBarHeight)
+                    .padding(horizontal = 20.dp)
+                    .clip(shape = ShapeDefaults.ExtraSmall),
                 query = query_title,
                 onQueryChange = {
                     query_title = it
@@ -480,12 +483,11 @@ fun SearchCampView(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .clip(shape = ShapeDefaults.ExtraSmall),
                 trailingIcon = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.padding(end = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
                         IconButton(
                             modifier = Modifier,
@@ -493,12 +495,6 @@ fun SearchCampView(
                                 isHapticProcessing = true
                                 startLauncherRecognizerIntent.launch(recognizerIntent())
                             },
-                            colors =  IconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContainerColor = Color.Gray,
-                                disabledContentColor = Color.Gray
-                            ),
                             content = {
                                 Icon(
                                     modifier = Modifier,
@@ -518,12 +514,6 @@ fun SearchCampView(
                                     it()
                                 }
                             },
-                            colors =  IconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContainerColor = Color.Gray,
-                                disabledContentColor = Color.Gray
-                            ),
                             content = {
                                 Icon(
                                     modifier = Modifier,
@@ -533,47 +523,38 @@ fun SearchCampView(
                             }
                         )
 
-                           IconButton(
-                               modifier = Modifier,
-                               onClick = {
+                        IconButton(
+                            modifier = Modifier,
+                            onClick = {
 
-                                   keyboardController?.hide()
+                                keyboardController?.hide()
 
-                                   isHapticProcessing = true
+                                isHapticProcessing = true
 
-                                   onSearchEventHandler(
-                                       administrativeDistrictSiDoCode,
-                                       administrativeDistrictSiGunGu,
-                                       query_title
-                                   )
+                                onSearchEventHandler(
+                                    administrativeDistrictSiDoCode,
+                                    administrativeDistrictSiGunGu,
+                                    query_title
+                                )
 
-                               },
-                               colors =  IconButtonColors(
-                                   containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                   contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
-                                    disabledContainerColor = Color.Gray,
-                                    disabledContentColor = Color.Gray
-                               ),
-                               content = {
-                                   Icon(
-                                       modifier = Modifier,
-                                       imageVector = Icons.Outlined.Search,
-                                       contentDescription = "Search"
-                                   )
-                               }
-                           )
+                            },
+                            content = {
+                                Icon(
+                                    modifier = Modifier,
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Search"
+                                )
+                            }
+                        )
+
+
+
 
 
 
                     }
                 },
                 tonalElevation = 2.dp,
-                colors = SearchBarDefaults.colors(
-                    containerColor = Color.Transparent,
-                    dividerColor = Color.Black ,
-                    inputFieldColors  = TextFieldDefaults.colors()
-
-                )
             ) {}
 
 
@@ -585,6 +566,7 @@ fun SearchCampView(
 }
 
 
+
 @Preview(showBackground = false, showSystemUi = false)
 @Composable
 fun SearchViewPreview() {
@@ -593,28 +575,28 @@ fun SearchViewPreview() {
     val permissionsManager = PermissionsManager()
     val searchCampDB2 = SearchCampDB.getInstance(context.applicationContext)
 
-    val str = "용인시"
-    val splitStr = str.split(" ", limit = 2)
-
     SearchCampTheme {
-        Surface( modifier = Modifier.fillMaxSize(),  color = MaterialTheme.colorScheme.background  ) {
+        Surface( modifier = Modifier.fillMaxSize(),  color = Color.Transparent  ) {
 
-            Column {
-                splitStr.forEach {
-                    Text(text = it)
-                }
-
-            }
-
-
-/*
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB2) {
-                      // SearchCampView()
+
+
+                        SearchCampView(
+                            onSearchEventHandler = { _,_,_ ->
+                            }
+                        )
+
+
+
+
+
+
+
                 }
             }
 
- */
+
         }
     }
 }

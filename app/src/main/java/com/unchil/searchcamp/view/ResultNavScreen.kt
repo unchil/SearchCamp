@@ -5,31 +5,32 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBackIosNew
+import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,29 +49,22 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.R
+import com.unchil.searchcamp.model.SnackBarChannelType
+import com.unchil.searchcamp.model.snackbarChannelList
 import com.unchil.searchcamp.navigation.SearchCampDestinations
-import com.unchil.searchcamp.navigation.mainScreens
-import com.unchil.searchcamp.navigation.navigateTo
 import com.unchil.searchcamp.navigation.resultScreens
+import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @Composable
 fun ResultNavScreen(
-    navController: NavHostController,
-    administrativeDistrictSiDoCode:String,
-    administrativeDistrictSiGunGu:String,
-    searchTitle:String? = null
+    viewModel: SearchScreenViewModel,
+    onScaffoldStateHandler:()->Unit
 ){
-
 
     val configuration = LocalConfiguration.current
     var isPortrait by remember { mutableStateOf(false) }
@@ -114,15 +108,56 @@ fun ResultNavScreen(
         }
     }
 
+    val currentListDataCntStateFlow = viewModel.currentListDataCntStateFlow.collectAsState()
+    
     var selectedScreen by rememberSaveable { mutableIntStateOf(0) }
 
+    val snackBarHostState = remember { SnackbarHostState() }
+    val channel = remember { Channel<Int>(Channel.CONFLATED) }
+
+    LaunchedEffect(channel) {
+
+        channel.receiveAsFlow().collect { index ->
+
+            val channelData = snackbarChannelList.first {
+                it.channel == index
+            }
 
 
+            val result = snackBarHostState.showSnackbar(
+                message =context.getString( channelData.message),
+                actionLabel =  channelData.actionLabel,
+                withDismissAction = channelData.withDismissAction,
+                duration = channelData.duration
+            )
+
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    //     hapticProcessing()
+                    //----------
+                    when (channelData.channelType) {
+                        SnackBarChannelType.SEARCH_RESULT -> {
+
+                        }
+                        else -> {}
+                    }
+                    //----------
+                }
+
+                SnackbarResult.Dismissed -> {
+                    //      hapticProcessing()
+
+                }
+            }
+        }
+    }
+
+    var isConcealed by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            if(isPortrait) {
+            if(false) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -130,23 +165,9 @@ fun ResultNavScreen(
                     contentAlignment = Alignment.Center
                 ) {
 
-                    IconButton(
-                        onClick = {
-                            hapticProcessing()
-                            navController.popBackStack()
-                        },
-                        modifier = Modifier.align(Alignment.CenterStart),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBackIosNew,
-                            contentDescription = "이전화면",
-                            tint = Color.LightGray
-                        )
-                    }
-
 
                     Text(
-                        text = context.getString(R.string.mainmenu_result),
+                        text = context.getString(R.string.mainmenu_result) + " ${currentListDataCntStateFlow.value} 건",
                         modifier = Modifier.align(Alignment.Center),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleMedium
@@ -201,7 +222,20 @@ fun ResultNavScreen(
 
             }
         },
-        snackbarHost = {},
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState){
+                Snackbar(
+                    snackbarData = it,
+                    modifier = Modifier,
+                    shape = ShapeDefaults.ExtraSmall,
+                    containerColor = Color.Yellow,
+                    contentColor = Color.Black,
+                    actionColor = Color.Red,
+
+                    dismissActionContentColor = Color.LightGray
+                )
+            }
+        },
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
@@ -231,24 +265,28 @@ fun ResultNavScreen(
                                 horizontalAlignment =  Alignment.CenterHorizontally,
                             ) {
 
-                                IconButton(
+                                androidx.compose.material3.IconButton(
                                     onClick = {
-                                        hapticProcessing()
-                                        navController.popBackStack()
-                                    },
-                                    modifier = Modifier,
+                                        isConcealed = ! isConcealed
+                                        onScaffoldStateHandler()
+                                    }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                                        contentDescription = "이전화면",
-                                        tint = Color.LightGray
+                                        Icons.Default.TravelExplore ,
+                                        contentDescription = "Localized description"
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.size(20.dp))
 
                                 Text(
                                     text = context.getString(R.string.mainmenu_result),
+                                    modifier = Modifier,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+
+                                Text(
+                                    text = "${currentListDataCntStateFlow.value}건",
                                     modifier = Modifier,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleMedium
@@ -297,28 +335,19 @@ fun ResultNavScreen(
 
                 Box(
                     modifier = Modifier
-                 //       .fillMaxWidth(columnWidth)
+                        //       .fillMaxWidth(columnWidth)
                         .fillMaxWidth()
                 ) {
                     when (resultScreens[selectedScreen]) {
                         SearchCampDestinations.resultListScreen -> {
-
-                            ResultListScreen(
-                                navController,
-                                administrativeDistrictSiDoCode,
-                                administrativeDistrictSiGunGu,
-                                searchTitle
-                            )
+                            ResultListScreen(viewModel = viewModel)
 
                         }
 
                         SearchCampDestinations.resultMapScreen -> {
 
                             ResultMapScreen(
-                                navController,
-                                administrativeDistrictSiDoCode,
-                                administrativeDistrictSiGunGu,
-                                searchTitle
+                               viewModel
                             )
                         }
 
@@ -333,139 +362,8 @@ fun ResultNavScreen(
 
         }
 
-       /*
-        Box(
-            modifier = Modifier.padding(it),
-            contentAlignment = Alignment.Center,
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-
-
-                Row(
-                    modifier = Modifier.fillMaxSize(1f),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-
-                    Box(
-                        modifier = Modifier.fillMaxWidth(columnWidth)
-                    ) {
-
-                        when (resultScreens[selectedScreen]) {
-                            SearchCampDestinations.resultListScreen -> {
-
-                                ResultListScreen(
-                                    navController,
-                                    administrativeDistrictSiDoCode,
-                                    administrativeDistrictSiGunGu,
-                                    searchTitle
-                                )
-
-                            }
-
-                            SearchCampDestinations.resultMapScreen -> {
-
-                                ResultMapScreen(
-                                    navController,
-                                    administrativeDistrictSiDoCode,
-                                    administrativeDistrictSiGunGu,
-                                    searchTitle
-                                )
-                            }
-
-                            else -> {}
-                        }
-                    }
-
-                    if (!isPortrait) {
-
-                        NavigationRail(
-                            modifier = Modifier
-                                .shadow(elevation = 1.dp)
-                                .width(70.dp)
-                                .fillMaxHeight(),
-                        ) {
-
-                            NavigationRailItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                                        contentDescription = "",
-                                        tint = Color.LightGray
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        "",
-                                        modifier = Modifier,
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = Color.LightGray
-                                    )
-
-                                },
-                                alwaysShowLabel = false,
-                                selected = false,
-                                onClick = {
-                                    navController.popBackStack()
-                                },
-                            )
-
-                            Spacer(modifier = Modifier.fillMaxHeight(0.15f))
-
-                            resultScreens.forEachIndexed { index, it ->
-                                NavigationRailItem(
-                                    icon = {
-                                        Icon(
-                                            imageVector = it.icon ?: Icons.Outlined.Info,
-                                            contentDescription = context.resources.getString(it.name),
-                                            tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                        )
-                                    },
-                                    label = {
-
-                                        Text(
-                                            context.resources.getString(it.name),
-                                            modifier = Modifier,
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
-                                        )
-
-                                    },
-                                    alwaysShowLabel = false,
-                                    selected = selectedScreen == index,
-                                    onClick = {
-                                        hapticProcessing()
-                                        selectedScreen = index
-                                    },
-                                    //      unselectedContentColor = Color.Gray
-                                )
-                            }
-
-
-                        }
-                    }
-
-                }
-
-
-            }// Column
-
-
-
-        }
-
-        */
-
 
     }
+
 
 }
