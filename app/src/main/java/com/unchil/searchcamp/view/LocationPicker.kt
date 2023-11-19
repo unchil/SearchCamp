@@ -12,10 +12,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,8 +38,21 @@ fun AdministrativeDistrictSiDoPicker(
 ) {
 
     val hapticFeedback = LocalHapticFeedback.current
-    val sido_state = rememberPickerState(dataList.size, repeatItems = false)
-    //val sido_contentDescription by remember { derivedStateOf { "${sido_state.selectedOption + 1}" } }
+
+    val configuration = LocalConfiguration.current
+
+    val sido_state = rememberPickerState(
+        initialNumberOfOptions =dataList.size,
+        initiallySelectedOption= 0,
+        repeatItems = false)
+
+
+
+    LaunchedEffect (key1 = configuration.orientation) {
+        sido_state.scrollToOption(0)
+    }
+
+
 
     LaunchedEffect(key1 =sido_state.isScrollInProgress) {
         if (sido_state.isScrollInProgress) {
@@ -56,10 +71,17 @@ fun AdministrativeDistrictSiDoPicker(
         gradientColor =  MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 
+        val  text  = if(dataList.size <= it){
+            dataList.last().ctp_kor_nm
+        }else {
+            dataList[it].ctp_kor_nm
+        }
+
+
         Text(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            text = dataList[it].ctp_kor_nm  ,
+            text = text  ,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             style = MaterialTheme.typography.bodyLarge,
@@ -77,14 +99,27 @@ fun AdministrativeDistrictSiGunGuPicker(
 ) {
 
     val hapticFeedback = LocalHapticFeedback.current
-    val siggState = rememberPickerState(dataList.size, repeatItems = false)
-//    val sido_contentDescription by remember { derivedStateOf { "${siggState.selectedOption + 1}" } }
+    val configuration = LocalConfiguration.current
+
+    val siggState = rememberPickerState(
+        initialNumberOfOptions =dataList.size,
+        initiallySelectedOption= 0,
+        repeatItems = false)
+
+    LaunchedEffect (key1 = configuration.orientation) {
+        siggState.scrollToOption(0)
+    }
+
 
     LaunchedEffect(key1 =siggState.isScrollInProgress) {
         if (siggState.isScrollInProgress) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         } else {
-            onSelectedHandler(VWorldService.LT_C_ADSIGG_INFO, dataList[siggState.selectedOption].sig_cd, dataList[siggState.selectedOption].sig_kor_nm)
+            onSelectedHandler(
+                VWorldService.LT_C_ADSIGG_INFO,
+                dataList[siggState.selectedOption].sig_cd,
+                dataList[siggState.selectedOption].sig_kor_nm
+            )
         }
     }
 
@@ -97,14 +132,23 @@ fun AdministrativeDistrictSiGunGuPicker(
         gradientColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
     ) {
 
+        // 빠른 recomposable 에 의 한 dataList  size  와  initialNumberOfOptions 의 불일치 로 인한 outofbound index
+        val  text  = if(dataList.size <= it){
+            dataList.last().sig_kor_nm
+        }else {
+            dataList[it].sig_kor_nm
+        }
+
         Text(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            text = dataList[it].sig_kor_nm  ,
+            text = text  ,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             style = MaterialTheme.typography.bodyLarge,
         )
+
+
     }
 
 }
