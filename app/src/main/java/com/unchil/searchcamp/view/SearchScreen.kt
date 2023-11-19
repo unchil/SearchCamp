@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,6 +96,20 @@ fun SearchScreen(){
         multiplePermissions = permissions
     ) {
 
+        var administrativeDistrictSiDoCode by rememberSaveable {
+            mutableStateOf("0")
+        }
+
+        var administrativeDistrictSiGunGu by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        val searchTitle: MutableState<String?> = rememberSaveable {
+            mutableStateOf(null)
+        }
+
+
+
 
         val context = LocalContext.current
         val db = LocalSearchCampDB.current
@@ -102,7 +117,11 @@ fun SearchScreen(){
 
         val viewModel = remember {
             SearchScreenViewModel(
-                repository = RepositoryProvider.getRepository().apply { database = db })
+                repository = RepositoryProvider.getRepository().apply { database = db },
+                administrativeDistrictSiDoCode = administrativeDistrictSiDoCode,
+                administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
+                searchTitle = searchTitle.value
+                )
         }
 
         val fusedLocationProviderClient = remember {
@@ -117,23 +136,14 @@ fun SearchScreen(){
             }
         }
 
+
+
         val currentListDataCntStateFlow = viewModel.currentListDataCntStateFlow.collectAsState()
 
         val channel = remember { Channel<Int>(Channel.CONFLATED) }
 
         val snackBarHostState = remember { SnackbarHostState() }
 
-        var administrativeDistrictSiDoCode by remember {
-            mutableStateOf("0")
-        }
-
-        var administrativeDistrictSiGunGu by remember {
-            mutableStateOf("")
-        }
-
-        val searchTitle: MutableState<String?> = remember {
-            mutableStateOf(null)
-        }
 
         val scope = rememberCoroutineScope()
 
@@ -156,6 +166,7 @@ fun SearchScreen(){
                     }
                 }
 
+
                 viewModel.onEvent(
                     SearchScreenViewModel.Event.RecvGoCampingData(
                         GoCampingService.CAMPSITE
@@ -164,13 +175,16 @@ fun SearchScreen(){
 
             }
 
+
             viewModel.onEvent(
                 SearchScreenViewModel.Event.Search(
-                    "0",
-                    "",
-                    ""
+                    administrativeDistrictSiDoCode,
+                    administrativeDistrictSiGunGu,
+                    searchTitle.value
                 )
             )
+
+
 
             viewModel.effect.collect {
                 when (it) {

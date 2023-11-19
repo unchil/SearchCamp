@@ -18,7 +18,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-class SearchScreenViewModel   (val repository: Repository) : ViewModel() {
+class SearchScreenViewModel   (
+    val repository: Repository,
+    val administrativeDistrictSiDoCode: String,
+    val administrativeDistrictSiGunGu: String,
+    val searchTitle: String? = null
+
+
+) : ViewModel() {
 
     private val _isRefreshing = MutableStateFlow(false)
 
@@ -55,12 +62,13 @@ class SearchScreenViewModel   (val repository: Repository) : ViewModel() {
             .onStart {
                 emit(
                     Event.Search(
-                        administrativeDistrictSiDoCode = "0",
-                        administrativeDistrictSiGunGu = "현위치",
-                        searchTitle = ""
+                        administrativeDistrictSiDoCode = administrativeDistrictSiDoCode,
+                        administrativeDistrictSiGunGu = administrativeDistrictSiGunGu,
+                        searchTitle = searchTitle
                     )
                 )
             }
+
 
 
 
