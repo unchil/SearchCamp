@@ -58,7 +58,18 @@ fun AdministrativeDistrictSiDoPicker(
         if (sido_state.isScrollInProgress) {
     //        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }else {
-            onSelectedHandler(VWorldService.LT_C_ADSIDO_INFO, dataList[sido_state.selectedOption].ctprvn_cd, dataList[sido_state.selectedOption].ctp_kor_nm)
+
+            val  administrativeDistrictSiDo:Pair<String, String>  = if(dataList.size <= sido_state.selectedOption){
+                Pair(  dataList.last().ctprvn_cd, dataList.last().ctp_kor_nm)
+            }else {
+                Pair(dataList[sido_state.selectedOption].ctprvn_cd , dataList[sido_state.selectedOption].ctp_kor_nm )
+            }
+
+            onSelectedHandler(
+                VWorldService.LT_C_ADSIDO_INFO,
+                administrativeDistrictSiDo.first,
+                administrativeDistrictSiDo.second
+            )
         }
     }
 
@@ -115,10 +126,20 @@ fun AdministrativeDistrictSiGunGuPicker(
         if (siggState.isScrollInProgress) {
        //     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         } else {
+
+
+            val  administrativeDistrictSiGunGu:Pair<String, String>  = if(dataList.size <= siggState.selectedOption){
+                Pair(  dataList.last().sig_cd, dataList.last().sig_kor_nm)
+            }else {
+                Pair(dataList[siggState.selectedOption].sig_cd , dataList[siggState.selectedOption].sig_kor_nm )
+            }
+
+
+
             onSelectedHandler(
                 VWorldService.LT_C_ADSIGG_INFO,
-                dataList[siggState.selectedOption].sig_cd,
-                dataList[siggState.selectedOption].sig_kor_nm
+                administrativeDistrictSiGunGu.first,
+                administrativeDistrictSiGunGu.second
             )
         }
     }
