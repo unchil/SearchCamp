@@ -171,7 +171,7 @@ fun AdministrativeDistrictSiDoPicker(
         ) {page ->
 
             Card(
-                modifier =  Modifier
+                modifier = Modifier
                     .height(itemHeight)
                     .width(boxWidth)
                     .graphicsLayer {
@@ -239,11 +239,17 @@ fun AdministrativeDistrictSiGunGuPicker(
     onSelectedHandler:(VWorldService, String, String)-> Unit
 ) {
 
+
+
     val pagerState  =   rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f,
         pageCount = {  dataList.size } )
 
+
+    LaunchedEffect(key1 = dataList ){
+        pagerState.scrollToPage(0)
+    }
 
 
     LaunchedEffect(key1 = pagerState.isScrollInProgress){
@@ -295,7 +301,7 @@ fun AdministrativeDistrictSiGunGuPicker(
         ) {page ->
 
             Card(
-                modifier =  Modifier
+                modifier = Modifier
                     .height(itemHeight)
                     .width(boxWidth)
                     .graphicsLayer {
