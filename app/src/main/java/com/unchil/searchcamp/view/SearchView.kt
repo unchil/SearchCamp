@@ -8,11 +8,8 @@ import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -31,27 +27,16 @@ import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.SearchOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarColors
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -70,7 +55,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,7 +67,6 @@ import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.db.entity.SiDo_TBL
-import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.recognizerIntent
@@ -192,6 +175,7 @@ fun SearchCampView(
 
 
         val sidoData = viewModel.sidoListStateFlow.collectAsState()
+
         val siggData = viewModel.sigunguListStateFlow.collectAsState()
 
         var administrativeDistrictTitle by remember {
@@ -267,12 +251,15 @@ fun SearchCampView(
             }
         }
 
+
+
         val onSelectedHandler: (type: VWorldService, code: String, name: String) -> Unit =
             { type, code, name ->
                 when (type) {
                     VWorldService.LT_C_ADSIDO_INFO -> {
                         administrativeDistrictSiDoCode = code
                         administrativeDistrictSiDo = name
+
                         viewModel.onEvent(LocationPickerViewModel.Event.GetSiGunGu(upCode = code))
                     }
 
@@ -283,11 +270,14 @@ fun SearchCampView(
                 }
             }
 
+
+
         LaunchedEffect(key1 = siggData.value) {
             if (siggData.value.isNotEmpty()) {
 
                 administrativeDistrictSiGunGu =  siggData.value.first().sig_kor_nm
                 administrativeDistrictTitle =  administrativeDistrictSiDo + " " + siggData.value.first().sig_kor_nm
+
             }
 
             if (administrativeDistrictSiDo.equals("현위치")) {
@@ -386,13 +376,15 @@ fun SearchCampView(
                                 ) {
 
 
+
+
                                     AdministrativeDistrictSiDoPicker(
                                         dataList = dataList,
                                         onSelectedHandler = onSelectedHandler,
                                     )
 
 
-                                    if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
+                                    if ( siggData.value.isNotEmpty() && administrativeDistrictSiDo != "현위치") {
 
                                         Spacer(modifier = Modifier.size(10.dp))
 
@@ -402,6 +394,7 @@ fun SearchCampView(
                                         )
 
                                     }
+
 
                                 }
 
@@ -413,7 +406,7 @@ fun SearchCampView(
 
                     }
 
-                    AnimatedVisibility(!isPortrait && sidoData.value.size > 0) {
+                    AnimatedVisibility(!isPortrait && sidoData.value.isNotEmpty()) {
 
                         val dataList = mutableListOf<SiDo_TBL>()
                         dataList.add(
@@ -454,15 +447,17 @@ fun SearchCampView(
                             ) {
 
 
+
                                 AdministrativeDistrictSiDoPicker(
                                     dataList = dataList,
                                     onSelectedHandler = onSelectedHandler,
                                 )
 
 
-                                if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
+                                if (siggData.value.isNotEmpty() && administrativeDistrictSiDo != "현위치") {
 
                                     Spacer(modifier = Modifier.size(10.dp))
+
 
                                     AdministrativeDistrictSiGunGuPicker(
                                         dataList = siggData.value,

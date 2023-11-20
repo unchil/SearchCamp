@@ -816,6 +816,7 @@ fun SiteImagePagerView(
             ){
 
                 if(isPortrait){
+
                     VerticalPager(
                         modifier = Modifier,
                         state = pagerState,
