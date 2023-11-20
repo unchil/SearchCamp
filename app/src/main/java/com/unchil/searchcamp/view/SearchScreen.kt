@@ -5,18 +5,26 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.rememberBackdropScaffoldState
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -108,12 +117,8 @@ fun SearchScreen(){
             mutableStateOf(null)
         }
 
-
-
-
         val context = LocalContext.current
         val db = LocalSearchCampDB.current
-
 
         val viewModel = remember {
             SearchScreenViewModel(
@@ -136,20 +141,15 @@ fun SearchScreen(){
             }
         }
 
-
-
         val currentListDataCntStateFlow = viewModel.currentListDataCntStateFlow.collectAsState()
 
         val channel = remember { Channel<Int>(Channel.CONFLATED) }
 
         val snackBarHostState = remember { SnackbarHostState() }
 
-
         val scope = rememberCoroutineScope()
 
         val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
-
-
 
         LaunchedEffect(key1 = viewModel) {
             if (isConnect) {
@@ -200,11 +200,6 @@ fun SearchScreen(){
             }
 
         }
-
-
-
-
-
 
         LaunchedEffect(channel) {
 
@@ -296,31 +291,29 @@ fun SearchScreen(){
 
         val configuration = LocalConfiguration.current
         var isPortrait by remember { mutableStateOf(false) }
-
-        var searchScreenHeight by remember { mutableStateOf(0.dp) }
-        var peekHeight by remember { mutableStateOf(0.dp) }
+        val peekHeight by remember { mutableStateOf(58.dp) }
         var headerHeight  by remember { mutableStateOf(0.dp) }
 
         when (configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> {
                 isPortrait = true
-                searchScreenHeight = 450.dp
-                peekHeight = configuration.screenHeightDp.dp  - searchScreenHeight
-                headerHeight = 60.dp
+                headerHeight = 70.dp
             }
             else ->{
                 isPortrait = false
-                searchScreenHeight = 290.dp
-                peekHeight = configuration.screenHeightDp.dp - searchScreenHeight
             }
         }
-
 
 
         BackdropScaffold(
             scaffoldState = scaffoldState,
             peekHeight = peekHeight,
             headerHeight = headerHeight,
+            persistentAppBar =  false,
+            backLayerBackgroundColor = Color.Transparent,
+            frontLayerShape =  ShapeDefaults.Medium,
+            frontLayerBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
+
             snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState) {
 
@@ -328,7 +321,9 @@ fun SearchScreen(){
                         snackbarData = it,
                         modifier = Modifier,
                         shape = ShapeDefaults.ExtraSmall,
-                        dismissActionContentColor = Color.LightGray
+                        containerColor = Color.Yellow,
+                        contentColor = Color.Black,
+                        dismissActionContentColor = Color.Black
                     )
 
 
@@ -336,7 +331,7 @@ fun SearchScreen(){
             },
             appBar = {
 
-                if(isPortrait){
+
                     TopAppBar(
                         title = {
                             Text(
@@ -375,7 +370,7 @@ fun SearchScreen(){
                         backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                }
+
 
 
             },
@@ -392,6 +387,7 @@ fun SearchScreen(){
                         }
                     }
 
+/*
                     AnimatedVisibility(visible = scaffoldState.isConcealed) {
                         Spacer(modifier = Modifier
                             .fillMaxSize()
@@ -399,30 +395,21 @@ fun SearchScreen(){
                     }
 
 
+ */
                 }
 
 
             },
             frontLayerContent = {
-
-
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.TopCenter,
                 ) {
 
                     SearchCampView(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 0.dp),
                         onSearchEventHandler = onSearchEventHandler
                     )
-
-
                 }
-
-
-
             }
         )
 
@@ -435,28 +422,99 @@ fun SearchScreen(){
 }
 
 
+
+
 @Preview
 @Composable
 fun PrevSearchScreenNew(){
 
+    /*
     val context = LocalContext.current
     val permissionsManager = PermissionsManager()
     val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
-
-
+*/
 
     SearchCampTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
+
+            BackDropScaffoldTest()
+/*
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB) {
                     SearchScreen()
                 }
             }
+ */
         }
     }
 
 
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@Composable
+fun BackDropScaffoldTest(){
+
+    val scaffoldState = rememberBackdropScaffoldState(
+        BackdropValue.Concealed
+    )
+    val scope = rememberCoroutineScope()
+    BackdropScaffold(
+        scaffoldState = scaffoldState,
+        appBar = {
+            TopAppBar(
+                title = { Text("Backdrop") },
+                navigationIcon = {
+                    if (scaffoldState.isConcealed) {
+                        IconButton(
+                            onClick = {
+                                scope.launch { scaffoldState.reveal() }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                scope.launch { scaffoldState.conceal() }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Close"
+                            )
+                        }
+                    }
+                },
+                elevation = 0.dp,
+                backgroundColor = Color.Transparent
+            )
+        },
+        backLayerContent = {
+            Box(modifier = Modifier.fillMaxSize())
+        },
+        frontLayerContent = {
+            Box(modifier = Modifier.fillMaxSize() )
+        },
+        modifier = Modifier,
+        gesturesEnabled =  true,
+        peekHeight =  56.dp, // default app bar height
+        headerHeight = 60.dp, // frontLayer header Height
+        persistentAppBar =  true,
+        stickyFrontLayer =  true,
+        backLayerBackgroundColor = Color.Red,
+        backLayerContentColor =  Color.Black,
+        frontLayerShape =  ShapeDefaults.Medium,
+        frontLayerElevation = 6.dp,
+        frontLayerBackgroundColor = Color.Yellow,
+        frontLayerContentColor =  Color.White,
+        frontLayerScrimColor = Color.Green,
+    )
 }

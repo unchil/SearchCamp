@@ -159,11 +159,10 @@ fun WeatherContent(isSticky:Boolean = false , onCheckLocationService:((Boolean)-
 
         Column(
             modifier = Modifier
-                .clickable(false, null, null) {}
+           //     .clickable(false, null, null) {}
                 .width(400.dp)
                 .clip(shape = ShapeDefaults.ExtraSmall)
                 .background(
-                    //color =MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 1f)
                     color = Color.Transparent
                 )
 

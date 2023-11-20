@@ -9,6 +9,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.NorthWest
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Search
@@ -37,10 +43,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -48,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,6 +68,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -97,9 +107,10 @@ fun SearchCampView(
 ){
 
 
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val configuration = LocalConfiguration.current
+    val focusmanager = LocalFocusManager.current
 
+
+    val configuration = LocalConfiguration.current
 
 
     var isPortrait by remember { mutableStateOf(false) }
@@ -239,7 +250,7 @@ fun SearchCampView(
         }
 
 
-        val isVisible: MutableState<Boolean> = remember { mutableStateOf(true) }
+        val isVisible: MutableState<Boolean> = remember { mutableStateOf(false) }
 
         val recognizerIntent = remember { recognizerIntent }
 
@@ -288,32 +299,38 @@ fun SearchCampView(
 
         val scrollState = rememberScrollState()
 
-
-
-        Column(
-                    modifier = Modifier
-                        .then(other = modifier)
-                        .fillMaxWidth(searchBoxWidth)
-                        .fillMaxHeight(searchBoxHeight)
-                        .clip(shape = ShapeDefaults.ExtraSmall)
-                        .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+        val historyItems = remember {
+            mutableStateListOf<String>()
+        }
 
 
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier
+                    .then(other = modifier)
+                    .fillMaxWidth(searchBoxWidth)
+                    .fillMaxHeight(searchBoxHeight)
+                    .clip(shape = ShapeDefaults.ExtraSmall),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(columnWidth),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable {
+                        isVisible.value = false
+                        focusmanager.clearFocus(true)
+                    },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(columnWidth),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
 
 
 
@@ -328,9 +345,75 @@ fun SearchCampView(
 
 
 
-                    WeatherContent()
+                        WeatherContent()
 
-                    AnimatedVisibility(isPortrait && sidoData.value.size > 0) {
+                        AnimatedVisibility(isPortrait && sidoData.value.size > 0) {
+
+                            val dataList = mutableListOf<SiDo_TBL>()
+                            dataList.add(
+                                SiDo_TBL(
+                                    ctprvn_cd = "0",
+                                    ctp_kor_nm = "현위치",
+                                    ctp_eng_nm = "CurrentLocation"
+                                )
+                            )
+                            dataList.addAll(1, sidoData.value)
+
+                            Column(
+                                modifier = Modifier
+                                    .clip(shape = ShapeDefaults.ExtraSmall)
+                                    .fillMaxWidth(columnWidth)
+                                    .height(administrativeDistrictPickerHeight),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = administrativeDistrictTitle,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    textAlign = TextAlign.Center
+                                )
+
+                                Spacer(modifier = Modifier.size(10.dp))
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+
+                                    AdministrativeDistrictSiDoPicker(
+                                        dataList = dataList,
+                                        onSelectedHandler = onSelectedHandler,
+                                    )
+
+
+                                    if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
+
+                                        Spacer(modifier = Modifier.size(10.dp))
+
+                                        AdministrativeDistrictSiGunGuPicker(
+                                            dataList = siggData.value,
+                                            onSelectedHandler = onSelectedHandler
+                                        )
+
+                                    }
+
+                                }
+
+
+                            }
+
+
+                        }
+
+                    }
+
+                    AnimatedVisibility(!isPortrait && sidoData.value.size > 0) {
 
                         val dataList = mutableListOf<SiDo_TBL>()
                         dataList.add(
@@ -344,8 +427,9 @@ fun SearchCampView(
 
                         Column(
                             modifier = Modifier
+                                .clickable { isVisible.value = false }
                                 .clip(shape = ShapeDefaults.ExtraSmall)
-                                .fillMaxWidth(columnWidth)
+                                .fillMaxWidth(1f)
                                 .height(administrativeDistrictPickerHeight),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -354,6 +438,7 @@ fun SearchCampView(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = administrativeDistrictTitle,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center
@@ -396,64 +481,179 @@ fun SearchCampView(
 
                 }
 
-                AnimatedVisibility(!isPortrait && sidoData.value.size > 0) {
 
-                    val dataList = mutableListOf<SiDo_TBL>()
-                    dataList.add(
-                        SiDo_TBL(
-                            ctprvn_cd = "0",
-                            ctp_kor_nm = "현위치",
-                            ctp_eng_nm = "CurrentLocation"
+
+                SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = if (isVisible.value) 0.dp else 8.dp)
+                    ,
+                    query = query_title,
+                    onQueryChange = {
+                        query_title = it
+                    },
+                    onSearch = { query_title ->
+                        onSearchEventHandler(
+                            administrativeDistrictSiDoCode,
+                            administrativeDistrictSiGunGu,
+                            query_title
                         )
-                    )
-                    dataList.addAll(1, sidoData.value)
+                        isVisible.value = false
 
-                    Column(
-                        modifier = Modifier
-                            .clip(shape = ShapeDefaults.ExtraSmall)
-                            .fillMaxWidth( 1f)
-                            .height(administrativeDistrictPickerHeight),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                        if(query_title.isNotEmpty()){
+                            historyItems.add(query_title)
+                        }
 
+                        focusmanager.clearFocus(true)
+                    },
+                    active = isVisible.value,
+                    onActiveChange = {
+                        isVisible.value = it
+                    },
+                    placeholder = {
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = administrativeDistrictTitle,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center
+                            text = "캠핑장 이름 검색",
+                            style = MaterialTheme.typography.bodyMedium
                         )
+                    },
+                    leadingIcon = {
+                        if(query_title.isNotEmpty()){
+                            IconButton(
+                                modifier = Modifier,
+                                onClick = {
+                                    isHapticProcessing = true
+                                    query_title = ""
+                                    onMessage?.let {
+                                        it()
+                                    }
+                                },
+                                content = {
+                                    Icon(
+                                        modifier = Modifier,
+                                        imageVector = Icons.Outlined.Close,
+                                        contentDescription = "Clear"
+                                    )
+                                }
+                            )
 
-                        Spacer(modifier = Modifier.size(10.dp))
-
+                        }
+                    },
+                    trailingIcon = {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(end = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
 
-
-                            AdministrativeDistrictSiDoPicker(
-                                dataList = dataList,
-                                onSelectedHandler = onSelectedHandler,
+                            IconButton(
+                                modifier = Modifier,
+                                onClick = {
+                                    isHapticProcessing = true
+                                    startLauncherRecognizerIntent.launch(recognizerIntent())
+                                },
+                                content = {
+                                    Icon(
+                                        modifier = Modifier,
+                                        imageVector = Icons.Outlined.Mic,
+                                        contentDescription = "SpeechToText"
+                                    )
+                                }
                             )
 
 
-                            if (siggData.value.size > 0 && administrativeDistrictSiDo != "현위치") {
 
-                                Spacer(modifier = Modifier.size(10.dp))
+                            IconButton(
+                                modifier = Modifier,
+                                onClick = {
 
-                                AdministrativeDistrictSiGunGuPicker(
-                                    dataList = siggData.value,
-                                    onSelectedHandler = onSelectedHandler
+                                    onSearchEventHandler(
+                                        administrativeDistrictSiDoCode,
+                                        administrativeDistrictSiGunGu,
+                                        query_title
+                                    )
+                                    isVisible.value = false
+
+                                    if(query_title.isNotEmpty()){
+                                        historyItems.add(query_title)
+                                    }
+
+                                    focusmanager.clearFocus(true)
+
+                                },
+                                content = {
+                                    Icon(
+                                        modifier = Modifier,
+                                        imageVector = Icons.Outlined.Search,
+                                        contentDescription = "Search"
+                                    )
+                                }
+                            )
+
+
+
+
+
+
+                        }
+                    },
+                    tonalElevation = 2.dp,
+                    shadowElevation = 2.dp,
+
+                    ) {
+
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(scrollState),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        val size = historyItems.size
+
+                        for ( i in 1.. size){
+                            val index = size - i
+                            val historyItem = historyItems[index]
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 6.dp) ,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+
+                                ) {
+
+                                Icon(
+                                    modifier = Modifier
+                                        .clickable {  historyItems.removeAt(index) },
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = null
+                                )
+
+                                Text(text = historyItem)
+
+                                Icon(
+                                    modifier = Modifier
+                                        .clickable {  query_title = historyItem },
+                                    imageVector = Icons.Default.NorthWest,
+                                    contentDescription = null
                                 )
 
                             }
-
                         }
+
+
+                        if(historyItems.isNotEmpty()){
+                            Text(
+                                text = "clear all history",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp)
+                                    .clickable { historyItems.clear() },
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
 
 
                     }
@@ -461,115 +661,17 @@ fun SearchCampView(
 
                 }
 
+
+
             }
 
 
 
-            SearchBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(searchBarHeight)
-                    .padding(horizontal = 20.dp)
-                    .clip(shape = ShapeDefaults.ExtraSmall),
-                query = query_title,
-                onQueryChange = {
-                    query_title = it
-                },
-                onSearch = { query_title ->
-                    onSearchEventHandler(
-                        administrativeDistrictSiDoCode,
-                        administrativeDistrictSiGunGu,
-                        query_title
-                    )
-                    keyboardController?.hide()
-                },
-                active = isVisible.value,
-                onActiveChange = {
-                    isVisible.value = it
-                },
-                placeholder = {
-                    Text(
-                        text = "캠핑장 이름 검색",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                trailingIcon = {
-                    Row(
-                        modifier = Modifier.padding(end = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        IconButton(
-                            modifier = Modifier,
-                            onClick = {
-                                isHapticProcessing = true
-                                startLauncherRecognizerIntent.launch(recognizerIntent())
-                            },
-                            content = {
-                                Icon(
-                                    modifier = Modifier,
-                                    imageVector = Icons.Outlined.Mic,
-                                    contentDescription = "SpeechToText"
-                                )
-                            }
-                        )
-
-
-                        IconButton(
-                            modifier = Modifier,
-                            onClick = {
-                                isHapticProcessing = true
-                                query_title = ""
-                                onMessage?.let {
-                                    it()
-                                }
-                            },
-                            content = {
-                                Icon(
-                                    modifier = Modifier,
-                                    imageVector = Icons.Outlined.SearchOff,
-                                    contentDescription = "Clear"
-                                )
-                            }
-                        )
-
-                        IconButton(
-                            modifier = Modifier,
-                            onClick = {
-
-                                keyboardController?.hide()
-
-                                isHapticProcessing = true
-
-                                onSearchEventHandler(
-                                    administrativeDistrictSiDoCode,
-                                    administrativeDistrictSiGunGu,
-                                    query_title
-                                )
-
-                            },
-                            content = {
-                                Icon(
-                                    modifier = Modifier,
-                                    imageVector = Icons.Outlined.Search,
-                                    contentDescription = "Search"
-                                )
-                            }
-                        )
 
 
 
 
 
-
-                    }
-                },
-                tonalElevation = 2.dp,
-            ) {}
-
-
-
-        }
 
     }
 
@@ -577,6 +679,8 @@ fun SearchCampView(
 
 
 
+@SuppressLint("RememberReturnType")
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = false, showSystemUi = false)
 @Composable
 fun SearchViewPreview() {
@@ -588,24 +692,74 @@ fun SearchViewPreview() {
     SearchCampTheme {
         Surface( modifier = Modifier.fillMaxSize(),  color = Color.Transparent  ) {
 
+
+            /*
             CompositionLocalProvider(LocalPermissionsManager provides permissionsManager) {
                 CompositionLocalProvider(LocalSearchCampDB provides searchCampDB2) {
-
-
                         SearchCampView(
                             onSearchEventHandler = { _,_,_ ->
                             }
                         )
 
-
-
-
-
-
-
                 }
             }
 
+             */
+
+            var queryString by remember {
+                mutableStateOf("")
+            }
+
+            // if the search bar is active or not
+            var isActive by remember {
+                mutableStateOf(false)
+            }
+
+            val contextForToast = LocalContext.current.applicationContext
+
+            // previous search terms
+            var historyItems = remember {
+                mutableStateListOf("SemicolonSpace", "Jetpack Compose", "Android")
+            }
+
+
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = if (isActive) 0.dp else 8.dp),
+                query = queryString,
+                onQueryChange = { newQueryString ->
+                    // this is called every time the user enters a new character
+                    queryString = newQueryString
+                },
+                onSearch = {
+                    // this is called when the user taps on the Search icon on the keyboard
+                    isActive = false
+                    historyItems.add(queryString) // add the current search term to the list
+                },
+                active = isActive,
+                onActiveChange = { activeChange ->
+                    isActive = activeChange
+                },
+                placeholder = {
+                    Text(text = "Search")
+                },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                }
+            ) {
+                // this is a column scope
+                // all the items are displayed vertically
+                historyItems.forEach { historyItem ->
+                    Row(modifier = Modifier.padding(all = 16.dp)) {
+                        Icon(
+                            modifier = Modifier.padding(end = 12.dp),
+                            imageVector = Icons.Default.History, contentDescription = null
+                        )
+                        Text(text = historyItem)
+                    }
+                }
+            }
 
         }
     }

@@ -871,7 +871,9 @@ fun SiteImagePagerView(
                                         isVisibleImage = true
                                         imageUrl = siteImageList.value.get(page).imageUrl
                                     }
-                                )
+                                ),
+                            shape =  ShapeDefaults.ExtraSmall,
+
                         ) {
                             Box(
                                 modifier = Modifier
@@ -944,7 +946,8 @@ fun SiteImagePagerView(
                                         isVisibleImage = true
                                         imageUrl = siteImageList.value.get(page).imageUrl
                                     }
-                                )
+                                ),
+                            shape =  ShapeDefaults.ExtraSmall,
                         ) {
                             Box(
                                 modifier = Modifier
