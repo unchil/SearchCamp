@@ -3,6 +3,7 @@ package com.unchil.searchcamp.view
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -79,7 +81,7 @@ import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import com.unchil.searchcamp.R
 
 
 @Composable
@@ -393,21 +395,6 @@ fun ResultListScreen(
                                 .background(color = Color.LightGray.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            /*
-                            Icon(
-                                modifier = Modifier
-                                    .scale(1f)
-                                    .clickable {
-                                        dragHandlerAction.invoke()
-                                    },
-                                imageVector =
-                                if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded)
-                                    Icons.Outlined.KeyboardArrowDown
-                                else Icons.Outlined.KeyboardArrowUp,
-                                contentDescription = "SiteDetailScreen",
-                            )
-
-                             */
 
                             currentCampSiteData.value?.let {
 
@@ -587,6 +574,13 @@ fun ResultListScreen(
                                 listState = lazyGridState
                             )
                         }
+
+
+                        if(campSiteStream.itemCount == 0) {
+                            ImageViewer(data = R.drawable.forest, size = Size.ORIGINAL)
+                        }
+
+
 
 
                     }// Box
