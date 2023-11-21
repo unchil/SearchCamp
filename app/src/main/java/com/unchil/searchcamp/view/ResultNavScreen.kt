@@ -157,24 +157,7 @@ fun ResultNavScreen(
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            if(false) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(70.dp),
-                    contentAlignment = Alignment.Center
-                ) {
 
-
-                    Text(
-                        text = context.getString(R.string.mainmenu_result) + " ${currentListDataCntStateFlow.value} 건",
-                        modifier = Modifier.align(Alignment.Center),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                }
-            }
         },
         bottomBar = {
             if (isPortrait) {
@@ -183,7 +166,9 @@ fun ResultNavScreen(
                         .fillMaxWidth()
                         .height(60.dp)
                         .shadow(elevation = 1.dp),
-                    backgroundColor = MaterialTheme.colorScheme.background
+                    backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    elevation = 2.dp,
                 ) {
 
                     resultScreens.forEachIndexed { index, it ->
@@ -192,7 +177,7 @@ fun ResultNavScreen(
                                 Icon(
                                     imageVector = it.icon ?: Icons.Outlined.Info,
                                     contentDescription = context.resources.getString(it.name),
-                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                    tint = if (selectedScreen == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline
                                 )
                             },
                             label = {
@@ -202,7 +187,7 @@ fun ResultNavScreen(
                                     modifier = Modifier,
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                    color = if (selectedScreen == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline
                                 )
 
                             },
@@ -213,8 +198,8 @@ fun ResultNavScreen(
                                 selectedScreen = index
 
                             },
-                            selectedContentColor = MaterialTheme.colorScheme.onSurface,
-                            //      unselectedContentColor = Color.Gray
+                            selectedContentColor = MaterialTheme.colorScheme.tertiary,
+                            unselectedContentColor = MaterialTheme.colorScheme.tertiaryContainer
                         )
                     }
                 }
@@ -258,6 +243,8 @@ fun ResultNavScreen(
                             .shadow(elevation = 1.dp)
                             .width(80.dp)
                             .fillMaxHeight(),
+                        containerColor= MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         header = {
                             Column(
                                 modifier = Modifier,
@@ -304,7 +291,7 @@ fun ResultNavScreen(
                                     Icon(
                                         imageVector = it.icon ?: Icons.Outlined.Info,
                                         contentDescription = context.resources.getString(it.name),
-                                        tint = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                        tint =  if (selectedScreen == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline
                                     )
                                 },
                                 label = {
@@ -314,7 +301,7 @@ fun ResultNavScreen(
                                         modifier = Modifier,
                                         textAlign = TextAlign.Center,
                                         style = MaterialTheme.typography.titleSmall,
-                                        color = if (selectedScreen == index) MaterialTheme.colorScheme.onSurface else Color.LightGray
+                                        color = if (selectedScreen == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline
                                     )
 
                                 },
@@ -324,7 +311,7 @@ fun ResultNavScreen(
                                     hapticProcessing()
                                     selectedScreen = index
                                 },
-                                //      unselectedContentColor = Color.Gray
+
                             )
                         }
 

@@ -392,7 +392,7 @@ fun ResultListScreen(
                             modifier = Modifier
                                 .height(60.dp)
                                 .fillMaxWidth()
-                                .background(color = Color.LightGray.copy(alpha = 0.2f)),
+                                .background(color = MaterialTheme.colorScheme.tertiary),
                             contentAlignment = Alignment.Center
                         ) {
 
@@ -406,6 +406,7 @@ fun ResultListScreen(
                                     Text(
                                         text = it.facltNm,
                                         modifier = Modifier.padding(vertical = 2.dp),
+                                        color = MaterialTheme.colorScheme.onTertiary,
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center,
                                         style = MaterialTheme.typography.titleMedium
@@ -416,7 +417,8 @@ fun ResultListScreen(
                                             Icon(
                                                 imageVector = Icons.Outlined.Home,
                                                 contentDescription = "홈페이지",
-                                                modifier = Modifier
+                                                modifier = Modifier,
+                                                tint = MaterialTheme.colorScheme.onTertiary
                                             )
                                         }
                                     }

@@ -134,10 +134,13 @@ fun AdministrativeDistrictPicker(
                 if(isUsableDarkMode){
                     Brush.verticalGradient(listOf(Color.Black, Color.DarkGray, Color.Black))
                 }else {
-                    Brush.verticalGradient(listOf(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        MaterialTheme.colorScheme.onSecondary,
-                        MaterialTheme.colorScheme.secondaryContainer))
+                    Brush.verticalGradient(
+                        listOf(
+                        MaterialTheme.colorScheme.outlineVariant,
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.outlineVariant
+                        )
+                    )
                 }
             ) ,
         contentAlignment = Alignment.Center

@@ -336,6 +336,7 @@ fun SearchScreen(){
                         title = {
                             Text(
                                 text = context.getString(R.string.mainmenu_result) + " ${currentListDataCntStateFlow.value} 건",
+                                color = MaterialTheme.colorScheme.onTertiary,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(end = 80.dp),
@@ -358,7 +359,8 @@ fun SearchScreen(){
                             ) {
                                 Icon(
                                     Icons.Default.TravelExplore,
-                                    contentDescription = "Localized description"
+                                    contentDescription = "Localized description",
+                                    tint = MaterialTheme.colorScheme.onTertiary
                                 )
                             }
 
@@ -367,8 +369,8 @@ fun SearchScreen(){
 
                         },
                         elevation = 2.dp,
-                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        backgroundColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
                     )
 
 

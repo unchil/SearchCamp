@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
 
             SearchCampTheme(
-                dynamicColor = true
+                dynamicColor = false
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

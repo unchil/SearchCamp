@@ -612,8 +612,8 @@ fun SearchCampView(
                     tonalElevation = 2.dp,
                     shadowElevation = 2.dp,
                     colors = SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        dividerColor =MaterialTheme.colorScheme.onSecondary
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        dividerColor =MaterialTheme.colorScheme.tertiary
                     ),
                 ) {
 

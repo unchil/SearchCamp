@@ -158,7 +158,7 @@ fun SiteDefaultView(
                 .fillMaxWidth()
                 .height(170.dp)
                 .clip(ShapeDefaults.ExtraSmall)
-                .background(color = MaterialTheme.colorScheme.background)  ,
+                .background(color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))  ,
             contentAlignment = Alignment.Center
         ){
 
