@@ -435,7 +435,6 @@ fun SearchCampView(
 
                         Column(
                             modifier = Modifier
-                                .clickable { isVisible.value = false }
                                 .clip(shape = ShapeDefaults.ExtraSmall)
                                 .fillMaxWidth(1f)
                                 .height(administrativeDistrictPickerHeight),
@@ -517,12 +516,12 @@ fun SearchCampView(
                             administrativeDistrictSiGunGu,
                             query_title
                         )
-                        isVisible.value = false
+
 
                         if (query_title.isNotEmpty()) {
                             historyItems.add(query_title)
                         }
-
+                        isVisible.value = false
                         focusmanager.clearFocus(true)
                     },
                     active = isVisible.value,
@@ -589,12 +588,12 @@ fun SearchCampView(
                                         administrativeDistrictSiGunGu,
                                         query_title
                                     )
-                                    isVisible.value = false
+
 
                                     if (query_title.isNotEmpty()) {
                                         historyItems.add(query_title)
                                     }
-
+                                    isVisible.value = false
                                     focusmanager.clearFocus(true)
 
                                 },

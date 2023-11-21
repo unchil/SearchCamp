@@ -386,16 +386,6 @@ fun SearchScreen(){
                             scope.launch { scaffoldState.conceal() }
                         }
                     }
-
-/*
-                    AnimatedVisibility(visible = scaffoldState.isConcealed) {
-                        Spacer(modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color.DarkGray.copy(alpha = 0.7f)))
-                    }
-
-
- */
                 }
 
 
