@@ -166,13 +166,13 @@ fun AdministrativeDistrictPicker(
                         )
 
                         scaleX = lerp(
-                            start = 0.7f,
+                            start = 0.85f,
                             stop = 1f,
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
 
                         scaleY = lerp(
-                            start = 0.7f,
+                            start = 0.85f,
                             stop = 1f,
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
