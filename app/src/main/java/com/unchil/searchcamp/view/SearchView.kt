@@ -308,10 +308,12 @@ fun SearchCampView(
 
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        isVisible.value = false
-                        focusmanager.clearFocus(true)
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            isVisible.value = false
+                            focusmanager.clearFocus(true)
+                        },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -377,10 +379,13 @@ fun SearchCampView(
 
 
 
-
-                                    AdministrativeDistrictSiDoPicker(
+                                    AdministrativeDistrictPicker(
+                                        administrativeDistrictType = VWorldService.LT_C_ADSIDO_INFO,
                                         dataList = dataList,
-                                        onSelectedHandler = onSelectedHandler,
+                                        pickerWidth = 160.dp,
+                                        itemHeight = 20.dp,
+                                        itemViewCount = 5 ,
+                                        onSelectedHandler = onSelectedHandler
                                     )
 
 
@@ -388,10 +393,17 @@ fun SearchCampView(
 
                                         Spacer(modifier = Modifier.size(10.dp))
 
-                                        AdministrativeDistrictSiGunGuPicker(
-                                            dataList = siggData.value,
+
+                                        AdministrativeDistrictPicker(
+                                            administrativeDistrictType = VWorldService.LT_C_ADSIGG_INFO,
+                                            dataList =  siggData.value,
+                                            pickerWidth = 160.dp,
+                                            itemHeight = 20.dp,
+                                            itemViewCount = 5 ,
                                             onSelectedHandler = onSelectedHandler
                                         )
+
+
 
                                     }
 
@@ -448,10 +460,15 @@ fun SearchCampView(
 
 
 
-                                AdministrativeDistrictSiDoPicker(
+                                AdministrativeDistrictPicker(
+                                    administrativeDistrictType = VWorldService.LT_C_ADSIDO_INFO,
                                     dataList = dataList,
-                                    onSelectedHandler = onSelectedHandler,
+                                    pickerWidth = 160.dp,
+                                    itemHeight = 20.dp,
+                                    itemViewCount = 5 ,
+                                    onSelectedHandler = onSelectedHandler
                                 )
+
 
 
                                 if (siggData.value.isNotEmpty() && administrativeDistrictSiDo != "현위치") {
@@ -459,10 +476,15 @@ fun SearchCampView(
                                     Spacer(modifier = Modifier.size(10.dp))
 
 
-                                    AdministrativeDistrictSiGunGuPicker(
-                                        dataList = siggData.value,
+                                    AdministrativeDistrictPicker(
+                                        administrativeDistrictType = VWorldService.LT_C_ADSIGG_INFO,
+                                        dataList =  siggData.value,
+                                        pickerWidth = 160.dp,
+                                        itemHeight = 20.dp,
+                                        itemViewCount = 5 ,
                                         onSelectedHandler = onSelectedHandler
                                     )
+
 
                                 }
 

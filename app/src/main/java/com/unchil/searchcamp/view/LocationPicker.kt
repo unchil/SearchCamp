@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.wear.compose.material.Text
@@ -41,11 +42,20 @@ import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 
+
+
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AdministrativeDistrictSiDoPicker(
-    dataList:List<SiDo_TBL>,
+fun AdministrativeDistrictPicker(
+    administrativeDistrictType: VWorldService,
+    dataList:List<Any>,
+    pickerWidth: Dp,
+    itemHeight: Dp,
+    itemViewCount:Int,
+    brushType:Brush = Brush.verticalGradient(listOf(Color.Gray, Color.White, Color.Gray)),
     onSelectedHandler:(VWorldService, String, String)-> Unit,
+
 ){
 
     val pagerState  =   rememberPagerState(
@@ -72,23 +82,33 @@ fun AdministrativeDistrictSiDoPicker(
 
     LaunchedEffect(key1 = pagerState.isScrollInProgress){
         if (!pagerState.isScrollInProgress){
-            onSelectedHandler(
-                VWorldService.LT_C_ADSIDO_INFO,
-                dataList[pagerState.currentPage].ctprvn_cd,
-                dataList[pagerState.currentPage].ctp_kor_nm
-            )
 
-        }else {
-            hapticProcessing()
+            when(administrativeDistrictType){
+                VWorldService.LT_C_ADSIDO_INFO -> {
+                    onSelectedHandler(
+                        VWorldService.LT_C_ADSIDO_INFO,
+                        ( dataList[pagerState.currentPage] as SiDo_TBL).ctprvn_cd,
+                        ( dataList[pagerState.currentPage]as SiDo_TBL).ctp_kor_nm
+                    )
+                }
+                VWorldService.LT_C_ADSIGG_INFO -> {
+                    onSelectedHandler(
+                        VWorldService.LT_C_ADSIGG_INFO,
+                        ( dataList[pagerState.currentPage] as SiGunGu_TBL).sig_cd,
+                        ( dataList[pagerState.currentPage] as SiGunGu_TBL).sig_kor_nm
+                    )
+                }
+            }
         }
     }
 
+    LaunchedEffect(key1 = pagerState.currentPage ){
+        hapticProcessing()
+    }
 
-    val itemHeight = 20.dp
-    val itemViewCount = 5
-    val boxWidth = 160.dp
-    val boxHeight = itemHeight * itemViewCount + itemHeight / 3
-    val  paddingValues = PaddingValues( vertical = boxHeight /2   -  itemHeight  / 2 )
+
+    val pickerHeight = itemHeight * itemViewCount + itemHeight / 3
+    val  paddingValues = PaddingValues( vertical = pickerHeight /2   -  itemHeight  / 2 )
     val pagesPerViewport = object : PageSize {
         override fun Density.calculateMainAxisPageSize(
             availableSpace: Int,
@@ -98,15 +118,13 @@ fun AdministrativeDistrictSiDoPicker(
         }
     }
 
-    val listColors = listOf(Color.Gray, Color.White, Color.Gray)
 
     Box(
         modifier = Modifier
             .clip(ShapeDefaults.Small)
-            .width(boxWidth)
-            .height(boxHeight)
-            .background( Brush.verticalGradient( listColors  ))
-        ,
+            .width(pickerWidth)
+            .height(pickerHeight)
+            .background(brushType) ,
         contentAlignment = Alignment.Center
     ){
 
@@ -119,10 +137,18 @@ fun AdministrativeDistrictSiDoPicker(
             contentPadding = paddingValues,
         ) {page ->
 
-            Card(
+            val text = when(administrativeDistrictType){
+                VWorldService.LT_C_ADSIDO_INFO -> {
+                     (dataList [page] as SiDo_TBL).ctp_kor_nm
+                }
+                VWorldService.LT_C_ADSIGG_INFO -> {
+                    (dataList [page] as SiGunGu_TBL).sig_kor_nm
+                }
+            }
+            androidx.compose.material3.Text(
                 modifier = Modifier
                     .height(itemHeight)
-                    .width(boxWidth)
+                    .width(pickerWidth)
                     .graphicsLayer {
                         // Calculate the absolute offset for the current page from the
                         // scroll position. We use the absolute value which allows us to mirror
@@ -140,199 +166,29 @@ fun AdministrativeDistrictSiDoPicker(
                         )
 
                         scaleX = lerp(
-                            start = 0.8f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                        )
-
-                        scaleY = lerp(
-                            start = 0.8f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                        )
-
-
-                    },
-                shape =  ShapeDefaults.ExtraSmall,
-                colors = CardColors(
-                    containerColor =  Color.Transparent,
-                    contentColor = Color.Black,
-                    disabledContainerColor =  Color.Gray,
-                    disabledContentColor = Color.Gray )
-            ) {
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    text = dataList[page].ctp_kor_nm,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-
-            }
-
-        }
-
-    }
-
-
-}
-
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun AdministrativeDistrictSiGunGuPicker(
-    dataList:List<SiGunGu_TBL>,
-    onSelectedHandler:(VWorldService, String, String)-> Unit
-) {
-
-
-
-    val pagerState  =   rememberPagerState(
-        initialPage = 0,
-        initialPageOffsetFraction = 0f,
-        pageCount = {  dataList.size } )
-
-
-    // dataList 변경시 pagerState.currentPage 가 initial 되지 않음.
-    LaunchedEffect(key1 = dataList ){
-        pagerState.scrollToPage(0)
-    }
-
-
-    val isUsableHaptic = LocalUsableHaptic.current
-    val hapticFeedback = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
-
-    fun hapticProcessing(){
-        if(isUsableHaptic){
-            coroutineScope.launch {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            }
-        }
-    }
-
-
-    LaunchedEffect(key1 = pagerState.isScrollInProgress){
-        if (!pagerState.isScrollInProgress){
-            onSelectedHandler(
-                VWorldService.LT_C_ADSIGG_INFO,
-                dataList[pagerState.currentPage].sig_cd,
-                dataList[pagerState.currentPage].sig_kor_nm
-            )
-        } else {
-            hapticProcessing()
-        }
-    }
-
-    val itemHeight = 20.dp
-    val itemViewCount = 5
-    val boxWidth = 160.dp
-    val boxHeight = itemHeight * itemViewCount + itemHeight / 3
-    val  paddingValues = PaddingValues( vertical = boxHeight /2   -  itemHeight  / 2 )
-    val pagesPerViewport = object : PageSize {
-        override fun Density.calculateMainAxisPageSize(
-            availableSpace: Int,
-            pageSpacing: Int
-        ): Int {
-            return  availableSpace
-        }
-    }
-
-
-
-    val listColors = listOf(Color.Gray, Color.White, Color.Gray)
-
-    Box(
-        modifier = Modifier
-            .clip(ShapeDefaults.Small)
-            .width(boxWidth)
-            .height(boxHeight)
-            .background( Brush.verticalGradient( listColors  ))
-        ,
-        contentAlignment = Alignment.Center
-    ){
-
-        VerticalPager(
-            modifier = Modifier,
-            state = pagerState,
-            pageSpacing = 0.dp,
-            pageSize = pagesPerViewport,
-            beyondBoundsPageCount = 15,
-            contentPadding = paddingValues,
-        ) {page ->
-
-            Card(
-                modifier = Modifier
-                    .height(itemHeight)
-                    .width(boxWidth)
-                    .graphicsLayer {
-                        // Calculate the absolute offset for the current page from the
-                        // scroll position. We use the absolute value which allows us to mirror
-                        // any effects for both directions
-                        val pageOffset = (
-                                (pagerState.currentPage - page) + pagerState
-                                    .currentPageOffsetFraction
-                                ).absoluteValue
-
-
-                        alpha = lerp(
                             start = 0.7f,
                             stop = 1f,
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
 
-                        scaleX = lerp(
-                            start = 0.8f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                        )
-
                         scaleY = lerp(
-                            start = 0.8f,
+                            start = 0.7f,
                             stop = 1f,
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
 
 
                     },
-                shape =  ShapeDefaults.ExtraSmall,
-                colors = CardColors(
-                    containerColor =  Color.Transparent,
-                    contentColor = Color.Black,
-                    disabledContainerColor =  Color.Gray,
-                    disabledContentColor = Color.Gray )
-            ) {
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    text = dataList[page].sig_kor_nm,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+                text = text,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            )
 
         }
 
     }
 
-
-
 }
 
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Preview(showBackground = false, showSystemUi = false)
-@Composable
-fun LocationPickerPreview() {
-
-
-
-}
