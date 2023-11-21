@@ -33,9 +33,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -503,8 +506,7 @@ fun SearchCampView(
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = if (isVisible.value) 0.dp else 8.dp)
-                    ,
+                        .padding(horizontal = if (isVisible.value) 0.dp else 8.dp),
                     query = query_title,
                     onQueryChange = {
                         query_title = it
@@ -517,7 +519,7 @@ fun SearchCampView(
                         )
                         isVisible.value = false
 
-                        if(query_title.isNotEmpty()){
+                        if (query_title.isNotEmpty()) {
                             historyItems.add(query_title)
                         }
 
@@ -534,7 +536,7 @@ fun SearchCampView(
                         )
                     },
                     leadingIcon = {
-                        if(query_title.isNotEmpty()){
+                        if (query_title.isNotEmpty()) {
                             IconButton(
                                 modifier = Modifier,
                                 onClick = {
@@ -589,7 +591,7 @@ fun SearchCampView(
                                     )
                                     isVisible.value = false
 
-                                    if(query_title.isNotEmpty()){
+                                    if (query_title.isNotEmpty()) {
                                         historyItems.add(query_title)
                                     }
 
@@ -606,16 +608,15 @@ fun SearchCampView(
                             )
 
 
-
-
-
-
                         }
                     },
                     tonalElevation = 2.dp,
                     shadowElevation = 2.dp,
-
-                    ) {
+                    colors = SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        dividerColor =MaterialTheme.colorScheme.onSecondary
+                    ),
+                ) {
 
                     Column(
                         modifier = Modifier

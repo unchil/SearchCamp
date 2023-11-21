@@ -21,8 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.wear.compose.material.Text
+import com.unchil.searchcamp.LocalUsableDarkMode
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.entity.SiDo_TBL
@@ -53,10 +56,13 @@ fun AdministrativeDistrictPicker(
     pickerWidth: Dp,
     itemHeight: Dp,
     itemViewCount:Int,
-    brushType:Brush = Brush.verticalGradient(listOf(Color.Gray, Color.White, Color.Gray)),
+    brushType:Brush? = null,
     onSelectedHandler:(VWorldService, String, String)-> Unit,
 
 ){
+
+    val isUsableDarkMode = LocalUsableDarkMode.current
+
 
     val pagerState  =   rememberPagerState(
         initialPage = 0,
@@ -107,7 +113,7 @@ fun AdministrativeDistrictPicker(
     }
 
 
-    val pickerHeight = itemHeight * itemViewCount + itemHeight / 3
+    val pickerHeight = itemHeight * itemViewCount + itemHeight / (itemViewCount + 2)
     val  paddingValues = PaddingValues( vertical = pickerHeight /2   -  itemHeight  / 2 )
     val pagesPerViewport = object : PageSize {
         override fun Density.calculateMainAxisPageSize(
@@ -124,7 +130,16 @@ fun AdministrativeDistrictPicker(
             .clip(ShapeDefaults.Small)
             .width(pickerWidth)
             .height(pickerHeight)
-            .background(brushType) ,
+            .background(
+                if(isUsableDarkMode){
+                    Brush.verticalGradient(listOf(Color.Black, Color.DarkGray, Color.Black))
+                }else {
+                    Brush.verticalGradient(listOf(
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.colorScheme.onSecondary,
+                        MaterialTheme.colorScheme.secondaryContainer))
+                }
+            ) ,
         contentAlignment = Alignment.Center
     ){
 
@@ -145,6 +160,8 @@ fun AdministrativeDistrictPicker(
                     (dataList [page] as SiGunGu_TBL).sig_kor_nm
                 }
             }
+
+
             androidx.compose.material3.Text(
                 modifier = Modifier
                     .height(itemHeight)
@@ -183,6 +200,9 @@ fun AdministrativeDistrictPicker(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
+
+
+
 
         }
 
