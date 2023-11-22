@@ -84,6 +84,8 @@ import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.entity.CampSite_TBL
+import com.unchil.searchcamp.db.entity.SiteImage_TBL
+import com.unchil.searchcamp.model.GoCampingResponseStatus
 import com.unchil.searchcamp.model.SiteDefaultData
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.shared.chromeIntent
@@ -335,17 +337,26 @@ fun ResultMapScreen(
 
         val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
             hapticProcessing()
-            currentCampSiteData.value = it
+
+            coroutineScope.launch {
+                viewModel.siteImageListResultStateFlow.emit(
+                    Pair(GoCampingResponseStatus.SUCCESS, emptyList<SiteImage_TBL>())
+                )
+            }
+
             if (isConnect) {
+
                 viewModel.onEvent(
                     SearchScreenViewModel.Event.RecvGoCampingData(
                         servicetype = GoCampingService.SITEIMAGE,
                         contentId = it.contentId
                     )
                 )
+
+                currentCampSiteData.value = it
+                isFirstTab = false
+                dragHandlerAction.invoke()
             }
-            isFirstTab = false
-            dragHandlerAction.invoke()
         }
 
 
@@ -363,7 +374,7 @@ fun ResultMapScreen(
                     modifier = Modifier
                         .height(60.dp)
                         .fillMaxWidth()
-                        .background(color = Color.LightGray.copy(alpha = 0.2f)),
+                        .background(color = MaterialTheme.colorScheme.tertiary),
                     contentAlignment = Alignment.Center
                 ) {
                     /*
@@ -392,6 +403,7 @@ fun ResultMapScreen(
                             Text(
                                 text = it.facltNm,
                                 modifier = Modifier.padding(vertical = 2.dp),
+                                color = MaterialTheme.colorScheme.onTertiary,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleMedium
@@ -402,7 +414,8 @@ fun ResultMapScreen(
                                     Icon(
                                         imageVector = Icons.Outlined.Home,
                                         contentDescription = "홈페이지",
-                                        modifier = Modifier
+                                        modifier = Modifier,
+                                        tint = MaterialTheme.colorScheme.onTertiary
                                     )
                                 }
                             }

@@ -8,10 +8,13 @@ import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.data.Repository
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.db.entity.SiteImage_TBL
+import com.unchil.searchcamp.model.GoCampingResponseStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
@@ -33,8 +36,13 @@ class SearchScreenViewModel   (
 
     val currentListDataStateFlow  = repository.currentListDataStateFlow
 
+
     val siteImageListStateFlow: MutableStateFlow<List<SiteImage_TBL>>
             = repository.siteImageListStateFlow
+
+    val siteImageListResultStateFlow: MutableStateFlow <  Pair < GoCampingResponseStatus, List<SiteImage_TBL>   >>
+            = repository.siteImageListResultStateFlow
+
 
     private val _effect = MutableSharedFlow<Effect>()
     val effect: SharedFlow<Effect> = _effect
@@ -46,6 +54,9 @@ class SearchScreenViewModel   (
 
 
     init{
+
+
+
         val eventStateFlow = MutableSharedFlow<Event>()
 
         //  1. fun onEvent(event: Event)
@@ -96,13 +107,21 @@ class SearchScreenViewModel   (
                 )
             }
             is Event.RecvGoCampingData -> {
-                recvGoCampingData(
-                    event.servicetype,
-                    event.mapX,
-                    event.mapY,
-                    event.keyword,
-                    event.contentId
-                )
+
+                if( event.servicetype == GoCampingService.SITEIMAGE){
+                    event.contentId?.let {
+                        recvGoCampingDataImageList( it )
+                    }
+                }else {
+                    recvGoCampingData(
+                        event.servicetype,
+                        event.mapX,
+                        event.mapY,
+                        event.keyword,
+                        event.contentId
+                    )
+                }
+
             }
 
         }
@@ -143,6 +162,18 @@ class SearchScreenViewModel   (
         }
     }
 
+
+    fun recvGoCampingDataImageList(
+        contentId:String
+    ){
+        viewModelScope.launch {
+            repository.recvGoCampingDataImageList(
+                contentId
+            )
+        }
+    }
+
+
     fun recvGoCampingData(
         serviceType: GoCampingService,
         mapX:String? = null,
@@ -178,11 +209,17 @@ class SearchScreenViewModel   (
         ): Event()
 
 
+
     }
 
 
     sealed class Effect {
          object QueryResultCount: Effect()
+
+        data class  RecvResult(
+            val resultType:GoCampingResponseStatus,
+            val resultCount:Int
+        ): Effect()
     }
 
 

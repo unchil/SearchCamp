@@ -54,6 +54,8 @@ import androidx.compose.material.icons.outlined.Signpost
 import androidx.compose.material.ripple.rememberRipple
 
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -96,7 +98,11 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
+import com.unchil.searchcamp.model.GoCampingResponseStatus
 import com.unchil.searchcamp.model.SiteDefaultData
+import com.unchil.searchcamp.model.SnackBarChannelType
+import com.unchil.searchcamp.model.getDesc
+import com.unchil.searchcamp.model.snackbarChannelList
 import com.unchil.searchcamp.shared.LocalPermissionsManager
 import com.unchil.searchcamp.shared.PermissionsManager
 import com.unchil.searchcamp.shared.checkInternetConnected
@@ -106,6 +112,7 @@ import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
 import com.unchil.searchcamp.ui.theme.SearchCampTheme
 import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.math.absoluteValue
 
 @SuppressLint("UnrememberedMutableState")
@@ -382,8 +389,6 @@ fun SiteIntroductionView(
 ){
 
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
-
 
     val configuration = LocalConfiguration.current
     var isPortrait by remember { mutableStateOf(false) }
@@ -423,51 +428,172 @@ fun SiteIntroductionView(
         }
     }
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(20.dp),
+                 ,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
 
-        /*
-        Row(
-            modifier = Modifier,
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+        ImageViewer(
+            data = if (siteData.firstImageUrl.isNotEmpty()) {
+                siteData.firstImageUrl
+            } else {
+                R.drawable.forest
+            },
+            size = Size.ORIGINAL,
+            contentScale = ContentScale.FillWidth
+        )
+
+
+        Column(
+            modifier = Modifier
+                .padding(all = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = siteData.facltNm ,
-                modifier = Modifier.padding(vertical = 10.dp),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium
-            )
 
 
-            AnimatedVisibility(siteData.homepage.isNotEmpty()){
 
-                Spacer(modifier = Modifier.size(10.dp))
+            if( siteData.tel.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
 
-                IconButton(onClick = {
-                    isHapticProcessing = true
-                    chromeIntent.invoke(context, siteData.homepage)
-                },
-                    colors =  IconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor =  MaterialTheme.colorScheme.onPrimaryContainer,
-                        disabledContainerColor = Color.Gray,
-                        disabledContentColor = Color.Gray
-                    ),
-
-                    ) {
+                ) {
                     Icon(
-                        imageVector = Icons.Outlined.Home,
-                        contentDescription = "홈페이지",
-                        modifier = Modifier
+                        imageVector = Icons.Outlined.Phone,
+                        contentDescription = "전화",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.tel,
+                        modifier = Modifier,
+                        //    fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+            }
+
+
+            if( siteData.addr1.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Signpost,
+                        contentDescription = "주소",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.addr1,
+                        modifier = Modifier,
+                        //   fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if( siteData.resveCl.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.EventAvailable,
+                        contentDescription = "예약",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.resveCl,
+                        modifier = Modifier,
+                        //       fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if( siteData.sbrsCl.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Countertops,
+                        contentDescription = "시설",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.sbrsCl,
+                        modifier = Modifier,
+                        //     fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+            }
+
+
+            if( siteData.eqpmnLendCl.isNotEmpty()) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.OutdoorGrill,
+                        contentDescription = "대여장비",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.eqpmnLendCl,
+                        modifier = Modifier,
+                        //        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+            }
+
+            if( siteData.glampInnerFclty.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Bungalow,
+                        contentDescription = "글램핑시설",
+                        modifier = Modifier.scale(0.7f)
+                    )
+                    Text(
+                        text = siteData.glampInnerFclty,
+                        modifier = Modifier,
+                        //        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
@@ -475,206 +601,17 @@ fun SiteIntroductionView(
 
         }
 
-         */
-
-
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(columnHeight)
-                .clip(ShapeDefaults.ExtraSmall)
-        ) {
-
-
-            ImageViewer(
-                data =    if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
-                    R.drawable.forest},
-                size = Size.ORIGINAL,
-                contentScale = ContentScale.Crop
-            )
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .clip(ShapeDefaults.ExtraSmall)
-                    .fillMaxWidth(0.8f)
-                    .fillMaxHeight(0.8f)
-                    .background(color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
-                    .padding(horizontal = 10.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-
-
-                if( siteData.tel.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Phone,
-                            contentDescription = "전화",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.tel,
-                            modifier = Modifier,
-                            //    fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                }
-
-
-                if( siteData.addr1.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Signpost,
-                            contentDescription = "주소",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.addr1,
-                            modifier = Modifier,
-                            //   fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-
-                if( siteData.resveCl.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.EventAvailable,
-                            contentDescription = "예약",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.resveCl,
-                            modifier = Modifier,
-                            //       fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-
-                if( siteData.sbrsCl.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Countertops,
-                            contentDescription = "시설",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.sbrsCl,
-                            modifier = Modifier,
-                            //     fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                }
-
-
-                if( siteData.eqpmnLendCl.isNotEmpty()) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.OutdoorGrill,
-                            contentDescription = "대여장비",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.eqpmnLendCl,
-                            modifier = Modifier,
-                            //        fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                }
-
-                if( siteData.glampInnerFclty.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Bungalow,
-                            contentDescription = "글램핑시설",
-                            modifier = Modifier.scale(0.7f)
-                        )
-                        Text(
-                            text = siteData.glampInnerFclty,
-                            modifier = Modifier,
-                            //        fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                }
-
-            }
-
-
-        }
-
-
-
-
-
-
-        AnimatedVisibility( siteData.intro.isNotEmpty()) {
+        if( siteData.intro.isNotEmpty()) {
             Text(
                 text = siteData.intro,
-                modifier = Modifier,
+                modifier = Modifier.padding(horizontal = 10.dp),
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.bodyMedium
             )
 
         }
 
-
     }
-
-
-
-
 }
 
 
@@ -704,36 +641,40 @@ fun SiteImagePagerView(
     var cardWidthDp by remember { mutableStateOf(0.dp) }
     var cardHeightDp by remember { mutableStateOf(0.dp) }
 
+    val landscapeBottomSheetWidth = 640.dp
+
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             isPortrait = true
             cardWidthDp =  configuration.screenWidthDp.dp
-            cardHeightDp = configuration.screenHeightDp.dp / 2
+            cardHeightDp = cardWidthDp
         }
         else ->{
             isPortrait = false
-            cardWidthDp = configuration.screenWidthDp.dp / 2
-            cardHeightDp = configuration.screenHeightDp.dp
+            cardWidthDp = landscapeBottomSheetWidth * 0.7f
+            cardHeightDp = cardWidthDp
         }
     }
 
+
+
     // 한 패이지 의 패딩값
     val paddingValues by mutableStateOf ( if(isPortrait){
-        PaddingValues( vertical = (configuration.screenHeightDp.dp -  cardHeightDp) * 0.4f  , horizontal = 10.dp )
+
+        PaddingValues( vertical = configuration.screenHeightDp.dp /2   -  cardHeightDp  / 2 )
     }else {
-        PaddingValues( vertical = 10.dp, horizontal =  (configuration.screenWidthDp.dp -  cardWidthDp) / 3)
+        PaddingValues( horizontal =  landscapeBottomSheetWidth /2  -  cardWidthDp / 2)
     }
     )
 
 
 
-    // 화면에 정상적으로 표현할 패이지 수
     val pagesPerViewport = object : PageSize {
         override fun Density.calculateMainAxisPageSize(
             availableSpace: Int,
             pageSpacing: Int
         ): Int {
-            return (availableSpace - 2 * pageSpacing) / 1
+            return availableSpace
         }
     }
 
@@ -786,8 +727,20 @@ fun SiteImagePagerView(
         var isVisibleImage by remember{ mutableStateOf(false) }
         var imageUrl by remember { mutableStateOf("") }
 
-        val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
+       // val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
+        val siteImageListResult = viewModel.siteImageListResultStateFlow.collectAsState()
+        val pagerState  =   rememberPagerState(
+            initialPage = 0,
+            initialPageOffsetFraction = 0f,
+            pageCount = {  siteImageListResult.value.second.size } )
 
+
+        LaunchedEffect(key1 = siteImageListResult.value ){
+            pagerState.scrollToPage(0)
+
+        }
+
+/*
         val pagerState  =   rememberPagerState(
             initialPage = 0,
             initialPageOffsetFraction = 0f,
@@ -795,19 +748,14 @@ fun SiteImagePagerView(
 
 
         LaunchedEffect(key1 = siteImageList.value ){
-
             pagerState.scrollToPage(0)
 
         }
+*/
 
-
-
-        // val paddingDp = if(isPortrait) { (heightDp.dp - cardHeightDp) / 2 }  else {(widthDp.dp - cardWidthDp) / 2}
-
-
+/*
 
         if( siteImageList.value.isNotEmpty() ) {
-
 
             Box (
                 modifier = Modifier
@@ -815,20 +763,20 @@ fun SiteImagePagerView(
                 contentAlignment = Alignment.Center,
             ){
 
+
                 if(isPortrait){
 
                     VerticalPager(
                         modifier = Modifier,
                         state = pagerState,
-                        pageSpacing = 10.dp,
+                        pageSpacing = 0.dp,
                         pageSize = pagesPerViewport,
-                        beyondBoundsPageCount = 3,
+                        beyondBoundsPageCount = 1,
                         contentPadding = paddingValues,
                     ) {page ->
 
                         Card(
                             Modifier
-                                //        .size(cardWidthDp)
                                 .height(cardHeightDp)
                                 .width(cardWidthDp)
                                 .graphicsLayer {
@@ -848,13 +796,13 @@ fun SiteImagePagerView(
                                     )
 
                                     scaleX = lerp(
-                                        start = 0.7f,
+                                        start = 0.8f,
                                         stop = 1f,
                                         fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                     )
 
                                     scaleY = lerp(
-                                        start = 0.7f,
+                                        start = 0.8f,
                                         stop = 1f,
                                         fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                     )
@@ -875,37 +823,40 @@ fun SiteImagePagerView(
                                 ),
                             shape =  ShapeDefaults.ExtraSmall,
 
+
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 0.dp)
-                            ){
-                                ImageViewer(
-                                    data = (siteImageList.value.get(page).imageUrl),
-                                    size = Size(600,600),
-                                    isZoomable = false,
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
+
+
+                            ImageViewer(
+                                data = (siteImageList.value.get(page).imageUrl),
+                                size = Size(600,600),
+                                isZoomable = false,
+                                contentScale = ContentScale.Crop
+                            )
+
+
                         }
 
                     }
 
                 }else {
 
+
+
+
                     HorizontalPager(
                         modifier = Modifier,
                         state = pagerState,
                         pageSpacing = 0.dp,
                         pageSize = pagesPerViewport,
-                        beyondBoundsPageCount = 3,
+                        beyondBoundsPageCount = 1,
                         contentPadding = paddingValues,
                     ) { page ->
 
                         Card(
                             Modifier
-                                .size(cardWidthDp)
+                                .width(cardWidthDp)
+                                .height(cardHeightDp)
                                 .graphicsLayer {
                                     // Calculate the absolute offset for the current page from the
                                     // scroll position. We use the absolute value which allows us to mirror
@@ -950,18 +901,14 @@ fun SiteImagePagerView(
                                 ),
                             shape =  ShapeDefaults.ExtraSmall,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(0.dp)
-                            ){
-                                ImageViewer(
-                                    data = (siteImageList.value.get(page).imageUrl),
-                                    size = Size(600,600),
-                                    isZoomable = false,
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
+
+                            ImageViewer(
+                                data = (siteImageList.value.get(page).imageUrl),
+                                size = Size(600,600),
+                                isZoomable = false,
+                                contentScale = ContentScale.Crop
+                            )
+
                         }
 
                     }
@@ -989,8 +936,7 @@ fun SiteImagePagerView(
                         modifier = Modifier
                             .clip(ShapeDefaults.ExtraSmall)
                             .fillMaxSize()
-                            .background(color = Color.White.copy(alpha = 1f))
-                            .padding(horizontal = 10.dp)
+                            .background(color = MaterialTheme.colorScheme.background)
                             .clickable {
                                 isHapticProcessing = true
                                 isVisibleImage = false
@@ -1013,10 +959,266 @@ fun SiteImagePagerView(
             }
 
         } else {
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-            )
+            ){
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+        }
+*/
+
+        when(siteImageListResult.value.first){
+
+            GoCampingResponseStatus.OK ->  {
+                if(siteImageListResult.value.second.size == 0){
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ){
+                        Text(
+                            text = "데이터가 존재하지 않습니다.",
+                            modifier = Modifier
+                                .align(Alignment.Center),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }else {
+                    Box (
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ){
+
+
+                        if(isPortrait){
+
+                            VerticalPager(
+                                modifier = Modifier,
+                                state = pagerState,
+                                pageSpacing = 0.dp,
+                                pageSize = pagesPerViewport,
+                                beyondBoundsPageCount = 1,
+                                contentPadding = paddingValues,
+                            ) {page ->
+
+                                Card(
+                                    Modifier
+                                        .height(cardHeightDp)
+                                        .width(cardWidthDp)
+                                        .graphicsLayer {
+                                            // Calculate the absolute offset for the current page from the
+                                            // scroll position. We use the absolute value which allows us to mirror
+                                            // any effects for both directions
+                                            val pageOffset = (
+                                                    (pagerState.currentPage - page) + pagerState
+                                                        .currentPageOffsetFraction
+                                                    ).absoluteValue
+
+
+                                            alpha = lerp(
+                                                start = 0.7f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+                                            scaleX = lerp(
+                                                start = 0.8f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+                                            scaleY = lerp(
+                                                start = 0.8f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+
+                                        }
+                                        .combinedClickable(
+                                            onLongClick = {
+                                                isHapticProcessing = true
+                                                isVisibleImage = true
+                                         //       imageUrl = siteImageList.value.get(page).imageUrl
+                                                imageUrl = siteImageListResult.value.second.get(page).imageUrl
+                                            },
+                                            onClick = {
+                                                isHapticProcessing = true
+                                                isVisibleImage = true
+                                                //       imageUrl = siteImageList.value.get(page).imageUrl
+                                                imageUrl = siteImageListResult.value.second.get(page).imageUrl
+                                            }
+                                        ),
+                                    shape =  ShapeDefaults.ExtraSmall,
+
+
+                                    ) {
+
+
+                                    ImageViewer(
+                                //        data = (siteImageList.value.get(page).imageUrl),
+                                        data = (siteImageListResult.value.second.get(page).imageUrl),
+                                        size = Size(600,600),
+                                        isZoomable = false,
+                                        contentScale = ContentScale.Crop
+                                    )
+
+
+                                }
+
+                            }
+
+                        }else {
+
+
+
+
+                            HorizontalPager(
+                                modifier = Modifier,
+                                state = pagerState,
+                                pageSpacing = 0.dp,
+                                pageSize = pagesPerViewport,
+                                beyondBoundsPageCount = 1,
+                                contentPadding = paddingValues,
+                            ) { page ->
+
+                                Card(
+                                    Modifier
+                                        .width(cardWidthDp)
+                                        .height(cardHeightDp)
+                                        .graphicsLayer {
+                                            // Calculate the absolute offset for the current page from the
+                                            // scroll position. We use the absolute value which allows us to mirror
+                                            // any effects for both directions
+                                            val pageOffset = (
+                                                    (pagerState.currentPage - page) + pagerState
+                                                        .currentPageOffsetFraction
+                                                    ).absoluteValue
+
+
+                                            alpha = lerp(
+                                                start = 0.7f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+                                            scaleX = lerp(
+                                                start = 0.7f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+                                            scaleY = lerp(
+                                                start = 0.7f,
+                                                stop = 1f,
+                                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                            )
+
+
+                                        }
+                                        .combinedClickable(
+                                            onLongClick = {
+                                                isHapticProcessing = true
+                                                isVisibleImage = true
+                                         //       imageUrl = siteImageList.value.get(page).imageUrl
+                                                imageUrl =  siteImageListResult.value.second.get(page).imageUrl
+                                            },
+                                            onClick = {
+                                                isHapticProcessing = true
+                                                isVisibleImage = true
+                                          //      imageUrl = siteImageList.value.get(page).imageUrl
+                                                imageUrl =  siteImageListResult.value.second.get(page).imageUrl
+                                            }
+                                        ),
+                                    shape =  ShapeDefaults.ExtraSmall,
+                                ) {
+
+                                    ImageViewer(
+                                 //       data = (siteImageList.value.get(page).imageUrl),
+                                        data = (siteImageListResult.value.second.get(page).imageUrl),
+                                        size = Size(600,600),
+                                        isZoomable = false,
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                }
+
+                            }
+
+
+
+                        }
+
+
+
+                        AnimatedVisibility(visible = isVisibleImage,
+                            enter = slideInVertically {
+                                // Slide in from 40 dp from the top.
+                                with(density) { 40.dp.roundToPx() }
+                            } + expandVertically(
+                                // Expand from the top.
+                                expandFrom = Alignment.Top
+                            ) + fadeIn(
+                                // Fade in with the initial alpha of 0.3f.
+                                initialAlpha = 0.3f
+                            ),
+                            exit = slideOutVertically() + shrinkVertically() + fadeOut()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(ShapeDefaults.ExtraSmall)
+                                    .fillMaxSize()
+                                    .background(color = MaterialTheme.colorScheme.background)
+                                    .clickable {
+                                        isHapticProcessing = true
+                                        isVisibleImage = false
+                                    }
+                            ) {
+                                ImageViewer(
+                                    data = imageUrl,
+                                    size = Size.ORIGINAL,
+                                    isZoomable = true,
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+                        }
+
+
+
+
+
+
+                    }
+                }
+            }
+            GoCampingResponseStatus.SUCCESS -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ){
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+            else -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ){
+                    Text(
+                        text = siteImageListResult.value.first.getDesc().second,
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
 
 

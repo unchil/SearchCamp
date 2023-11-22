@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Publish
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -82,6 +83,8 @@ import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.unchil.searchcamp.R
+import com.unchil.searchcamp.db.entity.SiteImage_TBL
+import com.unchil.searchcamp.model.GoCampingResponseStatus
 
 
 @Composable
@@ -187,12 +190,11 @@ fun SearchingProgressIndicator(
 ){
     if(isVisibility) {
         Box(modifier = Modifier.fillMaxSize()) {
-            /*
+
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
 
-             */
         }
     }
 }
@@ -296,7 +298,7 @@ fun ResultListScreen(
                 ErrorProgressView()
             }
             LoadState.Loading -> {
-                SearchingProgressIndicator(isLoading)
+           //     SearchingProgressIndicator(isLoading)
             }
             is LoadState.NotLoading -> {
 
@@ -364,17 +366,29 @@ fun ResultListScreen(
 
                 val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
                     hapticProcessing()
-                    currentCampSiteData.value = it
-                    if (isConnect) {
+
+
+                        coroutineScope.launch {
+                        //    viewModel.repository.siteImageListStateFlow.emit(emptyList())
+
+                            viewModel.siteImageListResultStateFlow.emit(
+                                Pair(GoCampingResponseStatus.SUCCESS, emptyList<SiteImage_TBL>())
+                            )
+
+                        }
+
                         viewModel.onEvent(
                             SearchScreenViewModel.Event.RecvGoCampingData(
                                 servicetype = GoCampingService.SITEIMAGE,
                                 contentId = it.contentId
                             )
                         )
-                    }
-                    isFirstTab = false
-                    dragHandlerAction.invoke()
+
+
+                        currentCampSiteData.value = it
+                        isFirstTab = false
+                        dragHandlerAction.invoke()
+
                 }
 
 
@@ -448,7 +462,7 @@ fun ResultListScreen(
                                 if (isFirstTab) {
                                     SiteIntroductionView(it)
                                 } else {
-                                    SiteImagePagerView(viewModel = viewModel)
+                                    SiteImagePagerView(viewModel = viewModel )
                                 }
                             }
                         }

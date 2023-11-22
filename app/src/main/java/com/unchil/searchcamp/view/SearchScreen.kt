@@ -321,9 +321,9 @@ fun SearchScreen(){
                         snackbarData = it,
                         modifier = Modifier,
                         shape = ShapeDefaults.ExtraSmall,
-                        containerColor = Color.Yellow,
-                        contentColor = Color.Black,
-                        dismissActionContentColor = Color.Black
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        dismissActionContentColor = MaterialTheme.colorScheme.tertiary
                     )
 
 

@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.room.withTransaction
 import com.google.android.gms.maps.model.LatLng
+import com.google.gson.JsonSyntaxException
 import com.unchil.searchcamp.BuildConfig
 import com.unchil.searchcamp.api.GoCampingInterface
 import com.unchil.searchcamp.api.OpenWeatherInterface
@@ -32,6 +33,7 @@ import com.unchil.searchcamp.shared.yyyyMMdd
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
@@ -171,11 +173,12 @@ class Repository {
     val _currentWeather: MutableStateFlow<CURRENTWEATHER_TBL?> = MutableStateFlow(null)
 
     val sidoListStateFlow:MutableStateFlow<List<SiDo_TBL>>  = MutableStateFlow(listOf())
+
     val sigunguListStateFlow:MutableStateFlow<List<SiGunGu_TBL>>  = MutableStateFlow(listOf())
 
     val siteImageListStateFlow:MutableStateFlow<List<SiteImage_TBL>> = MutableStateFlow(listOf())
 
-  //  val siteDefaultDataStateFlow:MutableStateFlow<SiteDefaultData?> = MutableStateFlow(null)
+    val siteImageListResultStateFlow:MutableStateFlow <  Pair < GoCampingResponseStatus, List<SiteImage_TBL>   >> = MutableStateFlow(   Pair(GoCampingResponseStatus.SUCCESS ,emptyList())    )
 
     var currentListDataStateFlow:MutableStateFlow<List<CampSite_TBL>> = MutableStateFlow(listOf())
 
@@ -438,6 +441,69 @@ class Repository {
 
     }
 
+
+
+    suspend fun recvGoCampingDataImageList( contentId:String) {
+
+        val serviceKey  = withContext(Dispatchers.IO) {
+            URLDecoder.decode(BuildConfig.GOCAMPING_API_KEY, "UTF-8")
+        }
+
+        val service = RetrofitAdapter.create(
+            service = GoCampingInterface::class.java,
+            url = GOCAMPING_URL
+        )
+
+        try {
+
+
+            val apiResponse = service.getImage(
+                serviceKey = serviceKey,
+                numOfRows = numOfRows,
+                pageNo = pageNo,
+                MobileOS = MobileOS,
+                MobileApp = MobileApp,
+                _type = datatype,
+                contentId = contentId
+            )
+
+            val resultList: MutableList<SiteImage_TBL> = mutableListOf()
+
+            apiResponse.response?.body?.items?.item?.forEach {
+                resultList.add(
+                    SiteImage_TBL(
+                        contentId = it.contentId,
+                        createdtime = it.createdtime,
+                        imageUrl = it.imageUrl,
+                        modifiedtime = it.modifiedtime,
+                        serialnum = it.serialnum
+                    )
+                )
+            }
+
+
+            val resultStatus = GoCampingResponseStatusList.first {
+                it.getDesc().first == apiResponse.response?.header?.resultCode
+            }
+
+            siteImageListResultStateFlow.emit (Pair(resultStatus, resultList))
+
+
+        } catch (e : Exception){
+
+            val itemsZeroPasingErrMsg = "Expected BEGIN_OBJECT but was STRING at line 1 column 82 path"
+
+            if(   e.localizedMessage?.contains(itemsZeroPasingErrMsg) ?: false  )  {
+                siteImageListResultStateFlow.emit (Pair(GoCampingResponseStatus.OK, emptyList()))
+            } else {
+                siteImageListResultStateFlow.emit (Pair(GoCampingResponseStatus.SERVICETIMEOUT_ERROR, emptyList()))
+            }
+        }
+
+    }
+
+
+
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun recvGoCampingData(
         serviceType:GoCampingService,
@@ -500,51 +566,17 @@ class Repository {
                         )
                     }
                     GoCampingService.SITEIMAGE -> {
-
                         if (!contentId.isNullOrEmpty()) {
-
-                            try {
-                                service.getImage(
-                                    serviceKey = serviceKey,
-                                    numOfRows = numOfRows,
-                                    pageNo = pageNo,
-                                    MobileOS = MobileOS,
-                                    MobileApp = MobileApp,
-                                    _type = datatype,
-                                    contentId = contentId
-                                )
-
-                            } catch(e: Exception) {
-
-                                val apiResponse  =  service.getImageEmpty(
-                                    serviceKey = serviceKey,
-                                    numOfRows = numOfRows,
-                                    pageNo = pageNo,
-                                    MobileOS = MobileOS,
-                                    MobileApp = MobileApp,
-                                    _type = datatype,
-                                    contentId = contentId
-                                )
-
-                                val resultStatus = GoCampingResponseStatusList.first {
-                                    it.getDesc().first == apiResponse.response.header.resultCode
-                                }
-
-                                if (resultStatus == GoCampingResponseStatus.OK){
-                                    val resultList: MutableList<SiteImage_TBL> = mutableListOf()
-                                  siteImageListStateFlow.emit(resultList)
-                                } else {
-
-                                }
-
-                                return
-
-                            }
-
-
-                        } else {
-
-                        }
+                            service.getImage(
+                                serviceKey = serviceKey,
+                                numOfRows = numOfRows,
+                                pageNo = pageNo,
+                                MobileOS = MobileOS,
+                                MobileApp = MobileApp,
+                                _type = datatype,
+                                contentId = contentId
+                            )
+                        } else { }
 
                     }
                     GoCampingService.SEARCH -> {
@@ -564,8 +596,6 @@ class Repository {
                     }
                 }
 
-
-
                 val resultStatus = GoCampingResponseStatusList.first {
                     it.getDesc().first == when(serviceType){
                         GoCampingService.CAMPSITE,
@@ -579,7 +609,6 @@ class Repository {
                         }
                     }
                 }
-
 
                 when (resultStatus) {
 
@@ -686,11 +715,6 @@ class Repository {
 
                                 siteImageListStateFlow.emit(resultList)
 
-                                database.withTransaction {
-                                    database.siteimageDao.trancate()
-                                    database.siteimageDao.insert_List(resultList)
-                                }
-
                             }
                             GoCampingService.SEARCH -> {}
 
@@ -702,7 +726,11 @@ class Repository {
 
 
             } catch (e: Exception){
-                val errMsg = e.localizedMessage
+                val itemsZeroPasingErrMsg = "Expected BEGIN_OBJECT but was STRING at line 1 column 82 path"
+                if(  serviceType == GoCampingService.SITEIMAGE
+                    && e.localizedMessage?.contains(itemsZeroPasingErrMsg) ?: false  )  {
+                    siteImageListStateFlow.emit(mutableListOf())
+                }
             } // catch
 
 
