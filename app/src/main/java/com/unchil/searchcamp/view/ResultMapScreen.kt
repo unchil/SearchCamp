@@ -348,14 +348,12 @@ fun ResultMapScreen(
             dragHandlerAction.invoke()
             hapticProcessing()
 
-            if (isConnected) {
-                viewModel.onEvent(
-                    SearchScreenViewModel.Event.RecvGoCampingData(
-                        servicetype = GoCampingService.SITEIMAGE,
-                        contentId = it.contentId
-                    )
+            viewModel.onEvent(
+                SearchScreenViewModel.Event.RecvGoCampingData(
+                    servicetype = GoCampingService.SITEIMAGE,
+                    contentId = it.contentId
                 )
-            }
+            )
 
         }
 
