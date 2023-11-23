@@ -21,9 +21,9 @@ SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를
 ###  Screen Shot
 ||||
 |:-:|:-:|:-:|
-|**Search Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/SearchScreen.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchScreen2.png) |
-|**Result Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list1.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_map1.png) |
-|**Detail Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list2.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/resultScreen_list3.png) |
+|**Search Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_search.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_search2.png) |
+|**Result Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_result1.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_result2.png) |
+|**Detail Screen**| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_detail1.png)| ![Alt text](https://github.com/unchil/SearchCamp/blob/main/app/src/main/assets/searchCamp_detail2.png) |
 
 ##  License
 **SPDX-License-Identifier: MIT**
