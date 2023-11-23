@@ -79,6 +79,7 @@ import com.google.maps.android.compose.widgets.ScaleBar
 import com.unchil.gismemo.view.MapTypeMenuList
 import com.unchil.gismemo.view.getDesc
 import com.unchil.gismemo.view.toLatLng
+import com.unchil.searchcamp.ChkNetWork
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.GoCampingService
@@ -129,14 +130,6 @@ fun ResultMapScreen(
     ) {
 
         val context = LocalContext.current
-        var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
-
-        LaunchedEffect(key1 = isConnected) {
-            while (!isConnected) {
-                delay(500)
-                isConnected = context.checkInternetConnected()
-            }
-        }
 
 
         val configuration = LocalConfiguration.current
@@ -322,22 +315,38 @@ fun ResultMapScreen(
             }
         }
 
+        var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
 
-        var isFirstTab by mutableStateOf(true)
+
+        LaunchedEffect(key1 = isConnected) {
+            while (!isConnected) {
+                delay(500)
+                isConnected = context.checkInternetConnected()
+            }
+        }
+
+        var isFirstTab by remember {mutableStateOf(true)}
+
+
+        LaunchedEffect(key1 = currentCampSiteData.value ){
+            isConnected = context.checkInternetConnected()
+        }
+
 
         val onClickHandler: (data: SiteDefaultData) -> Unit = {
-            hapticProcessing()
             currentCampSiteData.value = it
             isFirstTab = true
             dragHandlerAction.invoke()
+            hapticProcessing()
         }
 
 
         val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
-
-            hapticProcessing()
-
             viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
+            currentCampSiteData.value = it
+            isFirstTab = false
+            dragHandlerAction.invoke()
+            hapticProcessing()
 
             if (isConnected) {
                 viewModel.onEvent(
@@ -346,9 +355,6 @@ fun ResultMapScreen(
                         contentId = it.contentId
                     )
                 )
-                currentCampSiteData.value = it
-                isFirstTab = false
-                dragHandlerAction.invoke()
             }
 
         }
@@ -643,7 +649,13 @@ fun ResultMapScreen(
                     }
                 }
 
-
+                if( !isConnected) {
+                    ChkNetWork(onCheckState = {
+                        coroutineScope.launch {
+                            isConnected = context.checkInternetConnected()
+                        }
+                    })
+                }
 
 
             }

@@ -287,7 +287,8 @@ fun ResultListScreen(
         }
 
 
-        var isFirstTab by remember {mutableStateOf(true)}
+
+
 
         when (campSiteStream.loadState.source.refresh) {
             is LoadState.Error -> {
@@ -340,6 +341,7 @@ fun ResultListScreen(
 
                 var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
 
+
                 LaunchedEffect(key1 = isConnected) {
                     while (!isConnected) {
                         delay(500)
@@ -348,36 +350,36 @@ fun ResultListScreen(
                 }
 
 
+                var isFirstTab by remember {mutableStateOf(true)}
 
+
+                LaunchedEffect(key1 = currentCampSiteData.value ){
+                    isConnected = context.checkInternetConnected()
+                }
 
 
                 val onClickHandler: (data: SiteDefaultData) -> Unit = {
-                    hapticProcessing()
                     currentCampSiteData.value = it
                     isFirstTab = true
                     dragHandlerAction.invoke()
+                    hapticProcessing()
                 }
 
 
                 val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
-
+                    viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
+                    currentCampSiteData.value = it
+                    isFirstTab = false
+                    dragHandlerAction.invoke()
                     hapticProcessing()
 
-                    viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
-
                     if (isConnected) {
-
                         viewModel.onEvent(
                             SearchScreenViewModel.Event.RecvGoCampingData(
                                 servicetype = GoCampingService.SITEIMAGE,
                                 contentId = it.contentId
                             )
                         )
-
-                        currentCampSiteData.value = it
-                        isFirstTab = false
-                        dragHandlerAction.invoke()
-
                     }
 
                 }
@@ -586,6 +588,15 @@ fun ResultListScreen(
 
                         if(campSiteStream.itemCount == 0) {
                             ImageViewer(data = R.drawable.forest, size = Size.ORIGINAL)
+                        }
+
+
+                        if( !isConnected) {
+                            ChkNetWork(onCheckState = {
+                                coroutineScope.launch {
+                                    isConnected = context.checkInternetConnected()
+                                }
+                            })
                         }
 
 
