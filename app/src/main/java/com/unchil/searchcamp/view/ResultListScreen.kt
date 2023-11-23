@@ -45,6 +45,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -264,17 +265,17 @@ fun ResultListScreen(
 
 
 
-        val sheetState = SheetState(
+        val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState =  SheetState(
             skipPartiallyExpanded = false,
             density = LocalDensity.current,
             initialValue = SheetValue.PartiallyExpanded,
             skipHiddenState = true
-        )
-
-        val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+        ))
 
         val currentCampSiteData: MutableState<SiteDefaultData?> = remember { mutableStateOf(null) }
         val sheetPeekHeightValue by remember { mutableStateOf(0.dp) }
+
+
 
         val dragHandlerAction:()->Unit = {
             coroutineScope.launch {
@@ -284,10 +285,8 @@ fun ResultListScreen(
                     scaffoldState.bottomSheetState.partialExpand()
                 }
             }
+
         }
-
-
-
 
 
         when (campSiteStream.loadState.source.refresh) {
@@ -353,12 +352,8 @@ fun ResultListScreen(
                 var isFirstTab by remember {mutableStateOf(true)}
 
 
-                LaunchedEffect(key1 = currentCampSiteData.value ){
-                    isConnected = context.checkInternetConnected()
-                }
-
-
                 val onClickHandler: (data: SiteDefaultData) -> Unit = {
+                    isConnected = context.checkInternetConnected()
                     currentCampSiteData.value = it
                     isFirstTab = true
                     dragHandlerAction.invoke()
@@ -367,6 +362,7 @@ fun ResultListScreen(
 
 
                 val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
+                    isConnected = context.checkInternetConnected()
                     viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
                     currentCampSiteData.value = it
                     isFirstTab = false
@@ -456,7 +452,12 @@ fun ResultListScreen(
                                 }
                             }
 
+
+
+
                         }
+
+
                     }
                 ) { innerPadding ->
 

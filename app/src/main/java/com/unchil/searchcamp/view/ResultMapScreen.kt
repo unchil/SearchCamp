@@ -328,12 +328,9 @@ fun ResultMapScreen(
         var isFirstTab by remember {mutableStateOf(true)}
 
 
-        LaunchedEffect(key1 = currentCampSiteData.value ){
-            isConnected = context.checkInternetConnected()
-        }
-
 
         val onClickHandler: (data: SiteDefaultData) -> Unit = {
+            isConnected = context.checkInternetConnected()
             currentCampSiteData.value = it
             isFirstTab = true
             dragHandlerAction.invoke()
@@ -342,6 +339,7 @@ fun ResultMapScreen(
 
 
         val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
+            isConnected = context.checkInternetConnected()
             viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
             currentCampSiteData.value = it
             isFirstTab = false

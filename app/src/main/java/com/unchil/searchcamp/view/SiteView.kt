@@ -155,16 +155,14 @@ fun SiteDefaultView(
 
         Box(
             modifier = Modifier
+                /*
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = rememberRipple(bounded = true),
-                    onClick = {
-                        onClick.invoke()
-                    },
-                    onLongClick = {
-                        onLongClick.invoke()
-                    }
+                    onClick = onClick
                 )
+
+                 */
                 .fillMaxWidth()
                 .height(170.dp)
                 .clip(ShapeDefaults.ExtraSmall)
@@ -216,6 +214,9 @@ fun SiteDefaultView(
 
                     Column (
                         modifier = Modifier
+                            .clickable {
+                                 onClick.invoke()
+                            }
                             .fillMaxWidth(0.5f)
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.Center,
@@ -365,13 +366,7 @@ fun SiteDefaultView(
                         data = if(siteData.firstImageUrl.isNotEmpty()){siteData.firstImageUrl} else {
                             R.drawable.forest} ,
                         allowHardware = allowHardware,
-                        onClick = {
-                            onClickPhoto.invoke()
-                        },
-                        onLongClick = {
-                            onLongClick.invoke()
-                        }
-
+                        onClick = onClickPhoto,
                     )
 
 
