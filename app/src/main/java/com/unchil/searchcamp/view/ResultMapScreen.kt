@@ -150,12 +150,12 @@ fun ResultMapScreen(
             Configuration.ORIENTATION_PORTRAIT -> {
                 isPortrait = true
                 columnWidth = 9f
-                bottomPadding = 70.dp
+                bottomPadding = 60.dp
             }
             else ->{
                 isPortrait = false
                 columnWidth = 0.5f
-                bottomPadding = 10.dp
+                bottomPadding = 0.dp
             }
         }
 
@@ -623,7 +623,7 @@ fun ResultMapScreen(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth(columnWidth)
-                            .padding(bottom = 2.dp)
+                            .padding(bottom = bottomPadding)
                             .padding(horizontal = 10.dp),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -642,7 +642,6 @@ fun ResultMapScreen(
                                 }
                             )
                         }
-
 
                     }
                 }
