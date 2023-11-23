@@ -69,20 +69,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-
-
-
             val context = LocalContext.current
             val searchCampDB = SearchCampDB.getInstance(context.applicationContext)
-            var isConnect  by remember { mutableStateOf(context.checkInternetConnected()) }
+            var isConnected  by remember { mutableStateOf(context.checkInternetConnected()) }
 
             val coroutineScope = rememberCoroutineScope()
 
 
-            LaunchedEffect(key1 = isConnect ){
-                while(!isConnect) {
+            LaunchedEffect(key1 = isConnected ){
+                while(!isConnected) {
                     delay(500)
-                    isConnect = context.checkInternetConnected()
+                    isConnected = context.checkInternetConnected()
                 }
             }
 
@@ -100,12 +97,12 @@ class MainActivity : ComponentActivity() {
 
                                     Box(modifier = Modifier.fillMaxSize()
                                     ) {
-                                        if (isConnect) {
+                                        if (isConnected) {
                                             SearchScreen()
                                         } else {
                                             ChkNetWork(onCheckState = {
                                                 coroutineScope.launch {
-                                                    isConnect = checkInternetConnected()
+                                                    isConnected = checkInternetConnected()
                                                 }
                                             })
                                         }

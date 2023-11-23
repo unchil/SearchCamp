@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
+import com.unchil.searchcamp.ChkNetWork
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.data.RepositoryProvider
@@ -136,12 +138,12 @@ fun SearchScreen(){
         val fusedLocationProviderClient = remember {
             LocationServices.getFusedLocationProviderClient(context)
         }
-        var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
+        var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
 
-        LaunchedEffect(key1 = isConnect) {
-            while (!isConnect) {
+        LaunchedEffect(key1 = isConnected) {
+            while (!isConnected) {
                 delay(500)
-                isConnect = context.checkInternetConnected()
+                isConnected = context.checkInternetConnected()
             }
         }
 
@@ -151,12 +153,12 @@ fun SearchScreen(){
 
         val snackBarHostState = remember { SnackbarHostState() }
 
-        val scope = rememberCoroutineScope()
+        val coroutineScope = rememberCoroutineScope()
 
         val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
 
         LaunchedEffect(key1 = viewModel) {
-            if (isConnect) {
+            if (isConnected) {
 
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(context.mainExecutor) { task ->
                     if (task.isSuccessful && task.result != null) {
@@ -335,8 +337,6 @@ fun SearchScreen(){
                 }
             },
             appBar = {
-
-
                     TopAppBar(
                         title = {
 
@@ -362,10 +362,10 @@ fun SearchScreen(){
                             IconButton(
                                 onClick = {
                                     if (scaffoldState.isConcealed) {
-                                        scope.launch { scaffoldState.reveal() }
+                                        coroutineScope.launch { scaffoldState.reveal() }
 
                                     } else {
-                                        scope.launch { scaffoldState.conceal() }
+                                        coroutineScope.launch { scaffoldState.conceal() }
                                     }
                                 }
                             ) {
@@ -393,13 +393,24 @@ fun SearchScreen(){
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
+
+
                     ResultNavScreen(viewModel = viewModel){
                         if(scaffoldState.isConcealed){
-                            scope.launch { scaffoldState.reveal() }
+                            coroutineScope.launch { scaffoldState.reveal() }
                         }else{
-                            scope.launch { scaffoldState.conceal() }
+                            coroutineScope.launch { scaffoldState.conceal() }
                         }
                     }
+
+                    AnimatedVisibility(visible = !isConnected) {
+                        ChkNetWork(onCheckState = {
+                            coroutineScope.launch {
+                                isConnected = context.checkInternetConnected()
+                            }
+                        })
+                    }
+
                 }
 
 

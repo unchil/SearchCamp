@@ -129,15 +129,13 @@ fun ResultMapScreen(
     ) {
 
         val context = LocalContext.current
-        var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
+        var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
 
-        LaunchedEffect(key1 = isConnect) {
-            while (!isConnect) {
+        LaunchedEffect(key1 = isConnected) {
+            while (!isConnected) {
                 delay(500)
-                isConnect = context.checkInternetConnected()
+                isConnected = context.checkInternetConnected()
             }
-
-
         }
 
 
@@ -341,7 +339,7 @@ fun ResultMapScreen(
 
             viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
 
-            if (isConnect) {
+            if (isConnected) {
                 viewModel.onEvent(
                     SearchScreenViewModel.Event.RecvGoCampingData(
                         servicetype = GoCampingService.SITEIMAGE,

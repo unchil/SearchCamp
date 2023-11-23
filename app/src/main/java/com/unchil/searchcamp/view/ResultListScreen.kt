@@ -71,6 +71,7 @@ import coil.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.unchil.searchcamp.ChkNetWork
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.data.GoCampingService
 import com.unchil.searchcamp.db.entity.CampSite_TBL
@@ -245,11 +246,7 @@ fun ResultListScreen(
         val campSiteStream = viewModel.campSiteListPaging.collectAsLazyPagingItems()
 
 
-
-
-
         var isLoading by remember { mutableStateOf(true) }
-
 
         val isUsableHaptic = LocalUsableHaptic.current
         val hapticFeedback = LocalHapticFeedback.current
@@ -341,15 +338,13 @@ fun ResultListScreen(
 
 
 
-                var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
+                var isConnected by remember { mutableStateOf(context.checkInternetConnected()) }
 
-                LaunchedEffect(key1 = isConnect) {
-                    while (!isConnect) {
+                LaunchedEffect(key1 = isConnected) {
+                    while (!isConnected) {
                         delay(500)
-                        isConnect = context.checkInternetConnected()
+                        isConnected = context.checkInternetConnected()
                     }
-
-
                 }
 
 
@@ -370,7 +365,7 @@ fun ResultListScreen(
 
                     viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
 
-                    if (isConnect) {
+                    if (isConnected) {
 
                         viewModel.onEvent(
                             SearchScreenViewModel.Event.RecvGoCampingData(
@@ -452,6 +447,8 @@ fun ResultListScreen(
                             contentAlignment = Alignment.Center
 
                         ) {
+
+
                             currentCampSiteData.value?.let {
                                 if (isFirstTab) {
                                     SiteIntroductionView(it)
@@ -459,6 +456,7 @@ fun ResultListScreen(
                                     SiteImagePagerView(viewModel = viewModel )
                                 }
                             }
+
                         }
                     }
                 ) { innerPadding ->

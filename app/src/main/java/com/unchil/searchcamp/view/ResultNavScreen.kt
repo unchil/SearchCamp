@@ -322,23 +322,15 @@ fun ResultNavScreen(
 
                 Box(
                     modifier = Modifier
-                        //       .fillMaxWidth(columnWidth)
                         .fillMaxWidth()
                 ) {
                     when (resultScreens[selectedScreen]) {
                         SearchCampDestinations.resultListScreen -> {
                             ResultListScreen(viewModel = viewModel)
-
                         }
-
                         SearchCampDestinations.resultMapScreen -> {
-
-                            ResultMapScreen(
-                                viewModel
-                            )
+                            ResultMapScreen(viewModel = viewModel)
                         }
-
-                        else -> {}
                     }
                 }
 
