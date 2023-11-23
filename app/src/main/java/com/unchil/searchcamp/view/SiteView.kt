@@ -70,6 +70,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,6 +96,7 @@ import coil.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.R
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
@@ -113,6 +115,7 @@ import com.unchil.searchcamp.ui.theme.SearchCampTheme
 import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @SuppressLint("UnrememberedMutableState")
@@ -616,14 +619,13 @@ fun SiteIntroductionView(
 
 
 
-
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SiteImagePagerView(
     viewModel: SearchScreenViewModel,
     contentId: String? = null
-){
+) {
 
     val configuration = LocalConfiguration.current
     var isPortrait by remember { mutableStateOf(false) }
@@ -631,12 +633,10 @@ fun SiteImagePagerView(
         Configuration.ORIENTATION_PORTRAIT -> {
             true
         }
-        else ->{
+        else -> {
             false
         }
     }
-
-
 
     var cardWidthDp by remember { mutableStateOf(0.dp) }
     var cardHeightDp by remember { mutableStateOf(0.dp) }
@@ -646,10 +646,11 @@ fun SiteImagePagerView(
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             isPortrait = true
-            cardWidthDp =  configuration.screenWidthDp.dp
+            cardWidthDp = configuration.screenWidthDp.dp
             cardHeightDp = cardWidthDp
         }
-        else ->{
+
+        else -> {
             isPortrait = false
             cardWidthDp = landscapeBottomSheetWidth * 0.7f
             cardHeightDp = cardWidthDp
@@ -657,16 +658,15 @@ fun SiteImagePagerView(
     }
 
 
-
     // 한 패이지 의 패딩값
-    val paddingValues by mutableStateOf ( if(isPortrait){
+    val paddingValues by mutableStateOf(
+        if (isPortrait) {
 
-        PaddingValues( vertical = configuration.screenHeightDp.dp /2   -  cardHeightDp  / 2 )
-    }else {
-        PaddingValues( horizontal =  landscapeBottomSheetWidth /2  -  cardWidthDp / 2)
-    }
+            PaddingValues(vertical = configuration.screenHeightDp.dp / 2 - cardHeightDp / 2)
+        } else {
+            PaddingValues(horizontal = landscapeBottomSheetWidth / 2 - cardWidthDp / 2)
+        }
     )
-
 
 
     val pagesPerViewport = object : PageSize {
@@ -678,10 +678,7 @@ fun SiteImagePagerView(
         }
     }
 
-
-    val permissions = listOf(
-        Manifest.permission.INTERNET,
-    )
+    val permissions = listOf( Manifest.permission.INTERNET )
 
     val multiplePermissionsState = rememberMultiplePermissionsState( permissions)
 
@@ -699,283 +696,37 @@ fun SiteImagePagerView(
         multiplePermissions = permissions
     ) {
 
-
-        val density = LocalDensity.current
-        val context = LocalContext.current
-
-        var isConnect by remember { mutableStateOf(context.checkInternetConnected()) }
-
-        LaunchedEffect(key1 = isConnect) {
-            while (!isConnect) {
-                delay(500)
-                isConnect = context.checkInternetConnected()
-            }
-        }
-
-        val hapticFeedback = LocalHapticFeedback.current
-
-        var isHapticProcessing by remember { mutableStateOf(false) }
-
-        LaunchedEffect(key1 = isHapticProcessing) {
-            if (isHapticProcessing) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                isHapticProcessing = false
-            }
-        }
-
-
-        var isVisibleImage by remember{ mutableStateOf(false) }
-        var imageUrl by remember { mutableStateOf("") }
-
-       // val siteImageList = viewModel.siteImageListStateFlow.collectAsState()
-        val siteImageListResult = viewModel.siteImageListResultStateFlow.collectAsState()
-        val pagerState  =   rememberPagerState(
-            initialPage = 0,
-            initialPageOffsetFraction = 0f,
-            pageCount = {  siteImageListResult.value.second.size } )
-
-
-        LaunchedEffect(key1 = siteImageListResult.value ){
-            pagerState.scrollToPage(0)
-
-        }
-
-/*
-        val pagerState  =   rememberPagerState(
-            initialPage = 0,
-            initialPageOffsetFraction = 0f,
-            pageCount = {  siteImageList.value.size } )
-
-
-        LaunchedEffect(key1 = siteImageList.value ){
-            pagerState.scrollToPage(0)
-
-        }
-*/
-
-/*
-
-        if( siteImageList.value.isNotEmpty() ) {
-
-            Box (
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ){
-
-
-                if(isPortrait){
-
-                    VerticalPager(
-                        modifier = Modifier,
-                        state = pagerState,
-                        pageSpacing = 0.dp,
-                        pageSize = pagesPerViewport,
-                        beyondBoundsPageCount = 1,
-                        contentPadding = paddingValues,
-                    ) {page ->
-
-                        Card(
-                            Modifier
-                                .height(cardHeightDp)
-                                .width(cardWidthDp)
-                                .graphicsLayer {
-                                    // Calculate the absolute offset for the current page from the
-                                    // scroll position. We use the absolute value which allows us to mirror
-                                    // any effects for both directions
-                                    val pageOffset = (
-                                            (pagerState.currentPage - page) + pagerState
-                                                .currentPageOffsetFraction
-                                            ).absoluteValue
-
-
-                                    alpha = lerp(
-                                        start = 0.7f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-                                    scaleX = lerp(
-                                        start = 0.8f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-                                    scaleY = lerp(
-                                        start = 0.8f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-
-                                }
-                                .combinedClickable(
-                                    onLongClick = {
-                                        isHapticProcessing = true
-                                        isVisibleImage = true
-                                        imageUrl = siteImageList.value.get(page).imageUrl
-                                    },
-                                    onClick = {
-                                        isHapticProcessing = true
-                                        isVisibleImage = true
-                                        imageUrl = siteImageList.value.get(page).imageUrl
-                                    }
-                                ),
-                            shape =  ShapeDefaults.ExtraSmall,
-
-
-                        ) {
-
-
-                            ImageViewer(
-                                data = (siteImageList.value.get(page).imageUrl),
-                                size = Size(600,600),
-                                isZoomable = false,
-                                contentScale = ContentScale.Crop
-                            )
-
-
-                        }
-
-                    }
-
-                }else {
-
-
-
-
-                    HorizontalPager(
-                        modifier = Modifier,
-                        state = pagerState,
-                        pageSpacing = 0.dp,
-                        pageSize = pagesPerViewport,
-                        beyondBoundsPageCount = 1,
-                        contentPadding = paddingValues,
-                    ) { page ->
-
-                        Card(
-                            Modifier
-                                .width(cardWidthDp)
-                                .height(cardHeightDp)
-                                .graphicsLayer {
-                                    // Calculate the absolute offset for the current page from the
-                                    // scroll position. We use the absolute value which allows us to mirror
-                                    // any effects for both directions
-                                    val pageOffset = (
-                                            (pagerState.currentPage - page) + pagerState
-                                                .currentPageOffsetFraction
-                                            ).absoluteValue
-
-
-                                    alpha = lerp(
-                                        start = 0.7f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-                                    scaleX = lerp(
-                                        start = 0.7f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-                                    scaleY = lerp(
-                                        start = 0.7f,
-                                        stop = 1f,
-                                        fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                                    )
-
-
-                                }
-                                .combinedClickable(
-                                    onLongClick = {
-                                        isHapticProcessing = true
-                                        isVisibleImage = true
-                                        imageUrl = siteImageList.value.get(page).imageUrl
-                                    },
-                                    onClick = {
-                                        isHapticProcessing = true
-                                        isVisibleImage = true
-                                        imageUrl = siteImageList.value.get(page).imageUrl
-                                    }
-                                ),
-                            shape =  ShapeDefaults.ExtraSmall,
-                        ) {
-
-                            ImageViewer(
-                                data = (siteImageList.value.get(page).imageUrl),
-                                size = Size(600,600),
-                                isZoomable = false,
-                                contentScale = ContentScale.Crop
-                            )
-
-                        }
-
-                    }
-
-
-
-                }
-
-
-
-                AnimatedVisibility(visible = isVisibleImage,
-                    enter = slideInVertically {
-                        // Slide in from 40 dp from the top.
-                        with(density) { 40.dp.roundToPx() }
-                    } + expandVertically(
-                        // Expand from the top.
-                        expandFrom = Alignment.Top
-                    ) + fadeIn(
-                        // Fade in with the initial alpha of 0.3f.
-                        initialAlpha = 0.3f
-                    ),
-                    exit = slideOutVertically() + shrinkVertically() + fadeOut()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(ShapeDefaults.ExtraSmall)
-                            .fillMaxSize()
-                            .background(color = MaterialTheme.colorScheme.background)
-                            .clickable {
-                                isHapticProcessing = true
-                                isVisibleImage = false
-                            }
-                    ) {
-                        ImageViewer(
-                            data = imageUrl,
-                            size = Size.ORIGINAL,
-                            isZoomable = true,
-                            contentScale = ContentScale.Fit
-                        )
-                    }
-                }
-
-
-
-
-
-
-            }
-
-        } else {
-
-            Box(
-                modifier = Modifier
+        val resultState = viewModel.recvSiteImageListState.collectAsState()
+
+        when(resultState.value){
+            is SearchScreenViewModel.RecvSiteImageListState.Error -> {
+                val result = (resultState.value as SearchScreenViewModel.RecvSiteImageListState.Error)
+                Box( modifier = Modifier
                     .fillMaxSize()
-            ){
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                ) {
+                    Text(
+                        text = result.responseStatus.getDesc().second,
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
+            SearchScreenViewModel.RecvSiteImageListState.Loading -> {
+                Box( modifier = Modifier
+                    .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            is SearchScreenViewModel.RecvSiteImageListState.Success -> {
 
-        }
-*/
+                val result = (resultState.value as SearchScreenViewModel.RecvSiteImageListState.Success)
 
-        when(siteImageListResult.value.first){
-
-            GoCampingResponseStatus.OK ->  {
-                if(siteImageListResult.value.second.size == 0){
+                if(result.dataList.size == 0){
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -988,12 +739,42 @@ fun SiteImagePagerView(
                         )
                     }
                 }else {
+
+                    val density = LocalDensity.current
+                    val context = LocalContext.current
+
+                    val isUsableHaptic = LocalUsableHaptic.current
+                    val hapticFeedback = LocalHapticFeedback.current
+                    val coroutineScope = rememberCoroutineScope()
+
+                    fun hapticProcessing(){
+                        if(isUsableHaptic){
+                            coroutineScope.launch {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                        }
+                    }
+
+                    var isVisibleImage by remember{ mutableStateOf(false) }
+                    var imageUrl by remember { mutableStateOf("") }
+
+                    val pagerState  =   rememberPagerState(
+                        initialPage = 0,
+                        initialPageOffsetFraction = 0f,
+                        pageCount = {  result.dataList.size } )
+
+                    /*
+                    LaunchedEffect(key1 = pagerState.currentPage ){
+                        hapticProcessing()
+                    }
+
+                     */
+
                     Box (
                         modifier = Modifier
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center,
-                    ){
-
+                    ) {
 
                         if(isPortrait){
 
@@ -1004,34 +785,28 @@ fun SiteImagePagerView(
                                 pageSize = pagesPerViewport,
                                 beyondBoundsPageCount = 1,
                                 contentPadding = paddingValues,
-                            ) {page ->
+                            ) { page ->
 
                                 Card(
                                     Modifier
                                         .height(cardHeightDp)
                                         .width(cardWidthDp)
                                         .graphicsLayer {
-                                            // Calculate the absolute offset for the current page from the
-                                            // scroll position. We use the absolute value which allows us to mirror
-                                            // any effects for both directions
                                             val pageOffset = (
                                                     (pagerState.currentPage - page) + pagerState
                                                         .currentPageOffsetFraction
                                                     ).absoluteValue
-
 
                                             alpha = lerp(
                                                 start = 0.7f,
                                                 stop = 1f,
                                                 fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                             )
-
                                             scaleX = lerp(
                                                 start = 0.8f,
                                                 stop = 1f,
                                                 fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                             )
-
                                             scaleY = lerp(
                                                 start = 0.8f,
                                                 stop = 1f,
@@ -1042,16 +817,14 @@ fun SiteImagePagerView(
                                         }
                                         .combinedClickable(
                                             onLongClick = {
-                                                isHapticProcessing = true
+                                                hapticProcessing()
                                                 isVisibleImage = true
-                                         //       imageUrl = siteImageList.value.get(page).imageUrl
-                                                imageUrl = siteImageListResult.value.second.get(page).imageUrl
+                                                imageUrl = result.dataList[page].imageUrl
                                             },
                                             onClick = {
-                                                isHapticProcessing = true
+                                                hapticProcessing()
                                                 isVisibleImage = true
-                                                //       imageUrl = siteImageList.value.get(page).imageUrl
-                                                imageUrl = siteImageListResult.value.second.get(page).imageUrl
+                                                imageUrl = result.dataList[page].imageUrl
                                             }
                                         ),
                                     shape =  ShapeDefaults.ExtraSmall,
@@ -1061,8 +834,7 @@ fun SiteImagePagerView(
 
 
                                     ImageViewer(
-                                //        data = (siteImageList.value.get(page).imageUrl),
-                                        data = (siteImageListResult.value.second.get(page).imageUrl),
+                                        data = result.dataList[page].imageUrl,
                                         size = Size(600,600),
                                         isZoomable = false,
                                         contentScale = ContentScale.Crop
@@ -1073,10 +845,7 @@ fun SiteImagePagerView(
 
                             }
 
-                        }else {
-
-
-
+                        } else {
 
                             HorizontalPager(
                                 modifier = Modifier,
@@ -1092,27 +861,21 @@ fun SiteImagePagerView(
                                         .width(cardWidthDp)
                                         .height(cardHeightDp)
                                         .graphicsLayer {
-                                            // Calculate the absolute offset for the current page from the
-                                            // scroll position. We use the absolute value which allows us to mirror
-                                            // any effects for both directions
                                             val pageOffset = (
                                                     (pagerState.currentPage - page) + pagerState
                                                         .currentPageOffsetFraction
                                                     ).absoluteValue
-
 
                                             alpha = lerp(
                                                 start = 0.7f,
                                                 stop = 1f,
                                                 fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                             )
-
                                             scaleX = lerp(
                                                 start = 0.7f,
                                                 stop = 1f,
                                                 fraction = 1f - pageOffset.coerceIn(0f, 1f)
                                             )
-
                                             scaleY = lerp(
                                                 start = 0.7f,
                                                 stop = 1f,
@@ -1123,24 +886,21 @@ fun SiteImagePagerView(
                                         }
                                         .combinedClickable(
                                             onLongClick = {
-                                                isHapticProcessing = true
+                                                hapticProcessing()
                                                 isVisibleImage = true
-                                         //       imageUrl = siteImageList.value.get(page).imageUrl
-                                                imageUrl =  siteImageListResult.value.second.get(page).imageUrl
+                                                imageUrl = result.dataList[page].imageUrl
                                             },
                                             onClick = {
-                                                isHapticProcessing = true
+                                                hapticProcessing()
                                                 isVisibleImage = true
-                                          //      imageUrl = siteImageList.value.get(page).imageUrl
-                                                imageUrl =  siteImageListResult.value.second.get(page).imageUrl
+                                                imageUrl = result.dataList[page].imageUrl
                                             }
                                         ),
                                     shape =  ShapeDefaults.ExtraSmall,
                                 ) {
 
                                     ImageViewer(
-                                 //       data = (siteImageList.value.get(page).imageUrl),
-                                        data = (siteImageListResult.value.second.get(page).imageUrl),
+                                        data = result.dataList[page].imageUrl,
                                         size = Size(600,600),
                                         isZoomable = false,
                                         contentScale = ContentScale.Crop
@@ -1150,11 +910,7 @@ fun SiteImagePagerView(
 
                             }
 
-
-
                         }
-
-
 
                         AnimatedVisibility(visible = isVisibleImage,
                             enter = slideInVertically {
@@ -1175,7 +931,7 @@ fun SiteImagePagerView(
                                     .fillMaxSize()
                                     .background(color = MaterialTheme.colorScheme.background)
                                     .clickable {
-                                        isHapticProcessing = true
+                                        hapticProcessing()
                                         isVisibleImage = false
                                     }
                             ) {
@@ -1190,39 +946,13 @@ fun SiteImagePagerView(
 
 
 
-
-
-
                     }
+
+
                 }
-            }
-            GoCampingResponseStatus.SUCCESS -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ){
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-            else -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ){
-                    Text(
-                        text = siteImageListResult.value.first.getDesc().second,
-                        modifier = Modifier
-                            .align(Alignment.Center),
-                        textAlign = TextAlign.Center
-                    )
-                }
+
             }
         }
-
-
-
 
     }
 }

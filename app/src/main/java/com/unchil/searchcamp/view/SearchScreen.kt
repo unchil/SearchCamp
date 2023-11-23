@@ -109,6 +109,10 @@ fun SearchScreen(){
             mutableStateOf("0")
         }
 
+        var administrativeDistrictSiDo by rememberSaveable {
+            mutableStateOf("현위치")
+        }
+
         var administrativeDistrictSiGunGu by rememberSaveable {
             mutableStateOf("")
         }
@@ -264,9 +268,10 @@ fun SearchScreen(){
             }
         }
 
-        val onSearchEventHandler: (siDoCode: String, siGunGuName: String, siteName: String?) -> Unit =
-            { siDoCode, siGunGuName, siteName ->
+        val onSearchEventHandler: (siDoCode: String, siDo:String,  siGunGuName: String, siteName: String?) -> Unit =
+            { siDoCode, siDoName, siGunGuName, siteName ->
                 administrativeDistrictSiDoCode = siDoCode
+                administrativeDistrictSiDo = siDoName
                 administrativeDistrictSiGunGu = siGunGuName
                 searchTitle.value = siteName
 
@@ -334,8 +339,15 @@ fun SearchScreen(){
 
                     TopAppBar(
                         title = {
+
+                            val text = if( administrativeDistrictSiDoCode.equals("0")) {
+                                "${administrativeDistrictSiDo}\n${context.getString(R.string.mainmenu_result)} ${currentListDataCntStateFlow.value} 건"
+                            }else {
+                                "${administrativeDistrictSiDo} ${administrativeDistrictSiGunGu}\n${context.getString(R.string.mainmenu_result)} ${currentListDataCntStateFlow.value} 건"
+                            }
+
                             Text(
-                                text = context.getString(R.string.mainmenu_result) + " ${currentListDataCntStateFlow.value} 건",
+                                text =  text,
                                 color = MaterialTheme.colorScheme.onTertiary,
                                 modifier = Modifier
                                     .fillMaxWidth()

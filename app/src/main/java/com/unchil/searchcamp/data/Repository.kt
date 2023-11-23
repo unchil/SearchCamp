@@ -30,6 +30,7 @@ import com.unchil.searchcamp.model.getDesc
 import com.unchil.searchcamp.model.toCURRENTWEATHER_TBL
 import com.unchil.searchcamp.shared.UnixTimeToString
 import com.unchil.searchcamp.shared.yyyyMMdd
+import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -178,13 +179,21 @@ class Repository {
 
     val siteImageListStateFlow:MutableStateFlow<List<SiteImage_TBL>> = MutableStateFlow(listOf())
 
-    val siteImageListResultStateFlow:MutableStateFlow <  Pair < GoCampingResponseStatus, List<SiteImage_TBL>   >> = MutableStateFlow(   Pair(GoCampingResponseStatus.SUCCESS ,emptyList())    )
+
+
+     val _recvSiteImageListState:MutableStateFlow<SearchScreenViewModel.RecvSiteImageListState>
+     = MutableStateFlow(SearchScreenViewModel.RecvSiteImageListState.Success(emptyList()))
+
 
     var currentListDataStateFlow:MutableStateFlow<List<CampSite_TBL>> = MutableStateFlow(listOf())
 
 
+    fun setLoadingStateRecvSiteImageListState(){
+        _recvSiteImageListState.value = SearchScreenViewModel.RecvSiteImageListState.Loading
+    }
 
-     suspend fun getCampSiteListFlow(
+
+    suspend fun getCampSiteListFlow(
         administrativeDistrictSiDoCode:String,
         administrativeDistrictSiGunGu:String,
         searchTitle:String? = null): Int{
@@ -482,21 +491,16 @@ class Repository {
             }
 
 
-            val resultStatus = GoCampingResponseStatusList.first {
-                it.getDesc().first == apiResponse.response?.header?.resultCode
-            }
-
-            siteImageListResultStateFlow.emit (Pair(resultStatus, resultList))
-
+            _recvSiteImageListState.value = SearchScreenViewModel.RecvSiteImageListState.Success(resultList)
 
         } catch (e : Exception){
 
             val itemsZeroPasingErrMsg = "Expected BEGIN_OBJECT but was STRING at line 1 column 82 path"
 
             if(   e.localizedMessage?.contains(itemsZeroPasingErrMsg) ?: false  )  {
-                siteImageListResultStateFlow.emit (Pair(GoCampingResponseStatus.OK, emptyList()))
+                _recvSiteImageListState.value = SearchScreenViewModel.RecvSiteImageListState.Success(emptyList())
             } else {
-                siteImageListResultStateFlow.emit (Pair(GoCampingResponseStatus.SERVICETIMEOUT_ERROR, emptyList()))
+                _recvSiteImageListState.value = SearchScreenViewModel.RecvSiteImageListState.Error(GoCampingResponseStatus.SERVICETIMEOUT_ERROR)
             }
         }
 
@@ -726,11 +730,7 @@ class Repository {
 
 
             } catch (e: Exception){
-                val itemsZeroPasingErrMsg = "Expected BEGIN_OBJECT but was STRING at line 1 column 82 path"
-                if(  serviceType == GoCampingService.SITEIMAGE
-                    && e.localizedMessage?.contains(itemsZeroPasingErrMsg) ?: false  )  {
-                    siteImageListStateFlow.emit(mutableListOf())
-                }
+                val errMsg = e.localizedMessage
             } // catch
 
 

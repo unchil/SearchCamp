@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
@@ -37,11 +39,10 @@ class SearchScreenViewModel   (
     val currentListDataStateFlow  = repository.currentListDataStateFlow
 
 
-    val siteImageListStateFlow: MutableStateFlow<List<SiteImage_TBL>>
-            = repository.siteImageListStateFlow
+    private val _recvSiteImageListState:MutableStateFlow<RecvSiteImageListState>
+        = MutableStateFlow(RecvSiteImageListState.Success(emptyList()))
 
-    val siteImageListResultStateFlow: MutableStateFlow <  Pair < GoCampingResponseStatus, List<SiteImage_TBL>   >>
-            = repository.siteImageListResultStateFlow
+    val recvSiteImageListState: StateFlow<RecvSiteImageListState> = _recvSiteImageListState
 
 
     private val _effect = MutableSharedFlow<Effect>()
@@ -55,6 +56,11 @@ class SearchScreenViewModel   (
 
     init{
 
+        viewModelScope.launch {
+            repository._recvSiteImageListState.collect{
+                _recvSiteImageListState.value = it
+            }
+        }
 
 
         val eventStateFlow = MutableSharedFlow<Event>()
@@ -79,9 +85,6 @@ class SearchScreenViewModel   (
                     )
                 )
             }
-
-
-
 
 
         //  3.  viewModelScope.launch { searchMemo() }
@@ -124,7 +127,14 @@ class SearchScreenViewModel   (
 
             }
 
+            Event.InitRecvSiteImageList -> {
+                initRecvSiteImageList()
+            }
         }
+    }
+
+    private fun initRecvSiteImageList(){
+        repository.setLoadingStateRecvSiteImageListState()
     }
 
     private fun searchCampSite(
@@ -208,18 +218,19 @@ class SearchScreenViewModel   (
             val  contentId:String? = null
         ): Event()
 
+        object InitRecvSiteImageList: Event()
+    }
 
-
+    sealed class RecvSiteImageListState {
+        data class Success(val dataList: List<SiteImage_TBL>) : RecvSiteImageListState()
+        object Loading: RecvSiteImageListState()
+        data class Error(val responseStatus: GoCampingResponseStatus) :  RecvSiteImageListState()
     }
 
 
     sealed class Effect {
          object QueryResultCount: Effect()
 
-        data class  RecvResult(
-            val resultType:GoCampingResponseStatus,
-            val resultCount:Int
-        ): Effect()
     }
 
 

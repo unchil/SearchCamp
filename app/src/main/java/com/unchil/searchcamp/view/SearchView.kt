@@ -86,7 +86,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchCampView(
     modifier:Modifier  = Modifier,
-    onSearchEventHandler:(   administrativeDistrictSiDoCode:String,
+    onSearchEventHandler:(
+                        administrativeDistrictSiDoCode:String,
+                        administrativeDistrictSiDo:String,
                        administrativeDistrictSiGunGu:String,
                        searchTitle:String?)-> Unit,
     onMessage:(() -> Unit)? = null
@@ -513,6 +515,7 @@ fun SearchCampView(
                     onSearch = { query_title ->
                         onSearchEventHandler(
                             administrativeDistrictSiDoCode,
+                            administrativeDistrictSiDo,
                             administrativeDistrictSiGunGu,
                             query_title
                         )
@@ -585,6 +588,7 @@ fun SearchCampView(
 
                                     onSearchEventHandler(
                                         administrativeDistrictSiDoCode,
+                                        administrativeDistrictSiDo,
                                         administrativeDistrictSiGunGu,
                                         query_title
                                     )

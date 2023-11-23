@@ -336,30 +336,24 @@ fun ResultMapScreen(
 
 
         val onClickPhotoHandler: (data: SiteDefaultData) -> Unit = {
+
             hapticProcessing()
 
-            coroutineScope.launch {
-                viewModel.siteImageListResultStateFlow.emit(
-                    Pair(GoCampingResponseStatus.SUCCESS, emptyList<SiteImage_TBL>())
-                )
-            }
+            viewModel.onEvent(SearchScreenViewModel.Event.InitRecvSiteImageList)
 
             if (isConnect) {
-
                 viewModel.onEvent(
                     SearchScreenViewModel.Event.RecvGoCampingData(
                         servicetype = GoCampingService.SITEIMAGE,
                         contentId = it.contentId
                     )
                 )
-
                 currentCampSiteData.value = it
                 isFirstTab = false
                 dragHandlerAction.invoke()
             }
+
         }
-
-
 
 
         BottomSheetScaffold(
