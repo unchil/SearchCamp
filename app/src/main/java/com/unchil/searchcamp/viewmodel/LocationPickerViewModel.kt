@@ -9,15 +9,32 @@ import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.entity.SiDo_TBL
 import com.unchil.searchcamp.db.entity.SiGunGu_TBL
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LocationPickerViewModel (val repository: Repository) : ViewModel() {
 
-    val sidoListStateFlow: MutableStateFlow<List<SiDo_TBL>>
-            = repository.sidoListStateFlow
 
-    val sigunguListStateFlow: MutableStateFlow<List<SiGunGu_TBL>>
-            = repository.sigunguListStateFlow
+    private val _sidoListStateFlow: MutableStateFlow<List<SiDo_TBL>> = MutableStateFlow(emptyList())
+    val sidoListStateFlow:StateFlow<List<SiDo_TBL>> = _sidoListStateFlow
+
+    private val _sigunguListStateFlow: MutableStateFlow<List<SiGunGu_TBL>> = MutableStateFlow(emptyList())
+    val sigunguListStateFlow:StateFlow<List<SiGunGu_TBL>> = _sigunguListStateFlow
+
+
+    init {
+        viewModelScope.launch {
+            repository.sidoListStateFlow.collect{
+                _sidoListStateFlow.value = it
+            }
+        }
+
+        viewModelScope.launch {
+            repository.sigunguListStateFlow.collect{
+                _sigunguListStateFlow.value = it
+            }
+        }
+    }
 
 
     fun onEvent(event: Event) {

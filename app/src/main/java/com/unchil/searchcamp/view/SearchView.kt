@@ -338,11 +338,8 @@ fun SearchCampView(
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineLarge
                         )
-
-
-
-
-                        WeatherContent()
+                        
+                        WeatherContent(isSticky = true)
 
                         AnimatedVisibility(isPortrait && sidoData.value.size > 0) {
 

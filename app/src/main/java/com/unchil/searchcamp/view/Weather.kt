@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeviceThermostat
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.outlined.WbTwilight
 import androidx.compose.material.icons.outlined.WindPower
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +43,7 @@ import com.google.android.gms.location.LocationServices
 import com.unchil.searchcamp.ChkNetWork
 import com.unchil.searchcamp.shared.checkInternetConnected
 import com.unchil.searchcamp.R
-import com.unchil.searchcamp.model.CURRENTWEATHER_TBL
+import com.unchil.searchcamp.db.entity.CURRENTWEATHER_TBL
 import com.unchil.searchcamp.model.*
 import com.unchil.searchcamp.shared.view.CheckPermission
 import com.unchil.searchcamp.shared.view.PermissionRequiredCompose
@@ -80,7 +80,7 @@ private fun getWeatherIcon(type:String):Int {
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("MissingPermission", "SuspiciousIndentation", "UnrememberedMutableState")
 @Composable
-fun WeatherContent(isSticky:Boolean = false , onCheckLocationService:((Boolean)->Unit)? = null){
+fun WeatherContent(isSticky:Boolean = false ){
 
     val permissions = listOf(
         Manifest.permission.INTERNET,
@@ -101,81 +101,62 @@ fun WeatherContent(isSticky:Boolean = false , onCheckLocationService:((Boolean)-
         viewType = PermissionRequiredComposeFuncName.Weather
     ) {
 
-    val context = LocalContext.current
-    val configuration = LocalConfiguration.current
+        val context = LocalContext.current
+        val configuration = LocalConfiguration.current
         val coroutineScope = rememberCoroutineScope()
+        val db = LocalSearchCampDB.current
 
-    val db = LocalSearchCampDB.current
-    val viewModel = remember {
-        WeatherViewModel(repository = RepositoryProvider.getRepository().apply { database = db }  )
-    }
+        val viewModel = remember {
+            WeatherViewModel(repository = RepositoryProvider.getRepository().apply { database = db }  )
+        }
 
         val fusedLocationProviderClient = remember {
             LocationServices.getFusedLocationProviderClient(context)
         }
 
+        var isSuccessfulTask by rememberSaveable { mutableStateOf( false ) }
 
-        var isSuccessfulTask by remember { mutableStateOf( false ) }
-        var checkCurrentLocation by remember { mutableStateOf(true) }
+        var isConnected  by  remember { mutableStateOf(context.checkInternetConnected()) }
 
-        var isConnect  by  remember { mutableStateOf(context.checkInternetConnected()) }
-
-        LaunchedEffect(key1 = isConnect ){
-            while(!isConnect) {
+        LaunchedEffect(key1 = isConnected ){
+            while(!isConnected) {
                 delay(500)
-                isConnect = context.checkInternetConnected()
-
-                if(isConnect && !checkCurrentLocation){
-                    checkCurrentLocation = true
-                }
+                isConnected = context.checkInternetConnected()
             }
         }
 
-
-        isConnect  = context.checkInternetConnected()
-
-        LaunchedEffect(key1 =  checkCurrentLocation, key2 = isConnect){
-            if(checkCurrentLocation) {
-                checkCurrentLocation = false
+        val checkCurrentWeather:()->Unit = {
+            coroutineScope.launch {
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener( context.mainExecutor) { task ->
                     if (task.isSuccessful && task.result != null ) {
                         isSuccessfulTask = true
-
-                        if(isConnect) {
+                        if(isConnected) {
                             viewModel.searchWeather(task.result.toLatLng())
-                        }
-
-                    } else {
-                        onCheckLocationService?.let {
-                            it(false)
                         }
                     }
                 }
             }
         }
 
+        LaunchedEffect(key1 = viewModel ){
+            checkCurrentWeather.invoke()
+        }
 
-        val weatherData = viewModel._currentWeatheStaterFlow.collectAsState()
 
-        Column(
+        val weatherData = viewModel.currentWeatheStaterFlow.collectAsState()
+
+        Box(
             modifier = Modifier
-           //     .clickable(false, null, null) {}
                 .width(400.dp)
                 .clip(shape = ShapeDefaults.ExtraSmall)
                 .background(
                     color = Color.Transparent
-                )
-
-            ,
-            horizontalAlignment = Alignment.CenterHorizontally
+                ),
+            contentAlignment = Alignment.Center
         ) {
-
-
             AnimatedVisibility  (!isSuccessfulTask  ) {
-
                 IconButton(
-
-                    onClick = { checkCurrentLocation = true },
+                    onClick = checkCurrentWeather,
                     content = {
                         Row(
                             modifier = Modifier,
@@ -189,54 +170,40 @@ fun WeatherContent(isSticky:Boolean = false , onCheckLocationService:((Boolean)-
                             Text(text = context.resources.getString(R.string.weather_location_searching))
                         }
                     })
-
-
             }
 
-
-
-
-            AnimatedVisibility (weatherData.value != null){
-                weatherData.value?.let {
-
-                    WeatherView(it)
-                    /*
-                    when (configuration.orientation) {
-                        Configuration.ORIENTATION_PORTRAIT -> {
-                            WeatherView(it)
-                        }
-                        else -> {
-                            if (isSticky) {
-                                WeatherView(it)
-                            } else {
-                                WeatherViewLandScape(it)
-                            }
+            AnimatedVisibility (weatherData.value.dt != 0L){
+                when (configuration.orientation) {
+                    Configuration.ORIENTATION_PORTRAIT -> {
+                        WeatherView(weatherData.value)
+                    }
+                    else -> {
+                        if (isSticky) {
+                            WeatherView(weatherData.value)
+                        } else {
+                            WeatherViewLandScape(weatherData.value)
                         }
                     }
-
-                     */
-
                 }
             }
 
-            if (!isConnect) {
+            if (!isConnected) {
                 ChkNetWork(
                     onCheckState = {
                         coroutineScope.launch {
-                            isConnect =  context.checkInternetConnected()
+                            isConnected =  context.checkInternetConnected()
                         }
                     }
                 )
             }
 
-
-
         }
 
     }
 
-
 }
+
+
 
 @Composable
 fun WeatherView(
@@ -278,24 +245,6 @@ fun WeatherView(
 
         ) {
 
-
-/*
-            Icon (
-            //    imageVector = Icons.Outlined.LightMode
-                painter = painterResource(id = getWeatherIcon(item.icon))
-                ,contentDescription = "weather"
-                , modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxWidth(0.3f)
-                    .aspectRatio(1.5f)
-                , tint = Color(255, 165, 0)
-            )
-
-
- */
-
-
-
             Image(
                 painter =  painterResource(id = getWeatherIcon(item.icon)),
                 modifier = Modifier
@@ -307,9 +256,6 @@ fun WeatherView(
                 alignment = Alignment.Center,
                 colorFilter = colorFilter
             )
-
-
-
 
             Column (modifier = Modifier.padding(start= 10.dp)){
                 WeatherItem(id =  Icons.Outlined.WbTwilight, desc = item.toTextSun(context.resources::getString))
@@ -359,19 +305,6 @@ fun WeatherViewLandScape(
             style = MaterialTheme.typography.titleSmall
         )
 
-/*
-        Icon (
-        //    imageVector = Icons.Outlined.LightMode
-            painter = painterResource(id = getWeatherIcon(item.icon))
-            ,contentDescription = "weather"
-            , modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .aspectRatio(1f)
-            , tint = Color(255, 165, 0)
-        )
-
- */
-
         Image(
             painter =  painterResource(id = getWeatherIcon(item.icon)),
             modifier = Modifier
@@ -383,7 +316,6 @@ fun WeatherViewLandScape(
             alignment = Alignment.Center,
             colorFilter = colorFilter
             )
-
 
 
         Column (

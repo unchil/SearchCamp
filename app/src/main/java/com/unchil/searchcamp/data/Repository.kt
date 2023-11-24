@@ -6,19 +6,18 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.room.withTransaction
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.JsonSyntaxException
 import com.unchil.searchcamp.BuildConfig
 import com.unchil.searchcamp.api.GoCampingInterface
 import com.unchil.searchcamp.api.OpenWeatherInterface
 import com.unchil.searchcamp.api.RetrofitAdapter
 import com.unchil.searchcamp.api.VWorldInterface
 import com.unchil.searchcamp.db.SearchCampDB
+import com.unchil.searchcamp.db.entity.CURRENTWEATHER_TBL
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.db.entity.NearCampSite_TBL
 import com.unchil.searchcamp.db.entity.SiDo_TBL
 import com.unchil.searchcamp.db.entity.SiGunGu_TBL
 import com.unchil.searchcamp.db.entity.SiteImage_TBL
-import com.unchil.searchcamp.model.CURRENTWEATHER_TBL
 import com.unchil.searchcamp.model.GoCampingRecvItem
 import com.unchil.searchcamp.model.GoCampingResponse
 import com.unchil.searchcamp.model.GoCampingResponseImage
@@ -34,8 +33,8 @@ import com.unchil.searchcamp.viewmodel.SearchScreenViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import java.net.URLDecoder
@@ -122,7 +121,7 @@ enum class GoCampingService {
 
 
 enum class CollectType {
-    LT_C_ADSIDO_INFO, LT_C_ADSIGG_INFO,  CAMPSITE, NEARCAMPSITE, SITEIMAGE, SYNC
+    LT_C_ADSIDO_INFO, LT_C_ADSIGG_INFO,  CAMPSITE, NEARCAMPSITE, SITEIMAGE, SYNC, WEATHER
 }
 
 val CollectTypeList = listOf(
@@ -131,7 +130,8 @@ val CollectTypeList = listOf(
     CollectType.CAMPSITE,
     CollectType.NEARCAMPSITE,
     CollectType.SITEIMAGE,
-    CollectType.SYNC
+    CollectType.SYNC,
+    CollectType.WEATHER
 )
 
 
@@ -171,7 +171,11 @@ class Repository {
 
     val currentLatLng: MutableStateFlow<LatLng> = MutableStateFlow(LatLng(0.0, 0.0))
 
-    val _currentWeather: MutableStateFlow<CURRENTWEATHER_TBL?> = MutableStateFlow(null)
+    val _currentWeather: MutableStateFlow<CURRENTWEATHER_TBL> = MutableStateFlow(
+        CURRENTWEATHER_TBL( 0L, "", 0, 0L,"",0f, 0f,
+            "", "", "", 0f,0f,0f,0f,0f,
+            0f,0f,0f, 0, 0, "", 0L , 0L)
+    )
 
     val sidoListStateFlow:MutableStateFlow<List<SiDo_TBL>>  = MutableStateFlow(listOf())
 
@@ -332,13 +336,13 @@ class Repository {
 
     suspend fun getSiDoList() {
         database.sidoDao.select_All_Flow().collectLatest {
-            sidoListStateFlow.emit(it)
+            sidoListStateFlow.value = it
         }
     }
 
     suspend fun getSiGunGuList(upCode:String) {
         database.sigunguDao.select_Flow(upCode = upCode, length = upCode.length).collectLatest {
-            sigunguListStateFlow.emit(it)
+            sigunguListStateFlow.value = it
         }
     }
 
@@ -347,18 +351,36 @@ class Repository {
 
     suspend fun getWeatherData(latitude: String, longitude: String){
 
-        val OPENWEATHER_KEY = BuildConfig.OPENWEATHER_KEY
-        val OPENWEATHER_UNITS = "metric"
+        if( chkCollectTime(CollectType.WEATHER)  == true  ) {
 
-        val service = RetrofitAdapter.create( service = OpenWeatherInterface::class.java, url = OPENWEATHER_URL)
+            val OPENWEATHER_KEY = BuildConfig.OPENWEATHER_KEY
+            val OPENWEATHER_UNITS = "metric"
 
-        val apiResponse = service.getWeatherData(
-            latitude = latitude,
-            longitude = longitude,
-            units = OPENWEATHER_UNITS,
-            apiKey = OPENWEATHER_KEY
-        )
-        _currentWeather.emit(apiResponse.toCURRENTWEATHER_TBL())
+            val service = RetrofitAdapter.create( service = OpenWeatherInterface::class.java, url = OPENWEATHER_URL)
+
+            val apiResponse = service.getWeatherData(
+                latitude = latitude,
+                longitude = longitude,
+                units = OPENWEATHER_UNITS,
+                apiKey = OPENWEATHER_KEY
+            )
+
+            _currentWeather.value = apiResponse.toCURRENTWEATHER_TBL()
+
+            database.withTransaction {
+                database.currentWeatherDao.trancate()
+                database.currentWeatherDao.insert(apiResponse.toCURRENTWEATHER_TBL())
+            }
+
+            updateCollectTime(CollectType.WEATHER.name)
+
+        }else {
+            database.currentWeatherDao.select_Flow().collect{
+                _currentWeather.value = it
+            }
+
+        }
+
     }
 
 
@@ -371,6 +393,7 @@ class Repository {
             CollectType.NEARCAMPSITE -> 0
             CollectType.SITEIMAGE -> 0
             CollectType.SYNC -> 86400000
+            CollectType.WEATHER -> 3600000
         }
 
         val beforeCollectTime = database.collectTimeDao.select(type.name)

@@ -12,5 +12,6 @@ class SearchCamp : Application(), ImageLoaderFactory {
                 add(UnsplashSizingInterceptor)
             }
             .build()
+
     }
 }

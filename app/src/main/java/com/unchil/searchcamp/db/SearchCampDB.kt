@@ -11,10 +11,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.unchil.searchcamp.data.CollectTypeList
 import com.unchil.searchcamp.db.dao.CampSite_Dao
 import com.unchil.searchcamp.db.dao.CollectTime_Dao
+import com.unchil.searchcamp.db.dao.CurrentWeather_Dao
 import com.unchil.searchcamp.db.dao.NearCampSite_Dao
 import com.unchil.searchcamp.db.dao.SiDo_Dao
 import com.unchil.searchcamp.db.dao.SiGunGu_Dao
 import com.unchil.searchcamp.db.dao.SiteImage_Dao
+import com.unchil.searchcamp.db.entity.CURRENTWEATHER_TBL
 import com.unchil.searchcamp.db.entity.CampSite_TBL
 import com.unchil.searchcamp.db.entity.CollectTime_TBL
 import com.unchil.searchcamp.db.entity.NearCampSite_TBL
@@ -34,7 +36,8 @@ val LocalSearchCampDB = compositionLocalOf <SearchCampDB> { error("Not Found  Se
         CampSite_TBL::class,
         NearCampSite_TBL::class,
         CollectTime_TBL::class,
-        SiteImage_TBL::class ],
+        SiteImage_TBL::class,
+        CURRENTWEATHER_TBL::class],
     version = SearchCampDB.LATEST_VERSION,
     exportSchema = false,
     
@@ -49,6 +52,7 @@ abstract class SearchCampDB: RoomDatabase() {
     abstract  val nearCampSiteDao: NearCampSite_Dao
     abstract  val collectTimeDao: CollectTime_Dao
     abstract  val siteimageDao: SiteImage_Dao
+    abstract  val currentWeatherDao:CurrentWeather_Dao
 
     companion object {
 
@@ -56,9 +60,12 @@ abstract class SearchCampDB: RoomDatabase() {
 
         val migration_1_2 = object : Migration(1,2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE 'CollectTime_TBL' ('collectDataType' String, 'collectTime' Long, " + "PRIMARY KEY('collectDataType'))")
+               // database.execSQL("CREATE TABLE 'CollectTime_TBL' ('collectDataType' String, 'collectTime' Long, " + "PRIMARY KEY('collectDataType'))")
+                database.execSQL("INSERT INTO CollectTime_TBL ('collectDataType', 'collectTime')  VALUES ( 'WEATHER', 0)")
             }
         }
+
+
 
         @Volatile
         private var INSTANCE: SearchCampDB? = null
@@ -76,7 +83,7 @@ abstract class SearchCampDB: RoomDatabase() {
                  SearchCampDB::class.java,
                 "SearchCampDB"
             )
-         //       .addMigrations(migration_1_2)
+        //        .addMigrations(migration_1_2)
                 .allowMainThreadQueries()
                  .fallbackToDestructiveMigration()
                 .addCallback(object : Callback(){
