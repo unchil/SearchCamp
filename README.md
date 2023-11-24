@@ -9,7 +9,7 @@ This SearchCamp is a cmapSite Search program based on Google Map: [Google Maps P
 
 Weather information provided by OpenWeather: [OpenWeatherMap][openweatherlink]. 
 
-SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를 기반으로 한 캠핑장 검색 프로그램 입니다.
+[SearchCamp][release] 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를 기반으로 한 캠핑장 검색 프로그램 입니다.
 
 
 ###  Video
@@ -31,3 +31,4 @@ SearchCamp 앱은 [한국관광공사] 에서 제공하는 Open API 서비스를
 
 [googlelink]: https://developers.google.com/maps "Go GoogleMap"
 [openweatherlink]: https://openweathermap.org/ "Go OpenWeatherMap"
+[release]: https://drive.google.com/file/d/1RqxAcVm_SQ9LROpplWTv8Wj1CQk_5Ug4/view?usp=share_link "Download SearchCamp"
