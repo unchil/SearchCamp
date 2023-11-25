@@ -31,4 +31,4 @@ Weather information provided by OpenWeather: [OpenWeatherMap][openweatherlink].
 
 [googlelink]: https://developers.google.com/maps "Go GoogleMap"
 [openweatherlink]: https://openweathermap.org/ "Go OpenWeatherMap"
-[release]: https://drive.google.com/file/d/1RqxAcVm_SQ9LROpplWTv8Wj1CQk_5Ug4/view?usp=share_link "Download SearchCamp"
+[release]: https://drive.google.com/file/d/1l86BPU9Y_rdDwYJKlULrpEUj4GMg0T0z/view?usp=sharing "Download SearchCamp"
