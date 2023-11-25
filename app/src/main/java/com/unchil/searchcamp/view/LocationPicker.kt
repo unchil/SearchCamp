@@ -1,13 +1,23 @@
 package com.unchil.searchcamp.view
 
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Card
@@ -16,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +52,7 @@ import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.entity.SiDo_TBL
 import com.unchil.searchcamp.db.entity.SiGunGu_TBL
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -69,6 +81,8 @@ fun AdministrativeDistrictPicker(
         initialPageOffsetFraction = 0f,
         pageCount = {  dataList.size } )
 
+
+
     LaunchedEffect(key1 = dataList ){
         pagerState.scrollToPage(0)
     }
@@ -79,12 +93,11 @@ fun AdministrativeDistrictPicker(
 
     fun hapticProcessing(){
         if(isUsableHaptic){
-            coroutineScope.launch {
+            coroutineScope.launch{
                 hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             }
         }
     }
-
 
     LaunchedEffect(key1 = pagerState.isScrollInProgress){
         if (!pagerState.isScrollInProgress){
@@ -108,9 +121,11 @@ fun AdministrativeDistrictPicker(
         }
     }
 
+
     LaunchedEffect(key1 = pagerState.currentPage ){
         hapticProcessing()
     }
+
 
 
     val pickerHeight = itemHeight * itemViewCount + itemHeight / (itemViewCount + 2)
@@ -123,6 +138,20 @@ fun AdministrativeDistrictPicker(
             return  availableSpace
         }
     }
+
+    val flingBehavior = PagerDefaults.flingBehavior(
+        state = pagerState,
+        pagerSnapDistance = PagerSnapDistance.atMost(60),
+        lowVelocityAnimationSpec = tween(
+            easing = FastOutLinearInEasing,
+            durationMillis = 5000
+        ),
+        highVelocityAnimationSpec = rememberSplineBasedDecay(),
+        snapAnimationSpec = tween(
+            easing = FastOutSlowInEasing,
+            durationMillis = 500
+        ),
+    )
 
 
     Box(
@@ -151,8 +180,9 @@ fun AdministrativeDistrictPicker(
             state = pagerState,
             pageSpacing = 0.dp,
             pageSize = pagesPerViewport,
-            beyondBoundsPageCount = 15,
+            beyondBoundsPageCount = 30,
             contentPadding = paddingValues,
+            flingBehavior = flingBehavior,
         ) {page ->
 
             val text = when(administrativeDistrictType){
