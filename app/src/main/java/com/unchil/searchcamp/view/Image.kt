@@ -1,33 +1,32 @@
 package com.unchil.searchcamp.view
 
+import android.R.attr.rotation
+import android.R.attr.scaleX
 import android.annotation.SuppressLint
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ImageNotSupported
-import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
-import com.unchil.searchcamp.R
 import com.unchil.searchcamp.db.LocalSearchCampDB
 import com.unchil.searchcamp.db.SearchCampDB
 import com.unchil.searchcamp.shared.LocalPermissionsManager
@@ -44,15 +43,23 @@ fun ImageViewer(
     contentScale:ContentScale = ContentScale.Crop,
     allowHardware:Boolean = true){
 
+
     val scale = remember { mutableStateOf(1f) }
     val rotationState = remember { mutableStateOf(0f) }
 
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+        scale.value *=  zoomChange
+        rotationState.value += rotationChange
+        offset += offsetChange
+    }
+
+
     val boxModifier:Modifier = when(isZoomable) {
             true -> {
-                Modifier.fillMaxSize().pointerInput(Unit){
-                    detectTransformGestures { centroid, pan, zoom, rotation ->
-                        scale.value *= zoom
-                        rotationState.value += rotation }}
+                Modifier
+                    .fillMaxSize()
+                    .transformable(state = state)
             }
             false -> Modifier.fillMaxSize()
         }
@@ -62,14 +69,16 @@ fun ImageViewer(
             Modifier
                 .fillMaxSize()
                 .graphicsLayer(
-                    // adding some zoom limits (min 50%, max 200%)
-                    scaleX = maxOf(.5f, minOf(3f, scale.value)),
-                    scaleY = maxOf(.5f, minOf(3f, scale.value)),
-                    rotationZ = rotationState.value
+                    scaleX = scale.value,
+                    scaleY =  scale.value,
+                    rotationZ = rotationState.value,
+                    translationX = offset.x,
+                    translationY = offset.y
                 )
         }
         false -> Modifier.fillMaxSize()
     }
+
 
         Box(
             contentAlignment = Alignment.Center,
@@ -146,9 +155,9 @@ fun PhotoPreview(
             .width(100.dp)
             .border(width = 1.dp, color = Color.Black, shape = ShapeDefaults.Small)
             .clip(shape = ShapeDefaults.Small)
-            .combinedClickable (
-                onLongClick= { onLongClick?.invoke() },
-                onClick = { onClick?.invoke()}
+            .combinedClickable(
+                onLongClick = { onLongClick?.invoke() },
+                onClick = { onClick?.invoke() }
             )
     ,
         contentAlignment = Alignment.Center
