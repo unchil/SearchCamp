@@ -1,63 +1,54 @@
 package com.unchil.searchcamp.view
 
-import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import androidx.wear.compose.material.Text
 import com.unchil.searchcamp.LocalUsableDarkMode
 import com.unchil.searchcamp.LocalUsableHaptic
 import com.unchil.searchcamp.data.VWorldService
 import com.unchil.searchcamp.db.entity.SiDo_TBL
 import com.unchil.searchcamp.db.entity.SiGunGu_TBL
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
-
-
-
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -153,21 +144,20 @@ fun AdministrativeDistrictPicker(
         ),
     )
 
-
     Box(
         modifier = Modifier
             .clip(ShapeDefaults.Small)
             .width(pickerWidth)
             .height(pickerHeight)
             .background(
-                if(isUsableDarkMode){
+                if (isUsableDarkMode) {
                     Brush.verticalGradient(listOf(Color.Black, Color.DarkGray, Color.Black))
-                }else {
+                } else {
                     Brush.verticalGradient(
                         listOf(
-                        MaterialTheme.colorScheme.outlineVariant,
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.outlineVariant
+                            MaterialTheme.colorScheme.outlineVariant,
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.outlineVariant
                         )
                     )
                 }
@@ -176,13 +166,15 @@ fun AdministrativeDistrictPicker(
     ){
 
         VerticalPager(
-            modifier = Modifier,
+            modifier = Modifier
+            ,
             state = pagerState,
             pageSpacing = 0.dp,
             pageSize = pagesPerViewport,
             beyondBoundsPageCount = 30,
             contentPadding = paddingValues,
             flingBehavior = flingBehavior,
+       //     userScrollEnabled = true
         ) {page ->
 
             val text = when(administrativeDistrictType){
